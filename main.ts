@@ -48,31 +48,71 @@ export default class BackgammonPlugin extends Plugin {
     }
 
     drawBoard(ctx: CanvasRenderingContext2D): void {
-        const width = 500;
-        const height = 300;
-        const barWidth = 20;
-        const pointWidth = (width - barWidth) / 14;
-        
-        // Background
-        ctx.fillStyle = '#deb887'; // Wood-like color
-        ctx.fillRect(0, 0, width, height);
-        
-        // Draw points
-        for (let i = 0; i < 24; i++) {
-            const x = (i < 12) ? i * pointWidth : (i + 1) * pointWidth;
-            const y = (i < 12) ? height : 0;
-            const heightFactor = (i < 12) ? -1 : 1;
-            
-            ctx.fillStyle = (i % 2 === 0) ? '#8b4513' : '#d2691e'; // Alternating colors
+        const boardWidth = 500;
+        const boardHeight = 300;
+        const barWidth = boardWidth / 14; // Bar width is the same as a point width
+        const pointWidth = (boardWidth - barWidth) / 12; // Ensure all 12 points fit properly
+        const triangleHeight = boardHeight / 2; // Half the board height for points
+    
+        // Board background
+        ctx.fillStyle = "#8B4513"; // Wood color
+        ctx.fillRect(0, 0, boardWidth, boardHeight);
+    
+        // Draw the bar in the center
+        ctx.fillStyle = "#654321"; // Darker brown for the bar
+        ctx.fillRect(boardWidth / 2 - barWidth / 2, 0, barWidth, boardHeight);
+    
+        // Define colors for quadrants
+        const colors = [
+            ["#FFD700", "#FF4500"], // Left-bottom (gold, red-orange)
+            ["#8A2BE2", "#00CED1"], // Right-bottom (blue-violet, turquoise)
+            ["#32CD32", "#DC143C"], // Right-top (lime green, crimson)
+            ["#1E90FF", "#FF8C00"], // Left-top (dodger blue, dark orange)
+        ];
+    
+        // Function to draw a triangle
+        const drawTriangle = (x: number, isBottomHalf: boolean, color: string) => {
             ctx.beginPath();
-            ctx.moveTo(x, y);
-            ctx.lineTo(x + pointWidth / 2, y + (height / 2 * heightFactor));
-            ctx.lineTo(x + pointWidth, y);
+            if (isBottomHalf) {
+                // Bottom triangles (point up)
+                ctx.moveTo(x, boardHeight); // Bottom-left corner
+                ctx.lineTo(x + pointWidth / 2, boardHeight - triangleHeight); // Peak
+                ctx.lineTo(x + pointWidth, boardHeight); // Bottom-right corner
+            } else {
+                // Top triangles (point down)
+                ctx.moveTo(x, 0); // Top-left corner
+                ctx.lineTo(x + pointWidth / 2, triangleHeight); // Peak
+                ctx.lineTo(x + pointWidth, 0); // Top-right corner
+            }
             ctx.closePath();
+            ctx.fillStyle = color;
             ctx.fill();
+        };
+    
+        // Draw bottom half (quadrants 1 & 2)
+        for (let i = 0; i < 12; i++) {
+            let x = i * pointWidth;
+            if (i >= 6) x += barWidth; // Skip the bar
+            let quadrantIndex = i < 6 ? 0 : 1;
+            let color = colors[quadrantIndex][i % 2];
+    
+            drawTriangle(x, true, color);
+        }
+    
+        // Draw top half (quadrants 3 & 4)
+        for (let i = 0; i < 12; i++) {
+            let x = i * pointWidth;
+            if (i >= 6) x += barWidth; // Skip the bar
+            let quadrantIndex = i < 6 ? 3 : 2;
+            let color = colors[quadrantIndex][i % 2];
+    
+            drawTriangle(x, false, color);
         }
     }
-
+    
+    
+    
+    
     drawCheckers(ctx: CanvasRenderingContext2D, boardData: BoardData): void {
         const pointWidth = (500 - 20) / 14;
         const checkerRadius = 15;
