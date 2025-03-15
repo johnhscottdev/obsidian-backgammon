@@ -34,20 +34,45 @@ class BackgammonPlugin extends obsidian_1.Plugin {
     }
     renderBoard(el, boardData) {
         const canvas = document.createElement('canvas');
-        canvas.width = 500;
-        canvas.height = 300;
         el.appendChild(canvas);
         const ctx = canvas.getContext('2d');
         if (!ctx)
             return;
-        // Draw the board
-        this.drawBoard(ctx);
-        this.drawCheckers(ctx, boardData);
+        const baseWidth = 500;
+        const baseHeight = 300;
+        let scaleFactor = 1;
+        const getCanvasContainerWidth = () => {
+            var _a;
+            return ((_a = canvas.parentElement) === null || _a === void 0 ? void 0 : _a.clientWidth) || window.innerWidth;
+        };
+        // Function to resize and scale the canvas dynamically
+        const resizeCanvas = () => {
+            // Get word wrap width from Obsidian's active note
+            const unexplainedScaleError = 1.0; //(500.0/655.0);
+            let noteWidth = getCanvasContainerWidth();
+            //noteWidth = noteWidth * unexplainedScaleError;
+            // Maintain aspect ratio (500:300)
+            scaleFactor = noteWidth / baseWidth;
+            scaleFactor *= unexplainedScaleError;
+            scaleFactor = Math.min(scaleFactor, 1);
+            // Set canvas dimensions
+            canvas.width = baseWidth * scaleFactor;
+            canvas.height = baseHeight * scaleFactor;
+            // Apply scaling transformation
+            ctx.setTransform(scaleFactor, 0, 0, scaleFactor, 0, 0);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            // Redraw board
+            this.drawBoard(ctx);
+        };
+        // Initial render
+        resizeCanvas();
+        // Redraw when the note resizes
+        window.addEventListener('resize', resizeCanvas);
     }
     drawBoard(ctx) {
         const boardWidth = 500;
         const boardHeight = 300;
-        const barWidth = boardWidth / 14; // Bar width is the same as a point width
+        const barWidth = boardWidth / 12; // Bar width is the same as a point width
         const pointWidth = (boardWidth - barWidth) / 12; // Ensure all 12 points fit properly
         const triangleHeight = boardHeight / 2; // Half the board height for points
         // Board background
