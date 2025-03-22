@@ -99,6 +99,13 @@ function drawBoard(ctx) {
     drawTriangle(x, false, color);
   }
 }
+function drawCheckerLabel(ctx, x, y, text, checkerColor) {
+  ctx.font = "12px sans-serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillStyle = checkerColor === "black" ? "white" : "black";
+  ctx.fillText(text, x, y);
+}
 function drawCheckers(ctx, boardData) {
   const checkerRadius = 15;
   const boardWidth = 500;
@@ -123,6 +130,7 @@ function drawCheckers(ctx, boardData) {
       ctx.fillStyle = point.player === "X" ? "black" : "white";
       ctx.arc(x, yStart + direction * j * 30, checkerRadius, 0, Math.PI * 2);
       ctx.fill();
+      drawCheckerLabel(ctx, x, yStart + direction * j * 30, pointNumber.toString(), point.player === "X" ? "black" : "white");
     }
   });
   const drawBarCheckers = (player, count) => {

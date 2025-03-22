@@ -89,6 +89,14 @@ function drawBoard(ctx: CanvasRenderingContext2D): void {
 	}
 }
 
+function drawCheckerLabel(ctx: CanvasRenderingContext2D, x: number, y: number, text: string, checkerColor: 'black' | 'white'): void {
+	ctx.font = '12px sans-serif';
+	ctx.textAlign = 'center';
+	ctx.textBaseline = 'middle';
+	ctx.fillStyle = checkerColor === 'black' ? 'white' : 'black';
+	ctx.fillText(text, x, y);
+}
+
 export function drawCheckers(ctx: CanvasRenderingContext2D, boardData: BoardData): void {
 	const checkerRadius = 15;
 	const boardWidth = 500;
@@ -120,6 +128,7 @@ export function drawCheckers(ctx: CanvasRenderingContext2D, boardData: BoardData
 			ctx.fillStyle = point.player === 'X' ? 'black' : 'white';
 			ctx.arc(x, yStart + direction * j * 30, checkerRadius, 0, Math.PI * 2);
 			ctx.fill();
+			drawCheckerLabel(ctx, x, yStart + direction * j * 30, pointNumber.toString(), point.player === 'X' ? 'black' : 'white')
 		}
 	});
 
