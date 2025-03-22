@@ -1,10 +1,17 @@
 {
-    "compilerOptions": {
-      "target": "ES6",
-      "module": "CommonJS",
-      "strict": true,
-      "rootDir": ".",      
-    "esModuleInterop": true
-    }
-  }
-  
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",                  // Needed for ES module syntax
+    "moduleResolution": "Node",
+    "lib": ["ES2020", "DOM"],
+    "outDir": "dist",                    // Optional — for typings or intermediate outputs
+    "rootDir": "src",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,            // Required if using esbuild
+    "resolveJsonModule": true,          // Useful if you import JSON
+    "types": ["obsidian"]
+  },
+  "include": ["src"]
+}
