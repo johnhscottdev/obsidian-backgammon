@@ -25,14 +25,6 @@ __export(main_exports, {
 module.exports = __toCommonJS(main_exports);
 var import_obsidian = require("obsidian");
 
-// src/utils/parsePosition.ts
-function parsePosition(source) {
-  return {
-    X: [{ point: 13, count: 2 }, { point: 6, count: 5 }],
-    O: [{ point: 24, count: 2 }, { point: 8, count: 3 }]
-  };
-}
-
 // src/utils/renderBoard.ts
 function renderBoard(el, boardData) {
   const canvas = document.createElement("canvas");
@@ -73,9 +65,9 @@ function drawBoard(ctx) {
   ctx.fillRect(boardWidth / 2 - barWidth / 2, 0, barWidth, boardHeight);
   const colors = [
     ["#44aa44", "#aaffaa"],
+    ["#aaffaa", "#229922"],
     ["#229922", "#aaffaa"],
-    ["#229922", "#aaffaa"],
-    ["#229922", "#aaffaa"]
+    ["#aaffaa", "#229922"]
   ];
   const drawTriangle = (x, isBottomHalf, color) => {
     ctx.beginPath();
@@ -108,35 +100,81 @@ function drawBoard(ctx) {
   }
 }
 function drawCheckers(ctx, boardData) {
-  const pointWidth = (500 - 20) / 14;
   const checkerRadius = 15;
-  boardData.X.forEach((checker) => {
-    const x = checker.point < 12 ? checker.point * pointWidth + pointWidth / 2 : (checker.point + 1) * pointWidth + pointWidth / 2;
-    const yStart = checker.point < 12 ? 280 : 20;
-    for (let i = 0; i < checker.count; i++) {
-      ctx.fillStyle = "black";
+  const boardWidth = 500;
+  const barWidth = boardWidth / 12;
+  const pointWidth = (boardWidth - barWidth) / 12;
+  const barX = boardWidth / 2;
+  const getPointX = (point) => {
+    let posInRow = (point - 1) % 12;
+    let x = posInRow * pointWidth;
+    if (posInRow >= 6) x += barWidth;
+    return x + pointWidth / 2;
+  };
+  boardData.points.forEach((point, i) => {
+    if (!point.player || point.checkerCount === 0) return;
+    const pointNumber = 24 - i;
+    const isTop = pointNumber >= 13;
+    const x = getPointX(pointNumber);
+    const yStart = isTop ? 20 : 280;
+    const direction = isTop ? 1 : -1;
+    for (let j = 0; j < point.checkerCount; j++) {
       ctx.beginPath();
-      ctx.arc(x, yStart - i * 30, checkerRadius, 0, Math.PI * 2);
+      ctx.fillStyle = point.player === "X" ? "black" : "white";
+      ctx.arc(x, yStart + direction * j * 30, checkerRadius, 0, Math.PI * 2);
       ctx.fill();
     }
   });
-  boardData.O.forEach((checker) => {
-    const x = checker.point < 12 ? checker.point * pointWidth + pointWidth / 2 : (checker.point + 1) * pointWidth + pointWidth / 2;
-    const yStart = checker.point < 12 ? 20 : 280;
-    for (let i = 0; i < checker.count; i++) {
-      ctx.fillStyle = "white";
+  const drawBarCheckers = (player, count) => {
+    if (count === 0) return;
+    const isTop = player === "O";
+    const yStart = isTop ? 20 : 280;
+    const direction = isTop ? 1 : -1;
+    for (let j = 0; j < count; j++) {
       ctx.beginPath();
-      ctx.arc(x, yStart + i * 30, checkerRadius, 0, Math.PI * 2);
+      ctx.fillStyle = player === "X" ? "black" : "white";
+      ctx.arc(barX, yStart + direction * j * 30, checkerRadius, 0, Math.PI * 2);
       ctx.fill();
     }
-  });
+  };
+  drawBarCheckers("X", boardData.bar.X);
+  drawBarCheckers("O", boardData.bar.O);
+}
+
+// src/utils/parseXGID.ts
+function charToCount(c) {
+  if (c >= "a" && c <= "z") {
+    return [c.charCodeAt(0) - "a".charCodeAt(0) + 1, "O"];
+  }
+  if (c >= "A" && c <= "Z") {
+    return [c.charCodeAt(0) - "A".charCodeAt(0) + 1, "X"];
+  }
+  return [0, null];
+}
+function parseXGID(xgid) {
+  const parts = xgid.split(":");
+  const pointString = parts[0].slice(5);
+  const points = pointString.split("").map(charToCount).reverse().map(([count, player]) => ({
+    checkerCount: count,
+    player
+  }));
+  while (points.length < 24) {
+    points.push({ checkerCount: 0, player: null });
+  }
+  return {
+    points,
+    bar: { X: 0, O: 0 },
+    off: { X: 0, O: 0 }
+  };
 }
 
 // src/main.ts
 var BackgammonPlugin = class extends import_obsidian.Plugin {
   async onload() {
     this.registerMarkdownCodeBlockProcessor("backgammon", (source, el) => {
-      const boardData = parsePosition(source);
+      const xgid = source.trim();
+      const boardData = parseXGID(xgid);
+      console.log("[Processor] Parsed boardData:", boardData);
       renderBoard(el, boardData);
     });
   }

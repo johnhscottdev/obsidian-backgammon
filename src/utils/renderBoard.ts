@@ -28,9 +28,8 @@ export function renderBoard(el: HTMLElement, boardData: BoardData): void {
 
 		ctx.setTransform(scaleFactor, 0, 0, scaleFactor, 0, 0);
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-		drawBoard(ctx);
-		drawCheckers(ctx, boardData);
+		drawBoard(ctx); // draw triangles/background
+		drawCheckers(ctx, boardData); // now using points[]
 	};
 
 	resizeCanvas();
@@ -52,9 +51,9 @@ function drawBoard(ctx: CanvasRenderingContext2D): void {
 
 	const colors = [
 		["#44aa44", "#aaffaa"],
+		["#aaffaa", "#229922"],
 		["#229922", "#aaffaa"],
-		["#229922", "#aaffaa"],
-		["#229922", "#aaffaa"],
+		["#aaffaa", "#229922"],
 	];
 
 	const drawTriangle = (x: number, isBottomHalf: boolean, color: string) => {
@@ -90,35 +89,58 @@ function drawBoard(ctx: CanvasRenderingContext2D): void {
 	}
 }
 
-function drawCheckers(ctx: CanvasRenderingContext2D, boardData: BoardData): void {
-	const pointWidth = (500 - 20) / 14;
+export function drawCheckers(ctx: CanvasRenderingContext2D, boardData: BoardData): void {
 	const checkerRadius = 15;
+	const boardWidth = 500;
+	const barWidth = boardWidth / 12;
+	const pointWidth = (boardWidth - barWidth) / 12;
+	const barX = boardWidth / 2;
 
-	boardData.X.forEach(checker => {
-		const x = (checker.point < 12)
-			? checker.point * pointWidth + pointWidth / 2
-			: (checker.point + 1) * pointWidth + pointWidth / 2;
-		const yStart = (checker.point < 12) ? 280 : 20;
+	// Helper to get x-position from point number (1–24)
+	const getPointX = (point: number): number => {
+		let posInRow = (point - 1) % 12;
+		let x = posInRow * pointWidth;
+		if (posInRow >= 6) x += barWidth;
+		return x + pointWidth / 2;
+	};
 
-		for (let i = 0; i < checker.count; i++) {
-			ctx.fillStyle = 'black';
+	// Regular points (1–24)
+	boardData.points.forEach((point, i) => {
+		if (!point.player || point.checkerCount === 0) return;
+
+		const pointNumber = 24 - i;
+		const isTop = pointNumber >= 13;
+
+		const x = getPointX(pointNumber);
+		const yStart = isTop ? 20 : 280;
+		const direction = isTop ? 1 : -1;
+
+		for (let j = 0; j < point.checkerCount; j++) {
 			ctx.beginPath();
-			ctx.arc(x, yStart - i * 30, checkerRadius, 0, Math.PI * 2);
+			ctx.fillStyle = point.player === 'X' ? 'black' : 'white';
+			ctx.arc(x, yStart + direction * j * 30, checkerRadius, 0, Math.PI * 2);
 			ctx.fill();
 		}
 	});
 
-	boardData.O.forEach(checker => {
-		const x = (checker.point < 12)
-			? checker.point * pointWidth + pointWidth / 2
-			: (checker.point + 1) * pointWidth + pointWidth / 2;
-		const yStart = (checker.point < 12) ? 20 : 280;
+	// Checkers on the bar
+	const drawBarCheckers = (player: 'X' | 'O', count: number) => {
+		if (count === 0) return;
 
-		for (let i = 0; i < checker.count; i++) {
-			ctx.fillStyle = 'white';
+		const isTop = player === 'O'; // O is at top, X at bottom
+		const yStart = isTop ? 20 : 280;
+		const direction = isTop ? 1 : -1;
+
+		for (let j = 0; j < count; j++) {
 			ctx.beginPath();
-			ctx.arc(x, yStart + i * 30, checkerRadius, 0, Math.PI * 2);
+			ctx.fillStyle = player === 'X' ? 'black' : 'white';
+			ctx.arc(barX, yStart + direction * j * 30, checkerRadius, 0, Math.PI * 2);
 			ctx.fill();
 		}
-	});
+	};
+
+	drawBarCheckers('X', boardData.bar.X);
+	drawBarCheckers('O', boardData.bar.O);
 }
+
+

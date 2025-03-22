@@ -5,15 +5,17 @@
  */
 
 import { Plugin } from 'obsidian';
-import { parsePosition } from './utils';
 import { BoardData } from './types';
 import { renderBoard } from './utils';
+import { parseXGID } from './utils/parseXGID';
 
 
 export default class BackgammonPlugin extends Plugin {
     async onload(): Promise<void> {
-        this.registerMarkdownCodeBlockProcessor('backgammon', (source: string, el: HTMLElement) => {
-            const boardData: BoardData = parsePosition(source);
+        this.registerMarkdownCodeBlockProcessor('backgammon', (source, el) => {
+            const xgid = source.trim(); // assume raw XGID string
+            const boardData = parseXGID(xgid);
+            console.log('[Processor] Parsed boardData:', boardData);
             renderBoard(el, boardData);
         });
     }
