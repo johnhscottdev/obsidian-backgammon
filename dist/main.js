@@ -3,84 +3,63 @@
  * This plugin detects a code block with the language 'backgammon',
  * parses the position string, and renders a visualization inline.
  */
-
 import { Plugin } from 'obsidian';
 import { parsePosition } from './utils';
-import { BoardData } from './types';
-
-
 export default class BackgammonPlugin extends Plugin {
-    async onload(): Promise<void> {
-        this.registerMarkdownCodeBlockProcessor('backgammon', (source: string, el: HTMLElement) => {
-            const boardData: BoardData = parsePosition(source);
+    async onload() {
+        this.registerMarkdownCodeBlockProcessor('backgammon', (source, el) => {
+            const boardData = parsePosition(source);
             this.renderBoard(el, boardData);
         });
     }
-
-
-    renderBoard(el: HTMLElement, boardData: BoardData): void {
-        const canvas: HTMLCanvasElement = document.createElement('canvas');
+    renderBoard(el, boardData) {
+        const canvas = document.createElement('canvas');
         el.appendChild(canvas);
-        const ctx: CanvasRenderingContext2D | null = canvas.getContext('2d');
-    
-        if (!ctx) return;
-    
+        const ctx = canvas.getContext('2d');
+        if (!ctx)
+            return;
         const baseWidth = 500;
         const baseHeight = 300;
         let scaleFactor = 1;
-
-        const getCanvasContainerWidth = (): number => {
+        const getCanvasContainerWidth = () => {
             return canvas.parentElement?.clientWidth || window.innerWidth;
         };
-    
         // Function to resize and scale the canvas dynamically
         const resizeCanvas = () => {
             // Get word wrap width from Obsidian's active note
-            const unexplainedScaleError = 1.0;//(500.0/655.0);
+            const unexplainedScaleError = 1.0; //(500.0/655.0);
             let noteWidth = getCanvasContainerWidth();
             //noteWidth = noteWidth * unexplainedScaleError;
-    
             // Maintain aspect ratio (500:300)
             scaleFactor = noteWidth / baseWidth;
             scaleFactor *= unexplainedScaleError;
-            scaleFactor = Math.min(scaleFactor , 1)
-    
+            scaleFactor = Math.min(scaleFactor, 1);
             // Set canvas dimensions
             canvas.width = baseWidth * scaleFactor;
             canvas.height = baseHeight * scaleFactor;
-    
             // Apply scaling transformation
             ctx.setTransform(scaleFactor, 0, 0, scaleFactor, 0, 0);
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
             // Redraw board
             this.drawBoard(ctx);
         };
-    
         // Initial render
         resizeCanvas();
-    
         // Redraw when the note resizes
         window.addEventListener('resize', resizeCanvas);
     }
-    
-    
-
-    drawBoard(ctx: CanvasRenderingContext2D): void {
+    drawBoard(ctx) {
         const boardWidth = 500;
         const boardHeight = 300;
         const barWidth = boardWidth / 12; // Bar width is the same as a point width
         const pointWidth = (boardWidth - barWidth) / 12; // Ensure all 12 points fit properly
         const triangleHeight = boardHeight / 2; // Half the board height for points
-    
         // Board background
         ctx.fillStyle = "#8B4513"; // Wood color
         ctx.fillRect(0, 0, boardWidth, boardHeight);
-    
         // Draw the bar in the center
         ctx.fillStyle = "#654321"; // Darker brown for the bar
         ctx.fillRect(boardWidth / 2 - barWidth / 2, 0, barWidth, boardHeight);
-    
         // Define colors for quadrants
         const colors = [
             ["#FFD700", "#FF4500"], // Left-bottom (gold, red-orange)
@@ -88,16 +67,16 @@ export default class BackgammonPlugin extends Plugin {
             ["#32CD32", "#DC143C"], // Right-top (lime green, crimson)
             ["#1E90FF", "#FF8C00"], // Left-top (dodger blue, dark orange)
         ];
-    
         // Function to draw a triangle
-        const drawTriangle = (x: number, isBottomHalf: boolean, color: string) => {
+        const drawTriangle = (x, isBottomHalf, color) => {
             ctx.beginPath();
             if (isBottomHalf) {
                 // Bottom triangles (point up)
                 ctx.moveTo(x, boardHeight); // Bottom-left corner
                 ctx.lineTo(x + pointWidth / 2, boardHeight - triangleHeight); // Peak
                 ctx.lineTo(x + pointWidth, boardHeight); // Bottom-right corner
-            } else {
+            }
+            else {
                 // Top triangles (point down)
                 ctx.moveTo(x, 0); // Top-left corner
                 ctx.lineTo(x + pointWidth / 2, triangleHeight); // Peak
@@ -107,35 +86,28 @@ export default class BackgammonPlugin extends Plugin {
             ctx.fillStyle = color;
             ctx.fill();
         };
-    
         // Draw bottom half (quadrants 1 & 2)
         for (let i = 0; i < 12; i++) {
             let x = i * pointWidth;
-            if (i >= 6) x += barWidth; // Skip the bar
+            if (i >= 6)
+                x += barWidth; // Skip the bar
             let quadrantIndex = i < 6 ? 0 : 1;
             let color = colors[quadrantIndex][i % 2];
-    
             drawTriangle(x, true, color);
         }
-    
         // Draw top half (quadrants 3 & 4)
         for (let i = 0; i < 12; i++) {
             let x = i * pointWidth;
-            if (i >= 6) x += barWidth; // Skip the bar
+            if (i >= 6)
+                x += barWidth; // Skip the bar
             let quadrantIndex = i < 6 ? 3 : 2;
             let color = colors[quadrantIndex][i % 2];
-    
             drawTriangle(x, false, color);
         }
     }
-    
-    
-    
-    
-    drawCheckers(ctx: CanvasRenderingContext2D, boardData: BoardData): void {
+    drawCheckers(ctx, boardData) {
         const pointWidth = (500 - 20) / 14;
         const checkerRadius = 15;
-
         boardData.X.forEach(checker => {
             const x = (checker.point < 12) ? checker.point * pointWidth + pointWidth / 2 : (checker.point + 1) * pointWidth + pointWidth / 2;
             const yStart = (checker.point < 12) ? 280 : 20;
@@ -146,7 +118,6 @@ export default class BackgammonPlugin extends Plugin {
                 ctx.fill();
             }
         });
-        
         boardData.O.forEach(checker => {
             const x = (checker.point < 12) ? checker.point * pointWidth + pointWidth / 2 : (checker.point + 1) * pointWidth + pointWidth / 2;
             const yStart = (checker.point < 12) ? 20 : 280;
@@ -158,8 +129,7 @@ export default class BackgammonPlugin extends Plugin {
             }
         });
     }
-
-    onunload(): void {
+    onunload() {
         console.log('Unloading Backgammon Plugin');
     }
 }

@@ -24,18 +24,22 @@ __export(main_exports, {
 });
 module.exports = __toCommonJS(main_exports);
 var import_obsidian = require("obsidian");
+
+// src/utils/parsePosition.ts
+function parsePosition(source) {
+  return {
+    X: [{ point: 13, count: 2 }, { point: 6, count: 5 }],
+    O: [{ point: 24, count: 2 }, { point: 8, count: 3 }]
+  };
+}
+
+// src/main.ts
 var BackgammonPlugin = class extends import_obsidian.Plugin {
   async onload() {
     this.registerMarkdownCodeBlockProcessor("backgammon", (source, el) => {
-      const boardData = this.parsePosition(source);
+      const boardData = parsePosition(source);
       this.renderBoard(el, boardData);
     });
-  }
-  parsePosition(source) {
-    return {
-      X: [{ point: 13, count: 2 }, { point: 6, count: 5 }],
-      O: [{ point: 24, count: 2 }, { point: 8, count: 3 }]
-    };
   }
   renderBoard(el, boardData) {
     const canvas = document.createElement("canvas");
