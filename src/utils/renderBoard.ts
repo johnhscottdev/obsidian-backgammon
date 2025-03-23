@@ -127,6 +127,10 @@ export function drawCheckers(ctx: CanvasRenderingContext2D, boardData: BoardData
 	// Helper to get x-position from point number (1–24)
 	const getPointX = (absolutePointNumber: number, isTop:boolean): number => {
 		let index=0;
+		const centerOfPoint = (pointWidth / 2);
+		if(absolutePointNumber == 0 || absolutePointNumber == 25)
+			return (8 * pointWidth) - centerOfPoint;
+
 		if(absolutePointNumber > 12)
 			index = absolutePointNumber - 12;
 		else
@@ -139,7 +143,7 @@ export function drawCheckers(ctx: CanvasRenderingContext2D, boardData: BoardData
 		// account for leftmost bearoff tray
 		index++;		
 		
-		let centerOfPoint = (pointWidth / 2);
+		
 		return (index * pointWidth) - centerOfPoint;
 	};
 
@@ -155,8 +159,13 @@ export function drawCheckers(ctx: CanvasRenderingContext2D, boardData: BoardData
 			playerPointNumber = i;
 		
 		const isTop = absolutePointNumber <= 12;
+		const onBar = absolutePointNumber === 0 || absolutePointNumber === 25;
 		const x = getPointX(absolutePointNumber, isTop);
-		const yStart = isTop ? checkerMargin : boardHeight - checkerMargin;
+		let margin = checkerMargin;
+		if(onBar)
+			margin += checkerRadius;
+		const yStart = isTop ? margin : boardHeight - margin;
+		
 		const direction = isTop ? 1 : -1;
 		ctx.lineWidth = 1;
 

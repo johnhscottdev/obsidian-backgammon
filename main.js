@@ -120,6 +120,9 @@ function drawCheckerAtPosition(ctx, xPos, yPos, color) {
 function drawCheckers(ctx, boardData) {
   const getPointX = (absolutePointNumber, isTop) => {
     let index = 0;
+    const centerOfPoint = pointWidth / 2;
+    if (absolutePointNumber == 0 || absolutePointNumber == 25)
+      return 8 * pointWidth - centerOfPoint;
     if (absolutePointNumber > 12)
       index = absolutePointNumber - 12;
     else
@@ -127,7 +130,6 @@ function drawCheckers(ctx, boardData) {
     if (index > 6)
       index++;
     index++;
-    let centerOfPoint = pointWidth / 2;
     return index * pointWidth - centerOfPoint;
   };
   for (let i = 0; i < boardData.points.length; i++) {
@@ -139,8 +141,12 @@ function drawCheckers(ctx, boardData) {
     if (point.player === "O")
       playerPointNumber = i;
     const isTop = absolutePointNumber <= 12;
+    const onBar = absolutePointNumber === 0 || absolutePointNumber === 25;
     const x = getPointX(absolutePointNumber, isTop);
-    const yStart = isTop ? checkerMargin : boardHeight - checkerMargin;
+    let margin = checkerMargin;
+    if (onBar)
+      margin += checkerRadius;
+    const yStart = isTop ? margin : boardHeight - margin;
     const direction = isTop ? 1 : -1;
     ctx.lineWidth = 1;
     for (let j = 0; j < point.checkerCount; j++) {
@@ -164,14 +170,31 @@ function charToCount(c) {
   return [0, null];
 }
 function parseXGID(xgid) {
-  const parts = xgid.split(":");
-  const pointString = parts[0].slice(5);
+  const parts = xgid.replace(/^XGID=/, "").split(":");
+  const pointString = parts[0];
+  const turn = parseInt(parts[1], 10);
+  const cubeOwnerCode = parseInt(parts[2], 10);
+  const cubeValue = Math.pow(2, parseInt(parts[3], 10));
+  const scoreX = parseInt(parts[5], 10);
+  const scoreO = parseInt(parts[6], 10);
+  const matchLength = parseInt(parts[7], 10);
+  const cubeOwner = cubeOwnerCode === 0 ? "Center" : cubeOwnerCode === 1 ? "X" : "O";
   const points = pointString.split("").map(charToCount).reverse().map(([count, player]) => ({
     checkerCount: count,
     player
   }));
   return {
-    points
+    points,
+    turn: turn === 0 ? "X" : "O",
+    cube: {
+      value: cubeValue,
+      owner: cubeOwner
+    },
+    score: {
+      X: scoreX,
+      O: scoreO
+    },
+    matchLength
   };
 }
 

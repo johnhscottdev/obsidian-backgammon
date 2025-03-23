@@ -10,18 +10,40 @@ function charToCount(c: string): [number, Player | null] {
 	return [0, null];
 }
 
-//XGID=-b----E-C---eE---c-e----B-:0:0:1:65:0:0:3:0:10
-
 export function parseXGID(xgid: string): BoardData {
-	const parts = xgid.split(':');
-	const pointString = parts[0].slice(5); // remove "XGID=" or "-"
+	const parts = xgid.replace(/^XGID=/, '').split(':');
 
-	const points = pointString.split('').map(charToCount).reverse().map(([count, player]) => ({
-		checkerCount: count,
-		player,
-	}));
+	const pointString = parts[0];
+	const turn = parseInt(parts[1], 10); // 0 = X, 1 = O
+	const cubeOwnerCode = parseInt(parts[2], 10); // 0 = center, 1 = X, 2 = O
+	const cubeValue = Math.pow(2, parseInt(parts[3], 10)); // e.g., 1, 2, 4, 8, 16
+	const scoreX = parseInt(parts[5], 10);
+	const scoreO = parseInt(parts[6], 10);
+	const matchLength = parseInt(parts[7], 10);
+
+	const cubeOwner: Player | 'Center' =
+		cubeOwnerCode === 0 ? 'Center' : cubeOwnerCode === 1 ? 'X' : 'O';
+
+	const points = pointString
+		.split('')
+		.map(charToCount)
+		.reverse()
+		.map(([count, player]) => ({
+			checkerCount: count,
+			player,
+		}));
 
 	return {
 		points,
+		turn: turn === 0 ? 'X' : 'O',
+		cube: {
+			value: cubeValue,
+			owner: cubeOwner,
+		},
+		score: {
+			X: scoreX,
+			O: scoreO,
+		},
+		matchLength,
 	};
 }
