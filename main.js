@@ -26,14 +26,16 @@ module.exports = __toCommonJS(main_exports);
 var import_obsidian = require("obsidian");
 
 // src/utils/renderBoard.ts
-var boardWidth = 500;
-var boardHeight = 300;
+var scale = 1;
+var boardWidth = 500 * scale;
+var boardHeight = 400 * scale;
 var boardColumns = 6 + 6 + 3;
 var columnWidth = boardWidth / boardColumns;
 var barWidth = columnWidth;
 var pointWidth = columnWidth;
 var triangleHeight = boardHeight / 2 * 0.9;
 var checkerRadius = columnWidth / 2;
+var checkerMargin = boardWidth * 0.04;
 var barX = boardWidth / 2;
 function renderBoard(el, boardData) {
   const canvas = document.createElement("canvas");
@@ -62,9 +64,13 @@ function renderBoard(el, boardData) {
 }
 function drawBoard(ctx) {
   ctx.fillStyle = "#ffffff";
+  ctx.strokeStyle = "black";
+  ctx.lineWidth = 1;
   ctx.fillRect(0, 0, boardWidth, boardHeight);
   ctx.fillStyle = "#000000";
   ctx.strokeRect(boardWidth / 2 - barWidth / 2, 0, barWidth, boardHeight);
+  ctx.strokeRect(0, 0, barWidth, boardHeight);
+  ctx.strokeRect(boardWidth - columnWidth, 0, barWidth, boardHeight);
   const colors = ["#cccccc", "#ffffff"];
   const drawTriangle = (x, isBottomHalf, color) => {
     ctx.beginPath();
@@ -80,6 +86,7 @@ function drawBoard(ctx) {
     ctx.closePath();
     ctx.fillStyle = color;
     ctx.strokeStyle = "black";
+    ctx.lineWidth = 2;
     ctx.stroke();
     ctx.fill();
   };
@@ -99,59 +106,51 @@ function drawBoard(ctx) {
     let color = colors[i % 2];
     drawTriangle(x, false, color);
   }
+  ctx.lineWidth = 3;
+  ctx.strokeRect(0, 0, boardWidth, boardHeight);
 }
-function drawCheckerLabel(ctx, x, y, text, checkerColor) {
-  ctx.font = "12px sans-serif";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillStyle = checkerColor === "black" ? "white" : "black";
-  ctx.fillText(text, x, y);
+function drawCheckerAtPosition(ctx, xPos, yPos, color) {
+  ctx.beginPath();
+  ctx.fillStyle = color;
+  ctx.arc(xPos, yPos, checkerRadius, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = "black";
+  ctx.stroke();
 }
 function drawCheckers(ctx, boardData) {
-  const getPointX = (point) => {
-    let posInRow = (point - 1) % 12;
-    let x = posInRow * pointWidth;
-    if (posInRow >= 6) x += barWidth;
-    return x + pointWidth / 2;
+  const getPointX = (absolutePointNumber, isTop) => {
+    let index = 0;
+    if (absolutePointNumber > 12)
+      index = absolutePointNumber - 12;
+    else
+      index = 13 - absolutePointNumber;
+    if (index >= 6)
+      index++;
+    index++;
+    let centerOfPoint = pointWidth / 2;
+    return index * pointWidth - centerOfPoint;
   };
-  boardData.points.forEach((point, i) => {
-    if (!point.player || point.checkerCount === 0) return;
-    let pointNumber = 24 - i;
+  for (let i = 0; i < boardData.points.length; i++) {
+    let point = boardData.points[i];
+    if (!point.player || point.checkerCount === 0)
+      continue;
+    let absolutePointNumber = i;
+    let playerPointNumber = 24 - i;
     if (point.player === "O")
-      pointNumber = i;
-    let isTop = pointNumber >= 13;
-    if (point.player === "O")
-      isTop = !isTop;
-    const x = getPointX(pointNumber);
-    const yStart = isTop ? 20 : 280;
+      playerPointNumber = i;
+    const isTop = absolutePointNumber <= 12;
+    const x = getPointX(absolutePointNumber, isTop);
+    const yStart = isTop ? checkerMargin : boardHeight - checkerMargin;
     const direction = isTop ? 1 : -1;
+    ctx.lineWidth = 1;
     for (let j = 0; j < point.checkerCount; j++) {
-      ctx.beginPath();
-      ctx.fillStyle = point.player === "X" ? "black" : "white";
-      ctx.arc(x, yStart + direction * j * checkerRadius * 2, checkerRadius, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.strokeStyle = "black";
-      ctx.stroke();
-      drawCheckerLabel(ctx, x, yStart + direction * j * checkerRadius * 2, pointNumber.toString(), point.player === "X" ? "black" : "white");
+      let checkerColor = point.player === "X" ? "black" : "white";
+      let xPos = x;
+      let yPos = yStart + direction * j * checkerRadius * 2;
+      drawCheckerAtPosition(ctx, xPos, yPos, checkerColor);
     }
-  });
-  const drawBarCheckers = (player, count) => {
-    if (count === 0) return;
-    const isTop = player === "O";
-    const yStart = isTop ? 20 : 280;
-    const direction = isTop ? 1 : -1;
-    for (let j = 0; j < count; j++) {
-      ctx.beginPath();
-      ctx.fillStyle = player === "X" ? "black" : "white";
-      ctx.arc(barX, yStart + direction * j * checkerRadius * 2, checkerRadius, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.strokeStyle = "black";
-      ctx.lineWidth = 8;
-      ctx.stroke();
-    }
-  };
-  drawBarCheckers("X", boardData.bar.X);
-  drawBarCheckers("O", boardData.bar.O);
+  }
+  ;
 }
 
 // src/utils/parseXGID.ts
@@ -171,13 +170,8 @@ function parseXGID(xgid) {
     checkerCount: count,
     player
   }));
-  while (points.length < 24) {
-    points.push({ checkerCount: 0, player: null });
-  }
   return {
-    points,
-    bar: { X: 0, O: 0 },
-    off: { X: 0, O: 0 }
+    points
   };
 }
 

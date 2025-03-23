@@ -10,6 +10,8 @@ function charToCount(c: string): [number, Player | null] {
 	return [0, null];
 }
 
+//XGID=-b----E-C---eE---c-e----B-:0:0:1:65:0:0:3:0:10
+
 export function parseXGID(xgid: string): BoardData {
 	const parts = xgid.split(':');
 	const pointString = parts[0].slice(5); // remove "XGID=" or "-"
@@ -19,14 +21,7 @@ export function parseXGID(xgid: string): BoardData {
 		player,
 	}));
 
-	// Pad to 24 points if somehow shorter
-	while (points.length < 24) {
-		points.push({ checkerCount: 0, player: null });
-	}
-
 	return {
 		points,
-		bar: { X: 0, O: 0 },
-		off: { X: 0, O: 0 }
 	};
 }
