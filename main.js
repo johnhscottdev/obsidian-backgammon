@@ -26,13 +26,20 @@ module.exports = __toCommonJS(main_exports);
 var import_obsidian = require("obsidian");
 
 // src/utils/renderBoard.ts
+var boardWidth = 500;
+var boardHeight = 300;
+var boardColumns = 6 + 6 + 3;
+var columnWidth = boardWidth / boardColumns;
+var barWidth = columnWidth;
+var pointWidth = columnWidth;
+var triangleHeight = boardHeight / 2 * 0.9;
+var checkerRadius = columnWidth / 2;
+var barX = boardWidth / 2;
 function renderBoard(el, boardData) {
   const canvas = document.createElement("canvas");
   el.appendChild(canvas);
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
-  const baseWidth = 500;
-  const baseHeight = 300;
   let scaleFactor = 1;
   const getCanvasContainerWidth = () => {
     return canvas.parentElement?.clientWidth || window.innerWidth;
@@ -40,11 +47,11 @@ function renderBoard(el, boardData) {
   const resizeCanvas = () => {
     const unexplainedScaleError = 1;
     let noteWidth = getCanvasContainerWidth();
-    scaleFactor = noteWidth / baseWidth;
+    scaleFactor = noteWidth / boardWidth;
     scaleFactor *= unexplainedScaleError;
     scaleFactor = Math.min(scaleFactor, 1);
-    canvas.width = baseWidth * scaleFactor;
-    canvas.height = baseHeight * scaleFactor;
+    canvas.width = boardWidth * scaleFactor;
+    canvas.height = boardHeight * scaleFactor;
     ctx.setTransform(scaleFactor, 0, 0, scaleFactor, 0, 0);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawBoard(ctx);
@@ -54,21 +61,11 @@ function renderBoard(el, boardData) {
   window.addEventListener("resize", resizeCanvas);
 }
 function drawBoard(ctx) {
-  const boardWidth = 500;
-  const boardHeight = 300;
-  const barWidth = boardWidth / 12;
-  const pointWidth = (boardWidth - barWidth) / 12;
-  const triangleHeight = boardHeight / 2;
-  ctx.fillStyle = "#cccccc";
+  ctx.fillStyle = "#ffffff";
   ctx.fillRect(0, 0, boardWidth, boardHeight);
-  ctx.fillStyle = "#654321";
-  ctx.fillRect(boardWidth / 2 - barWidth / 2, 0, barWidth, boardHeight);
-  const colors = [
-    ["#44aa44", "#aaffaa"],
-    ["#aaffaa", "#229922"],
-    ["#229922", "#aaffaa"],
-    ["#aaffaa", "#229922"]
-  ];
+  ctx.fillStyle = "#000000";
+  ctx.strokeRect(boardWidth / 2 - barWidth / 2, 0, barWidth, boardHeight);
+  const colors = ["#cccccc", "#ffffff"];
   const drawTriangle = (x, isBottomHalf, color) => {
     ctx.beginPath();
     if (isBottomHalf) {
@@ -82,20 +79,24 @@ function drawBoard(ctx) {
     }
     ctx.closePath();
     ctx.fillStyle = color;
+    ctx.strokeStyle = "black";
+    ctx.stroke();
     ctx.fill();
   };
   for (let i = 0; i < 12; i++) {
     let x = i * pointWidth;
+    x += columnWidth;
     if (i >= 6) x += barWidth;
     let quadrantIndex = i < 6 ? 0 : 1;
-    let color = colors[quadrantIndex][i % 2];
+    let color = colors[(i + 1) % 2];
     drawTriangle(x, true, color);
   }
   for (let i = 0; i < 12; i++) {
     let x = i * pointWidth;
+    x += columnWidth;
     if (i >= 6) x += barWidth;
     let quadrantIndex = i < 6 ? 3 : 2;
-    let color = colors[quadrantIndex][i % 2];
+    let color = colors[i % 2];
     drawTriangle(x, false, color);
   }
 }
@@ -107,11 +108,6 @@ function drawCheckerLabel(ctx, x, y, text, checkerColor) {
   ctx.fillText(text, x, y);
 }
 function drawCheckers(ctx, boardData) {
-  const checkerRadius = 15;
-  const boardWidth = 500;
-  const barWidth = boardWidth / 12;
-  const pointWidth = (boardWidth - barWidth) / 12;
-  const barX = boardWidth / 2;
   const getPointX = (point) => {
     let posInRow = (point - 1) % 12;
     let x = posInRow * pointWidth;
@@ -120,17 +116,23 @@ function drawCheckers(ctx, boardData) {
   };
   boardData.points.forEach((point, i) => {
     if (!point.player || point.checkerCount === 0) return;
-    const pointNumber = 24 - i;
-    const isTop = pointNumber >= 13;
+    let pointNumber = 24 - i;
+    if (point.player === "O")
+      pointNumber = i;
+    let isTop = pointNumber >= 13;
+    if (point.player === "O")
+      isTop = !isTop;
     const x = getPointX(pointNumber);
     const yStart = isTop ? 20 : 280;
     const direction = isTop ? 1 : -1;
     for (let j = 0; j < point.checkerCount; j++) {
       ctx.beginPath();
       ctx.fillStyle = point.player === "X" ? "black" : "white";
-      ctx.arc(x, yStart + direction * j * 30, checkerRadius, 0, Math.PI * 2);
+      ctx.arc(x, yStart + direction * j * checkerRadius * 2, checkerRadius, 0, Math.PI * 2);
       ctx.fill();
-      drawCheckerLabel(ctx, x, yStart + direction * j * 30, pointNumber.toString(), point.player === "X" ? "black" : "white");
+      ctx.strokeStyle = "black";
+      ctx.stroke();
+      drawCheckerLabel(ctx, x, yStart + direction * j * checkerRadius * 2, pointNumber.toString(), point.player === "X" ? "black" : "white");
     }
   });
   const drawBarCheckers = (player, count) => {
@@ -141,8 +143,11 @@ function drawCheckers(ctx, boardData) {
     for (let j = 0; j < count; j++) {
       ctx.beginPath();
       ctx.fillStyle = player === "X" ? "black" : "white";
-      ctx.arc(barX, yStart + direction * j * 30, checkerRadius, 0, Math.PI * 2);
+      ctx.arc(barX, yStart + direction * j * checkerRadius * 2, checkerRadius, 0, Math.PI * 2);
       ctx.fill();
+      ctx.strokeStyle = "black";
+      ctx.lineWidth = 8;
+      ctx.stroke();
     }
   };
   drawBarCheckers("X", boardData.bar.X);

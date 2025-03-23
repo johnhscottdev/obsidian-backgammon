@@ -1,14 +1,23 @@
 import type { BoardData } from '../types/board';
 
+
+
+const boardWidth = 500;
+const boardHeight = 300;
+const boardColumns = 6 + 6 + 3; // all 12 points, the bar, and the bear off trays
+const columnWidth = boardWidth / boardColumns
+const barWidth = columnWidth;
+const pointWidth = columnWidth;
+const triangleHeight = (boardHeight / 2) * 0.9;
+const checkerRadius = (columnWidth / 2);
+const barX = boardWidth / 2;
+
 export function renderBoard(el: HTMLElement, boardData: BoardData): void {
 	const canvas: HTMLCanvasElement = document.createElement('canvas');
 	el.appendChild(canvas);
 	const ctx: CanvasRenderingContext2D | null = canvas.getContext('2d');
 
 	if (!ctx) return;
-
-	const baseWidth = 500;
-	const baseHeight = 300;
 	let scaleFactor = 1;
 
 	const getCanvasContainerWidth = (): number => {
@@ -19,12 +28,12 @@ export function renderBoard(el: HTMLElement, boardData: BoardData): void {
 		const unexplainedScaleError = 1.0;
 		let noteWidth = getCanvasContainerWidth();
 
-		scaleFactor = noteWidth / baseWidth;
+		scaleFactor = noteWidth / boardWidth;
 		scaleFactor *= unexplainedScaleError;
 		scaleFactor = Math.min(scaleFactor, 1);
 
-		canvas.width = baseWidth * scaleFactor;
-		canvas.height = baseHeight * scaleFactor;
+		canvas.width = boardWidth * scaleFactor;
+		canvas.height = boardHeight * scaleFactor;
 
 		ctx.setTransform(scaleFactor, 0, 0, scaleFactor, 0, 0);
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -37,24 +46,14 @@ export function renderBoard(el: HTMLElement, boardData: BoardData): void {
 }
 
 function drawBoard(ctx: CanvasRenderingContext2D): void {
-	const boardWidth = 500;
-	const boardHeight = 300;
-	const barWidth = boardWidth / 12;
-	const pointWidth = (boardWidth - barWidth) / 12;
-	const triangleHeight = boardHeight / 2;
 
-	ctx.fillStyle = "#cccccc";
+	ctx.fillStyle = "#ffffff";
 	ctx.fillRect(0, 0, boardWidth, boardHeight);
 
-	ctx.fillStyle = "#654321";
-	ctx.fillRect(boardWidth / 2 - barWidth / 2, 0, barWidth, boardHeight);
+	ctx.fillStyle = "#000000";
+	ctx.strokeRect(boardWidth / 2 - barWidth / 2, 0, barWidth, boardHeight);
 
-	const colors = [
-		["#44aa44", "#aaffaa"],
-		["#aaffaa", "#229922"],
-		["#229922", "#aaffaa"],
-		["#aaffaa", "#229922"],
-	];
+	const colors = ["#cccccc", "#ffffff"];
 
 	const drawTriangle = (x: number, isBottomHalf: boolean, color: string) => {
 		ctx.beginPath();
@@ -69,22 +68,26 @@ function drawBoard(ctx: CanvasRenderingContext2D): void {
 		}
 		ctx.closePath();
 		ctx.fillStyle = color;
+		ctx.strokeStyle = "black";
+		ctx.stroke();
 		ctx.fill();
 	};
 
 	for (let i = 0; i < 12; i++) {
 		let x = i * pointWidth;
+		x += columnWidth; // offset for bear off tray
 		if (i >= 6) x += barWidth;
 		let quadrantIndex = i < 6 ? 0 : 1;
-		let color = colors[quadrantIndex][i % 2];
+		let color = colors[(i+1) % 2];
 		drawTriangle(x, true, color);
 	}
 
 	for (let i = 0; i < 12; i++) {
 		let x = i * pointWidth;
+		x += columnWidth; // offset for bear off tray
 		if (i >= 6) x += barWidth;
 		let quadrantIndex = i < 6 ? 3 : 2;
-		let color = colors[quadrantIndex][i % 2];
+		let color = colors[i % 2];
 		drawTriangle(x, false, color);
 	}
 }
@@ -98,11 +101,6 @@ function drawCheckerLabel(ctx: CanvasRenderingContext2D, x: number, y: number, t
 }
 
 export function drawCheckers(ctx: CanvasRenderingContext2D, boardData: BoardData): void {
-	const checkerRadius = 15;
-	const boardWidth = 500;
-	const barWidth = boardWidth / 12;
-	const pointWidth = (boardWidth - barWidth) / 12;
-	const barX = boardWidth / 2;
 
 	// Helper to get x-position from point number (1–24)
 	const getPointX = (point: number): number => {
@@ -116,8 +114,12 @@ export function drawCheckers(ctx: CanvasRenderingContext2D, boardData: BoardData
 	boardData.points.forEach((point, i) => {
 		if (!point.player || point.checkerCount === 0) return;
 
-		const pointNumber = 24 - i;
-		const isTop = pointNumber >= 13;
+		let pointNumber = 24 - i;
+		if(point.player==='O')
+			pointNumber = i;
+		let isTop = pointNumber >= 13;
+		if(point.player==='O')
+			isTop = !isTop;
 
 		const x = getPointX(pointNumber);
 		const yStart = isTop ? 20 : 280;
@@ -126,9 +128,12 @@ export function drawCheckers(ctx: CanvasRenderingContext2D, boardData: BoardData
 		for (let j = 0; j < point.checkerCount; j++) {
 			ctx.beginPath();
 			ctx.fillStyle = point.player === 'X' ? 'black' : 'white';
-			ctx.arc(x, yStart + direction * j * 30, checkerRadius, 0, Math.PI * 2);
+			ctx.arc(x, yStart + direction * j * checkerRadius*2, checkerRadius, 0, Math.PI * 2);
 			ctx.fill();
-			drawCheckerLabel(ctx, x, yStart + direction * j * 30, pointNumber.toString(), point.player === 'X' ? 'black' : 'white')
+			ctx.strokeStyle = 'black';
+			ctx.stroke();	
+
+			drawCheckerLabel(ctx, x, yStart + direction * j * checkerRadius*2, pointNumber.toString(), point.player === 'X' ? 'black' : 'white')
 		}
 	});
 
@@ -142,9 +147,13 @@ export function drawCheckers(ctx: CanvasRenderingContext2D, boardData: BoardData
 
 		for (let j = 0; j < count; j++) {
 			ctx.beginPath();
-			ctx.fillStyle = player === 'X' ? 'black' : 'white';
-			ctx.arc(barX, yStart + direction * j * 30, checkerRadius, 0, Math.PI * 2);
-			ctx.fill();
+			ctx.fillStyle = player === 'X' ? 'black' : 'white';			
+			ctx.arc(barX, yStart + direction * j * checkerRadius*2, checkerRadius, 0, Math.PI * 2);			
+			ctx.fill();	
+
+			ctx.strokeStyle = 'black';
+			ctx.lineWidth = 8;
+			ctx.stroke();			
 		}
 	};
 
