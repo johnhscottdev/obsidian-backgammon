@@ -133,7 +133,7 @@ export function drawCheckers(ctx: CanvasRenderingContext2D, boardData: BoardData
 			index = 13 - absolutePointNumber;
 		
 		//account for the bar
-		if(index >= 6)
+		if(index > 6)
 			index++;		
 		
 		// account for leftmost bearoff tray

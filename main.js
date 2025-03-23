@@ -124,7 +124,7 @@ function drawCheckers(ctx, boardData) {
       index = absolutePointNumber - 12;
     else
       index = 13 - absolutePointNumber;
-    if (index >= 6)
+    if (index > 6)
       index++;
     index++;
     let centerOfPoint = pointWidth / 2;
