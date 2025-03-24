@@ -48,6 +48,11 @@ export function renderBoard(el: HTMLElement, boardData: BoardData): void {
 		else if (boardData.cubeOwner === 'O')
 			cubeY = checkerMargin;
 		drawCubeAtPosition(ctx, columnWidth/2, cubeY, boardData.cubeValue);
+
+		let dieOffset = columnWidth * 2.5;
+		let dieSize = checkerRadius*2;
+		drawDieAtPosition(ctx, boardWidth/2+dieOffset, boardHeight/2, dieSize, 5);
+		drawDieAtPosition(ctx, boardWidth/2+dieOffset + dieSize * 1.1, boardHeight/2, dieSize, 6);
 	};
 
 	resizeCanvas();
@@ -131,6 +136,54 @@ function drawCubeAtPosition(ctx: CanvasRenderingContext2D, xPos:number, yPos:num
 	ctx.textBaseline = 'middle';
 	ctx.fillStyle = 'black';
 	ctx.fillText(cubeValue.toString(), xPos, yPos);
+}
+
+function drawDieAtPosition(ctx: CanvasRenderingContext2D, x: number, y: number, size: number, value: number) {
+	// Clamp value between 1 and 6
+	const dieValue = Math.max(1, Math.min(value, 6));
+
+	const radius = size / 2;
+	const pipRadius = size * 0.07;
+
+	// Draw die background
+	ctx.beginPath();
+	ctx.fillStyle = '#fff';
+	ctx.strokeStyle = '#000';
+	ctx.lineWidth = 2;
+	ctx.roundRect(x - radius, y - radius, size, size, size * 0.15);
+	ctx.fill();
+	ctx.stroke();
+
+	// Pip positions (relative to center)
+	const offsets = [
+		[-0.3, -0.3],
+		[ 0.3,  0.3],
+		[ 0.3, -0.3],
+		[-0.3,  0.3],
+		[-0.3,  0],
+		[ 0.3,  0],
+		[ 0,    0]
+	];
+
+	const pipMap: Record<number, number[][]> = {
+		1: [[6]],
+		2: [[0], [1]],
+		3: [[0], [1], [6]],
+		4: [[0], [1], [2], [3]],
+		5: [[0], [1], [2], [3], [6]],
+		6: [[0], [1], [2], [3], [4], [5]],
+	};
+
+	// Draw pips
+	ctx.fillStyle = '#000';
+	for (const group of pipMap[dieValue]) {
+		for (const i of group) {
+			const [dx, dy] = offsets[i];
+			ctx.beginPath();
+			ctx.arc(x + dx * size, y + dy * size, pipRadius, 0, Math.PI * 2);
+			ctx.fill();
+		}
+	}
 }
 
 function drawCheckerAtPosition(ctx: CanvasRenderingContext2D, xPos:number, yPos:number, color:string)
