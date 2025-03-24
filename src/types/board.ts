@@ -19,5 +19,7 @@ export interface BoardData {
 	die2:number,
 	scoreX: number;
 	scoreO: number;
+	jacoby:boolean;
+	beaver:boolean;
 	matchLength: number;
 }

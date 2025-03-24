@@ -61,12 +61,18 @@ export function renderBoard(el: HTMLElement, boardData: BoardData): void {
 				dieSpacing *= -1;
 			}
 
-			
-
-
 			let dieSize = checkerRadius*2;
 			drawDieAtPosition(ctx, boardWidth/2+dieOffset, boardHeight/2, dieSize, boardData.die1, color);
 			drawDieAtPosition(ctx, boardWidth/2+dieOffset + dieSize * dieSpacing, boardHeight/2, dieSize, boardData.die2, color);
+		}		
+
+		if(boardData.matchLength > 0)
+		{
+			const scoreMargin = 6;
+			const scoreX = boardWidth - columnWidth/2;
+			drawScoreAtPosition(ctx, scoreX , checkerRadius*scoreMargin, boardData.scoreO, "White");
+			drawScoreAtPosition(ctx, scoreX, boardHeight - checkerRadius*scoreMargin, boardData.scoreX, "Black");
+			drawScoreAtPosition(ctx, scoreX, boardHeight/2, boardData.matchLength, "Length");
 		}
 	};
 
@@ -136,6 +142,29 @@ function drawCheckerLabel(ctx: CanvasRenderingContext2D, x: number, y: number, t
 	ctx.textBaseline = 'middle';
 	ctx.fillStyle = checkerColor;
 	ctx.fillText(text, x, y);
+}
+function drawScoreAtPosition(ctx: CanvasRenderingContext2D, xPos:number, yPos:number, score:number, header:string)
+{
+	const sizeX = columnWidth;
+	const sizeY = sizeX + checkerRadius;
+	ctx.fillStyle = 'white';
+	ctx.strokeStyle = 'black';
+	ctx.fillRect(xPos-sizeX/2, yPos-sizeY/2, sizeX, sizeY);
+
+	ctx.lineWidth = 1;
+	ctx.strokeRect(xPos-sizeX/2, yPos-sizeY/2, sizeX, sizeY);		
+	
+	ctx.font = 'bold 8px sans-serif';
+	ctx.textAlign = 'center';
+	ctx.textBaseline = 'middle';
+	ctx.fillStyle = 'black';
+	ctx.fillText(header, xPos, yPos-checkerRadius*.5);
+
+	ctx.font = 'bold 16px sans-serif';
+	ctx.textAlign = 'center';
+	ctx.textBaseline = 'middle';
+	ctx.fillStyle = 'black';
+	ctx.fillText(score.toString(), xPos, yPos + checkerRadius*.5);
 }
 
 function drawCubeAtPosition(ctx: CanvasRenderingContext2D, xPos:number, yPos:number, cubeValue:number)

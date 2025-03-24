@@ -27,7 +27,8 @@ export function parseXGID(xgid: string): BoardData {
 	const die2 = parseInt(parts[4][1]);
 	const scoreX = parseInt(parts[5], 10);
 	const scoreO = parseInt(parts[6], 10);
-	const matchLength = parseInt(parts[7], 10);
+	const rulesFlags = parseInt(parts[7], 10);
+	const matchLength = parseInt(parts[8], 10);	
 
 	const cubeOwner: Player | 'Center' =
 		cubeOwnerCode === 0 ? 'Center' : cubeOwnerCode === 1 ? 'X' : 'O';
@@ -41,6 +42,8 @@ export function parseXGID(xgid: string): BoardData {
 			player,
 		}));
 
+	const jacoby = rulesFlags % 2 === 1;
+	const beaver = rulesFlags % 4 === 1;
 	
 	const checkersOnBoardX = countCheckers(points, 'X');
 	const checkersOnBoardO = countCheckers(points, 'O');
@@ -57,7 +60,9 @@ export function parseXGID(xgid: string): BoardData {
 		cubeValue: cubeOwner === 'Center' ? 64 : cubeValue,
 		scoreX:scoreX,
 		scoreO:scoreO,
-		matchLength,
+		beaver:beaver,
+		jacoby:jacoby,
+		matchLength:matchLength,
 	};
 
 

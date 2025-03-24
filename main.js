@@ -76,6 +76,13 @@ function renderBoard(el, boardData) {
       drawDieAtPosition(ctx, boardWidth / 2 + dieOffset, boardHeight / 2, dieSize, boardData.die1, color);
       drawDieAtPosition(ctx, boardWidth / 2 + dieOffset + dieSize * dieSpacing, boardHeight / 2, dieSize, boardData.die2, color);
     }
+    if (boardData.matchLength > 0) {
+      const scoreMargin = 6;
+      const scoreX = boardWidth - columnWidth / 2;
+      drawScoreAtPosition(ctx, scoreX, checkerRadius * scoreMargin, boardData.scoreO, "White");
+      drawScoreAtPosition(ctx, scoreX, boardHeight - checkerRadius * scoreMargin, boardData.scoreX, "Black");
+      drawScoreAtPosition(ctx, scoreX, boardHeight / 2, boardData.matchLength, "Length");
+    }
   };
   resizeCanvas();
   window.addEventListener("resize", resizeCanvas);
@@ -133,6 +140,25 @@ function drawCheckerLabel(ctx, x, y, text, checkerColor) {
   ctx.textBaseline = "middle";
   ctx.fillStyle = checkerColor;
   ctx.fillText(text, x, y);
+}
+function drawScoreAtPosition(ctx, xPos, yPos, score, header) {
+  const sizeX = columnWidth;
+  const sizeY = sizeX + checkerRadius;
+  ctx.fillStyle = "white";
+  ctx.strokeStyle = "black";
+  ctx.fillRect(xPos - sizeX / 2, yPos - sizeY / 2, sizeX, sizeY);
+  ctx.lineWidth = 1;
+  ctx.strokeRect(xPos - sizeX / 2, yPos - sizeY / 2, sizeX, sizeY);
+  ctx.font = "bold 8px sans-serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillStyle = "black";
+  ctx.fillText(header, xPos, yPos - checkerRadius * 0.5);
+  ctx.font = "bold 16px sans-serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillStyle = "black";
+  ctx.fillText(score.toString(), xPos, yPos + checkerRadius * 0.5);
 }
 function drawCubeAtPosition(ctx, xPos, yPos, cubeValue) {
   const size = columnWidth - 5;
@@ -269,12 +295,15 @@ function parseXGID(xgid) {
   const die2 = parseInt(parts[4][1]);
   const scoreX = parseInt(parts[5], 10);
   const scoreO = parseInt(parts[6], 10);
-  const matchLength = parseInt(parts[7], 10);
+  const rulesFlags = parseInt(parts[7], 10);
+  const matchLength = parseInt(parts[8], 10);
   const cubeOwner = cubeOwnerCode === 0 ? "Center" : cubeOwnerCode === 1 ? "X" : "O";
   const points = pointString.split("").map(charToCount).reverse().map(([count, player]) => ({
     checkerCount: count,
     player
   }));
+  const jacoby = rulesFlags % 2 === 1;
+  const beaver = rulesFlags % 4 === 1;
   const checkersOnBoardX = countCheckers(points, "X");
   const checkersOnBoardO = countCheckers(points, "O");
   const borneOffX = 15 - checkersOnBoardX;
@@ -290,6 +319,8 @@ function parseXGID(xgid) {
     cubeValue: cubeOwner === "Center" ? 64 : cubeValue,
     scoreX,
     scoreO,
+    beaver,
+    jacoby,
     matchLength
   };
   return boardData;
