@@ -58,6 +58,12 @@ function renderBoard(el, boardData) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawBoard(ctx);
     drawCheckers(ctx, boardData);
+    let cubeY = boardHeight / 2;
+    if (boardData.cubeOwner === "X")
+      cubeY = boardHeight - checkerMargin;
+    else if (boardData.cubeOwner === "O")
+      cubeY = checkerMargin;
+    drawCubeAtPosition(ctx, columnWidth / 2, cubeY, boardData.cubeValue);
   };
   resizeCanvas();
   window.addEventListener("resize", resizeCanvas);
@@ -110,11 +116,23 @@ function drawBoard(ctx) {
   ctx.strokeRect(0, 0, boardWidth, boardHeight);
 }
 function drawCheckerLabel(ctx, x, y, text, checkerColor) {
-  ctx.font = "12px sans-serif";
+  ctx.font = "bold 16px sans-serif";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.fillStyle = checkerColor;
   ctx.fillText(text, x, y);
+}
+function drawCubeAtPosition(ctx, xPos, yPos, cubeValue) {
+  const size = columnWidth - 5;
+  ctx.fillStyle = "white";
+  ctx.strokeStyle = "black";
+  ctx.fillRect(xPos - size / 2, yPos - size / 2, size, size);
+  ctx.strokeRect(xPos - size / 2, yPos - size / 2, size, size);
+  ctx.font = "bold 16px sans-serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillStyle = "black";
+  ctx.fillText(cubeValue.toString(), xPos, yPos);
 }
 function drawCheckerAtPosition(ctx, xPos, yPos, color) {
   ctx.beginPath();
@@ -194,9 +212,9 @@ function countCheckers(points, player) {
 function parseXGID(xgid) {
   const parts = xgid.replace(/^XGID=/, "").split(":");
   const pointString = parts[0];
-  const turn = parseInt(parts[1], 10);
   const cubeOwnerCode = parseInt(parts[2], 10);
-  const cubeValue = Math.pow(2, parseInt(parts[3], 10));
+  const cubeValue = Math.pow(2, parseInt(parts[1], 10));
+  const turn = parseInt(parts[3], 10);
   const scoreX = parseInt(parts[5], 10);
   const scoreO = parseInt(parts[6], 10);
   const matchLength = parseInt(parts[7], 10);
@@ -214,14 +232,10 @@ function parseXGID(xgid) {
     borneOffX,
     borneOffO,
     turn: turn === 0 ? "X" : "O",
-    cube: {
-      value: cubeValue,
-      owner: cubeOwner
-    },
-    score: {
-      X: scoreX,
-      O: scoreO
-    },
+    cubeOwner,
+    cubeValue: cubeOwner === "Center" ? 64 : cubeValue,
+    scoreX,
+    scoreO,
     matchLength
   };
   return boardData;

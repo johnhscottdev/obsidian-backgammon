@@ -41,6 +41,13 @@ export function renderBoard(el: HTMLElement, boardData: BoardData): void {
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
 		drawBoard(ctx); // draw triangles/background
 		drawCheckers(ctx, boardData); // now using points[]
+
+		let cubeY = boardHeight/2;
+		if(boardData.cubeOwner === 'X')
+			cubeY = boardHeight - checkerMargin;
+		else if (boardData.cubeOwner === 'O')
+			cubeY = checkerMargin;
+		drawCubeAtPosition(ctx, columnWidth/2, cubeY, boardData.cubeValue);
 	};
 
 	resizeCanvas();
@@ -104,11 +111,26 @@ function drawBoard(ctx: CanvasRenderingContext2D): void {
 }
 
 function drawCheckerLabel(ctx: CanvasRenderingContext2D, x: number, y: number, text: string, checkerColor: 'black' | 'white'): void {
-	ctx.font = '12px sans-serif';
+	ctx.font = 'bold 16px sans-serif';
 	ctx.textAlign = 'center';
 	ctx.textBaseline = 'middle';
 	ctx.fillStyle = checkerColor;
 	ctx.fillText(text, x, y);
+}
+
+function drawCubeAtPosition(ctx: CanvasRenderingContext2D, xPos:number, yPos:number, cubeValue:number)
+{
+	const size = columnWidth - 5;
+	ctx.fillStyle = 'white';
+	ctx.strokeStyle = 'black';
+	ctx.fillRect(xPos-size/2, yPos-size/2, size, size);
+	ctx.strokeRect(xPos-size/2, yPos-size/2, size, size);		
+	
+	ctx.font = 'bold 16px sans-serif';
+	ctx.textAlign = 'center';
+	ctx.textBaseline = 'middle';
+	ctx.fillStyle = 'black';
+	ctx.fillText(cubeValue.toString(), xPos, yPos);
 }
 
 function drawCheckerAtPosition(ctx: CanvasRenderingContext2D, xPos:number, yPos:number, color:string)

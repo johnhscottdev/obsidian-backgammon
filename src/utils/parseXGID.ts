@@ -19,10 +19,10 @@ function countCheckers(points: { checkerCount: number; player: Player | null }[]
 export function parseXGID(xgid: string): BoardData {
 	const parts = xgid.replace(/^XGID=/, '').split(':');
 
-	const pointString = parts[0];
-	const turn = parseInt(parts[1], 10); // 0 = X, 1 = O
+	const pointString = parts[0];	
 	const cubeOwnerCode = parseInt(parts[2], 10); // 0 = center, 1 = X, 2 = O
-	const cubeValue = Math.pow(2, parseInt(parts[3], 10)); // e.g., 1, 2, 4, 8, 16
+	const cubeValue = Math.pow(2, parseInt(parts[1], 10)); // e.g., 1, 2, 4, 8, 16
+	const turn = parseInt(parts[3], 10); // 0 = X, 1 = O	
 	const scoreX = parseInt(parts[5], 10);
 	const scoreO = parseInt(parts[6], 10);
 	const matchLength = parseInt(parts[7], 10);
@@ -49,14 +49,10 @@ export function parseXGID(xgid: string): BoardData {
 		borneOffX,
 		borneOffO,
 		turn: turn === 0 ? 'X' : 'O',
-		cube: {
-			value: cubeValue,
-			owner: cubeOwner,
-		},
-		score: {
-			X: scoreX,
-			O: scoreO,
-		},
+		cubeOwner: cubeOwner,
+		cubeValue: cubeOwner === 'Center' ? 64 : cubeValue,
+		scoreX:scoreX,
+		scoreO:scoreO,
 		matchLength,
 	};
 

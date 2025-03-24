@@ -12,14 +12,10 @@ export interface BoardData {
 	}[];
 	borneOffX:number;
 	borneOffO:number;
-	turn?: Player;
-	cube?: {
-		value: number;
-		owner: Player | 'Center';
-	};
-	score?: {
-		X: number;
-		O: number;
-	};
-	matchLength?: number;
+	turn: Player;
+	cubeValue: number;
+	cubeOwner:Player | 'Center';
+	scoreX: number;
+	scoreO: number;
+	matchLength: number;
 }
