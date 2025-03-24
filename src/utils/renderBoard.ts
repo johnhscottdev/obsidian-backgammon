@@ -107,7 +107,7 @@ function drawCheckerLabel(ctx: CanvasRenderingContext2D, x: number, y: number, t
 	ctx.font = '12px sans-serif';
 	ctx.textAlign = 'center';
 	ctx.textBaseline = 'middle';
-	ctx.fillStyle = checkerColor === 'black' ? 'white' : 'black';
+	ctx.fillStyle = checkerColor;
 	ctx.fillText(text, x, y);
 }
 
@@ -125,7 +125,7 @@ function drawCheckerAtPosition(ctx: CanvasRenderingContext2D, xPos:number, yPos:
 export function drawCheckers(ctx: CanvasRenderingContext2D, boardData: BoardData): void {
 
 	// Helper to get x-position from point number (1–24)
-	const getPointX = (absolutePointNumber: number, isTop:boolean): number => {
+	const getPointX = (absolutePointNumber: number): number => {
 		let index=0;
 		const centerOfPoint = (pointWidth / 2);
 		if(absolutePointNumber == 0 || absolutePointNumber == 25)
@@ -160,7 +160,7 @@ export function drawCheckers(ctx: CanvasRenderingContext2D, boardData: BoardData
 		
 		const isTop = absolutePointNumber <= 12;
 		const onBar = absolutePointNumber === 0 || absolutePointNumber === 25;
-		const x = getPointX(absolutePointNumber, isTop);
+		const x = getPointX(absolutePointNumber);
 		let margin = checkerMargin;
 		if(onBar)
 			margin += checkerRadius;
@@ -177,6 +177,22 @@ export function drawCheckers(ctx: CanvasRenderingContext2D, boardData: BoardData
 			//drawCheckerLabel(ctx, xPos, yPos, absolutePointNumber.toString(), point.player === 'X' ? 'black' : 'white');
 		}
 	};
+
+	
+	if(boardData.borneOffX > 0)
+	{
+		const xPos = (boardColumns * columnWidth) - columnWidth * .5;
+		const yPos = boardHeight - (checkerMargin + checkerRadius);
+		drawCheckerAtPosition(ctx, xPos, yPos, 'black');
+		drawCheckerLabel(ctx, xPos, yPos, boardData.borneOffX.toString(), 'white');
+	}
+	if(boardData.borneOffO > 0)
+	{
+		const xPos = (boardColumns * columnWidth) - columnWidth * .5;
+		const yPos = checkerMargin + checkerRadius;
+		drawCheckerAtPosition(ctx, xPos, yPos, 'white');
+		drawCheckerLabel(ctx, xPos, yPos, boardData.borneOffO.toString(), 'black');
+	}
 }
 
 

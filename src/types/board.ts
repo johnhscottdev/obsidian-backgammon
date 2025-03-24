@@ -10,6 +10,8 @@ export interface BoardData {
 		checkerCount: number;
 		player: Player | null;
 	}[];
+	borneOffX:number;
+	borneOffO:number;
 	turn?: Player;
 	cube?: {
 		value: number;

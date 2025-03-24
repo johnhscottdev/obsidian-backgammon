@@ -10,6 +10,12 @@ function charToCount(c: string): [number, Player | null] {
 	return [0, null];
 }
 
+function countCheckers(points: { checkerCount: number; player: Player | null }[], player: Player): number {
+	return points
+		.filter(p => p.player === player)
+		.reduce((sum, p) => sum + p.checkerCount, 0);
+}
+
 export function parseXGID(xgid: string): BoardData {
 	const parts = xgid.replace(/^XGID=/, '').split(':');
 
@@ -33,8 +39,15 @@ export function parseXGID(xgid: string): BoardData {
 			player,
 		}));
 
-	return {
+	
+	const checkersOnBoardX = countCheckers(points, 'X');
+	const checkersOnBoardO = countCheckers(points, 'O');
+	const borneOffX = 15 - checkersOnBoardX;
+	const borneOffO = 15 - checkersOnBoardX;
+	let boardData:BoardData = {
 		points,
+		borneOffX,
+		borneOffO,
 		turn: turn === 0 ? 'X' : 'O',
 		cube: {
 			value: cubeValue,
@@ -46,4 +59,7 @@ export function parseXGID(xgid: string): BoardData {
 		},
 		matchLength,
 	};
+
+
+	return boardData;
 }

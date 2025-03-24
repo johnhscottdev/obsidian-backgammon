@@ -109,6 +109,13 @@ function drawBoard(ctx) {
   ctx.lineWidth = 3;
   ctx.strokeRect(0, 0, boardWidth, boardHeight);
 }
+function drawCheckerLabel(ctx, x, y, text, checkerColor) {
+  ctx.font = "12px sans-serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillStyle = checkerColor;
+  ctx.fillText(text, x, y);
+}
 function drawCheckerAtPosition(ctx, xPos, yPos, color) {
   ctx.beginPath();
   ctx.fillStyle = color;
@@ -118,7 +125,7 @@ function drawCheckerAtPosition(ctx, xPos, yPos, color) {
   ctx.stroke();
 }
 function drawCheckers(ctx, boardData) {
-  const getPointX = (absolutePointNumber, isTop) => {
+  const getPointX = (absolutePointNumber) => {
     let index = 0;
     const centerOfPoint = pointWidth / 2;
     if (absolutePointNumber == 0 || absolutePointNumber == 25)
@@ -142,7 +149,7 @@ function drawCheckers(ctx, boardData) {
       playerPointNumber = i;
     const isTop = absolutePointNumber <= 12;
     const onBar = absolutePointNumber === 0 || absolutePointNumber === 25;
-    const x = getPointX(absolutePointNumber, isTop);
+    const x = getPointX(absolutePointNumber);
     let margin = checkerMargin;
     if (onBar)
       margin += checkerRadius;
@@ -157,6 +164,18 @@ function drawCheckers(ctx, boardData) {
     }
   }
   ;
+  if (boardData.borneOffX > 0) {
+    const xPos = boardColumns * columnWidth - columnWidth * 0.5;
+    const yPos = boardHeight - (checkerMargin + checkerRadius);
+    drawCheckerAtPosition(ctx, xPos, yPos, "black");
+    drawCheckerLabel(ctx, xPos, yPos, boardData.borneOffX.toString(), "white");
+  }
+  if (boardData.borneOffO > 0) {
+    const xPos = boardColumns * columnWidth - columnWidth * 0.5;
+    const yPos = checkerMargin + checkerRadius;
+    drawCheckerAtPosition(ctx, xPos, yPos, "white");
+    drawCheckerLabel(ctx, xPos, yPos, boardData.borneOffO.toString(), "black");
+  }
 }
 
 // src/utils/parseXGID.ts
@@ -168,6 +187,9 @@ function charToCount(c) {
     return [c.charCodeAt(0) - "A".charCodeAt(0) + 1, "X"];
   }
   return [0, null];
+}
+function countCheckers(points, player) {
+  return points.filter((p) => p.player === player).reduce((sum, p) => sum + p.checkerCount, 0);
 }
 function parseXGID(xgid) {
   const parts = xgid.replace(/^XGID=/, "").split(":");
@@ -183,8 +205,14 @@ function parseXGID(xgid) {
     checkerCount: count,
     player
   }));
-  return {
+  const checkersOnBoardX = countCheckers(points, "X");
+  const checkersOnBoardO = countCheckers(points, "O");
+  const borneOffX = 15 - checkersOnBoardX;
+  const borneOffO = 15 - checkersOnBoardX;
+  let boardData = {
     points,
+    borneOffX,
+    borneOffO,
     turn: turn === 0 ? "X" : "O",
     cube: {
       value: cubeValue,
@@ -196,6 +224,7 @@ function parseXGID(xgid) {
     },
     matchLength
   };
+  return boardData;
 }
 
 // src/main.ts
