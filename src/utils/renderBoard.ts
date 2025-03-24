@@ -49,10 +49,25 @@ export function renderBoard(el: HTMLElement, boardData: BoardData): void {
 			cubeY = checkerMargin;
 		drawCubeAtPosition(ctx, columnWidth/2, cubeY, boardData.cubeValue);
 
-		let dieOffset = columnWidth * 2.5;
-		let dieSize = checkerRadius*2;
-		drawDieAtPosition(ctx, boardWidth/2+dieOffset, boardHeight/2, dieSize, 5);
-		drawDieAtPosition(ctx, boardWidth/2+dieOffset + dieSize * 1.1, boardHeight/2, dieSize, 6);
+		if(boardData.die1 > 0 && boardData.die2 > 0)
+		{
+			const color = boardData.turn === 'X' ? 'black' : 'white'
+			
+			let dieOffset = columnWidth * 2.5;
+			let dieSpacing = 1.2;
+			if(boardData.turn === 'O')
+			{
+				dieOffset *= -1;
+				dieSpacing *= -1;
+			}
+
+			
+
+
+			let dieSize = checkerRadius*2;
+			drawDieAtPosition(ctx, boardWidth/2+dieOffset, boardHeight/2, dieSize, boardData.die1, color);
+			drawDieAtPosition(ctx, boardWidth/2+dieOffset + dieSize * dieSpacing, boardHeight/2, dieSize, boardData.die2, color);
+		}
 	};
 
 	resizeCanvas();
@@ -138,17 +153,17 @@ function drawCubeAtPosition(ctx: CanvasRenderingContext2D, xPos:number, yPos:num
 	ctx.fillText(cubeValue.toString(), xPos, yPos);
 }
 
-function drawDieAtPosition(ctx: CanvasRenderingContext2D, x: number, y: number, size: number, value: number) {
+function drawDieAtPosition(ctx: CanvasRenderingContext2D, x: number, y: number, size: number, value: number, color:string) {
 	// Clamp value between 1 and 6
 	const dieValue = Math.max(1, Math.min(value, 6));
 
 	const radius = size / 2;
-	const pipRadius = size * 0.07;
+	const pipRadius = size * 0.1;
 
 	// Draw die background
 	ctx.beginPath();
-	ctx.fillStyle = '#fff';
-	ctx.strokeStyle = '#000';
+	ctx.fillStyle = color;
+	ctx.strokeStyle = color === 'white' ? 'black' : 'white' ;
 	ctx.lineWidth = 2;
 	ctx.roundRect(x - radius, y - radius, size, size, size * 0.15);
 	ctx.fill();
@@ -175,7 +190,7 @@ function drawDieAtPosition(ctx: CanvasRenderingContext2D, x: number, y: number, 
 	};
 
 	// Draw pips
-	ctx.fillStyle = '#000';
+	ctx.fillStyle = color === 'white' ? 'black' : 'white' ;
 	for (const group of pipMap[dieValue]) {
 		for (const i of group) {
 			const [dx, dy] = offsets[i];

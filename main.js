@@ -64,10 +64,18 @@ function renderBoard(el, boardData) {
     else if (boardData.cubeOwner === "O")
       cubeY = checkerMargin;
     drawCubeAtPosition(ctx, columnWidth / 2, cubeY, boardData.cubeValue);
-    let dieOffset = columnWidth * 2.5;
-    let dieSize = checkerRadius * 2;
-    drawDieAtPosition(ctx, boardWidth / 2 + dieOffset, boardHeight / 2, dieSize, 5);
-    drawDieAtPosition(ctx, boardWidth / 2 + dieOffset + dieSize * 1.1, boardHeight / 2, dieSize, 6);
+    if (boardData.die1 > 0 && boardData.die2 > 0) {
+      const color = boardData.turn === "X" ? "black" : "white";
+      let dieOffset = columnWidth * 2.5;
+      let dieSpacing = 1.2;
+      if (boardData.turn === "O") {
+        dieOffset *= -1;
+        dieSpacing *= -1;
+      }
+      let dieSize = checkerRadius * 2;
+      drawDieAtPosition(ctx, boardWidth / 2 + dieOffset, boardHeight / 2, dieSize, boardData.die1, color);
+      drawDieAtPosition(ctx, boardWidth / 2 + dieOffset + dieSize * dieSpacing, boardHeight / 2, dieSize, boardData.die2, color);
+    }
   };
   resizeCanvas();
   window.addEventListener("resize", resizeCanvas);
@@ -138,13 +146,13 @@ function drawCubeAtPosition(ctx, xPos, yPos, cubeValue) {
   ctx.fillStyle = "black";
   ctx.fillText(cubeValue.toString(), xPos, yPos);
 }
-function drawDieAtPosition(ctx, x, y, size, value) {
+function drawDieAtPosition(ctx, x, y, size, value, color) {
   const dieValue = Math.max(1, Math.min(value, 6));
   const radius = size / 2;
-  const pipRadius = size * 0.07;
+  const pipRadius = size * 0.1;
   ctx.beginPath();
-  ctx.fillStyle = "#fff";
-  ctx.strokeStyle = "#000";
+  ctx.fillStyle = color;
+  ctx.strokeStyle = color === "white" ? "black" : "white";
   ctx.lineWidth = 2;
   ctx.roundRect(x - radius, y - radius, size, size, size * 0.15);
   ctx.fill();
@@ -166,7 +174,7 @@ function drawDieAtPosition(ctx, x, y, size, value) {
     5: [[0], [1], [2], [3], [6]],
     6: [[0], [1], [2], [3], [4], [5]]
   };
-  ctx.fillStyle = "#000";
+  ctx.fillStyle = color === "white" ? "black" : "white";
   for (const group of pipMap[dieValue]) {
     for (const i of group) {
       const [dx, dy] = offsets[i];
@@ -257,6 +265,8 @@ function parseXGID(xgid) {
   const cubeOwnerCode = parseInt(parts[2], 10);
   const cubeValue = Math.pow(2, parseInt(parts[1], 10));
   const turn = parseInt(parts[3], 10);
+  const die1 = parseInt(parts[4][0]);
+  const die2 = parseInt(parts[4][1]);
   const scoreX = parseInt(parts[5], 10);
   const scoreO = parseInt(parts[6], 10);
   const matchLength = parseInt(parts[7], 10);
@@ -273,7 +283,9 @@ function parseXGID(xgid) {
     points,
     borneOffX,
     borneOffO,
-    turn: turn === 0 ? "X" : "O",
+    turn: turn === -1 ? "X" : "O",
+    die1,
+    die2,
     cubeOwner,
     cubeValue: cubeOwner === "Center" ? 64 : cubeValue,
     scoreX,

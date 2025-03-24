@@ -23,6 +23,8 @@ export function parseXGID(xgid: string): BoardData {
 	const cubeOwnerCode = parseInt(parts[2], 10); // 0 = center, 1 = X, 2 = O
 	const cubeValue = Math.pow(2, parseInt(parts[1], 10)); // e.g., 1, 2, 4, 8, 16
 	const turn = parseInt(parts[3], 10); // 0 = X, 1 = O	
+	const die1 = parseInt(parts[4][0]);
+	const die2 = parseInt(parts[4][1]);
 	const scoreX = parseInt(parts[5], 10);
 	const scoreO = parseInt(parts[6], 10);
 	const matchLength = parseInt(parts[7], 10);
@@ -48,7 +50,9 @@ export function parseXGID(xgid: string): BoardData {
 		points,
 		borneOffX,
 		borneOffO,
-		turn: turn === 0 ? 'X' : 'O',
+		turn: turn === -1 ? 'X' : 'O',
+		die1:die1,
+		die2:die2,
 		cubeOwner: cubeOwner,
 		cubeValue: cubeOwner === 'Center' ? 64 : cubeValue,
 		scoreX:scoreX,
