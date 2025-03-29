@@ -64,8 +64,8 @@ function renderBoard(el, boardData) {
     else if (boardData.cubeOwner === "O")
       cubeY = checkerMargin;
     drawCubeAtPosition(ctx, columnWidth / 2, cubeY, boardData.cubeValue);
-    if (boardData.die1 > 0 && boardData.die2 > 0) {
-      const color = boardData.turn === "X" ? "black" : "white";
+    const dieColor = boardData.turn === "X" ? "black" : "white";
+    {
       let dieOffset = columnWidth * 2.5;
       let dieSpacing = 1.2;
       if (boardData.turn === "O") {
@@ -73,8 +73,8 @@ function renderBoard(el, boardData) {
         dieSpacing *= -1;
       }
       let dieSize = checkerRadius * 2;
-      drawDieAtPosition(ctx, boardWidth / 2 + dieOffset, boardHeight / 2, dieSize, boardData.die1, color);
-      drawDieAtPosition(ctx, boardWidth / 2 + dieOffset + dieSize * dieSpacing, boardHeight / 2, dieSize, boardData.die2, color);
+      drawDieAtPosition(ctx, boardWidth / 2 + dieOffset, boardHeight / 2, dieSize, boardData.die1, dieColor);
+      drawDieAtPosition(ctx, boardWidth / 2 + dieOffset + dieSize * dieSpacing, boardHeight / 2, dieSize, boardData.die2, dieColor);
     }
     if (boardData.matchLength > 0) {
       const scoreMargin = 6;
@@ -202,13 +202,15 @@ function drawDieAtPosition(ctx, x, y, size, value, color) {
     5: [[0], [1], [2], [3], [6]],
     6: [[0], [1], [2], [3], [4], [5]]
   };
-  ctx.fillStyle = color === "white" ? "black" : "white";
-  for (const group of pipMap[dieValue]) {
-    for (const i of group) {
-      const [dx, dy] = offsets[i];
-      ctx.beginPath();
-      ctx.arc(x + dx * size, y + dy * size, pipRadius, 0, Math.PI * 2);
-      ctx.fill();
+  if (value != 0) {
+    ctx.fillStyle = color === "white" ? "black" : "white";
+    for (const group of pipMap[dieValue]) {
+      for (const i of group) {
+        const [dx, dy] = offsets[i];
+        ctx.beginPath();
+        ctx.arc(x + dx * size, y + dy * size, pipRadius, 0, Math.PI * 2);
+        ctx.fill();
+      }
     }
   }
 }
