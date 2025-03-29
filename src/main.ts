@@ -15,12 +15,12 @@ export default class BackgammonPlugin extends Plugin {
         this.registerMarkdownCodeBlockProcessor('backgammon', (source, el) => {
             const xgid = source.trim(); // assume raw XGID string
             const boardData = parseXGID(xgid);
-            console.log('[Processor] Parsed boardData:', boardData);
+            //console.log('[Processor] Parsed boardData:', boardData);
             renderBoard(el, boardData);
         });
     }
 
     onunload(): void {
-        console.log('Unloading Backgammon Plugin');
+        //console.log('Unloading Backgammon Plugin');
     }
 }

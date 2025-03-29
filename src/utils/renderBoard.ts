@@ -76,8 +76,11 @@ export function renderBoard(el: HTMLElement, boardData: BoardData): void {
 		}
 	};
 
-	resizeCanvas();
-	window.addEventListener('resize', resizeCanvas);
+	const observer = new ResizeObserver(() => {
+		resizeCanvas(); // your resize logic
+	});
+	observer.observe(canvas.parentElement!);
+	//resizeCanvas();
 }
 
 function drawBoard(ctx: CanvasRenderingContext2D): void {

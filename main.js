@@ -84,8 +84,10 @@ function renderBoard(el, boardData) {
       drawScoreAtPosition(ctx, scoreX, boardHeight / 2, boardData.matchLength, "Length");
     }
   };
-  resizeCanvas();
-  window.addEventListener("resize", resizeCanvas);
+  const observer = new ResizeObserver(() => {
+    resizeCanvas();
+  });
+  observer.observe(canvas.parentElement);
 }
 function drawBoard(ctx) {
   ctx.fillStyle = "#ffffff";
@@ -332,11 +334,9 @@ var BackgammonPlugin = class extends import_obsidian.Plugin {
     this.registerMarkdownCodeBlockProcessor("backgammon", (source, el) => {
       const xgid = source.trim();
       const boardData = parseXGID(xgid);
-      console.log("[Processor] Parsed boardData:", boardData);
       renderBoard(el, boardData);
     });
   }
   onunload() {
-    console.log("Unloading Backgammon Plugin");
   }
 };
