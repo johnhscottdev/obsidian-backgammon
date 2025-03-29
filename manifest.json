@@ -1,9 +1,9 @@
 {
-    "id": "obsidian-backgammon",
-    "name": "Backgammon Plugin",
+    "id": "obsidian-backgammon-xgid",
+    "name": "Backgammon XGID Display",
     "version": "1.0.0",
     "minAppVersion": "1.0.0",
-    "author": "Your Name",
-    "description": "Renders a backgammon board from a text input.",
+    "author": "John H Scott",
+    "description": "Renders an a backgammon position given an XGID",
     "isDesktopOnly": false
   }

@@ -311,7 +311,7 @@ function parseXGID(xgid) {
   const checkersOnBoardX = countCheckers(points, "X");
   const checkersOnBoardO = countCheckers(points, "O");
   const borneOffX = 15 - checkersOnBoardX;
-  const borneOffO = 15 - checkersOnBoardX;
+  const borneOffO = 15 - checkersOnBoardO;
   let boardData = {
     points,
     borneOffX,
@@ -333,7 +333,7 @@ function parseXGID(xgid) {
 // src/main.ts
 var BackgammonPlugin = class extends import_obsidian.Plugin {
   async onload() {
-    this.registerMarkdownCodeBlockProcessor("backgammon", (source, el) => {
+    this.registerMarkdownCodeBlockProcessor("xgid", (source, el) => {
       const xgid = source.trim();
       const boardData = parseXGID(xgid);
       renderBoard(el, boardData);

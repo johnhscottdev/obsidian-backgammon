@@ -12,7 +12,7 @@ import { parseXGID } from './utils/parseXGID';
 
 export default class BackgammonPlugin extends Plugin {
     async onload(): Promise<void> {
-        this.registerMarkdownCodeBlockProcessor('backgammon', (source, el) => {
+        this.registerMarkdownCodeBlockProcessor('xgid', (source, el) => {
             const xgid = source.trim(); // assume raw XGID string
             const boardData = parseXGID(xgid);
             //console.log('[Processor] Parsed boardData:', boardData);

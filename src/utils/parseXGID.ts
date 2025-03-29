@@ -48,7 +48,7 @@ export function parseXGID(xgid: string): BoardData {
 	const checkersOnBoardX = countCheckers(points, 'X');
 	const checkersOnBoardO = countCheckers(points, 'O');
 	const borneOffX = 15 - checkersOnBoardX;
-	const borneOffO = 15 - checkersOnBoardX;
+	const borneOffO = 15 - checkersOnBoardO;
 	let boardData:BoardData = {
 		points,
 		borneOffX,
