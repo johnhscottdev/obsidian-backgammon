@@ -22,4 +22,5 @@ export interface BoardData {
 	jacoby:boolean;
 	beaver:boolean;
 	matchLength: number;
+	crawford:boolean;
 }

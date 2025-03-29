@@ -47,7 +47,11 @@ export function renderBoard(el: HTMLElement, boardData: BoardData): void {
 			cubeY = boardHeight - checkerMargin;
 		else if (boardData.cubeOwner === 'O')
 			cubeY = checkerMargin;
-		drawCubeAtPosition(ctx, columnWidth/2, cubeY, boardData.cubeValue);
+
+		let cubeValue = boardData.cubeValue.toString();
+		if(boardData.crawford)
+			cubeValue = "Cr";
+		drawCubeAtPosition(ctx, columnWidth/2, cubeY, cubeValue);
 
 		const dieColor = boardData.turn === 'X' ? 'black' : 'white'
 		//if(boardData.die1 > 0 && boardData.die2 > 0)
@@ -169,7 +173,7 @@ function drawScoreAtPosition(ctx: CanvasRenderingContext2D, xPos:number, yPos:nu
 	ctx.fillText(score.toString(), xPos, yPos + checkerRadius*.5);
 }
 
-function drawCubeAtPosition(ctx: CanvasRenderingContext2D, xPos:number, yPos:number, cubeValue:number)
+function drawCubeAtPosition(ctx: CanvasRenderingContext2D, xPos:number, yPos:number, cubeValue:string)
 {
 	const size = columnWidth - 5;
 	ctx.fillStyle = 'white';
@@ -181,7 +185,7 @@ function drawCubeAtPosition(ctx: CanvasRenderingContext2D, xPos:number, yPos:num
 	ctx.textAlign = 'center';
 	ctx.textBaseline = 'middle';
 	ctx.fillStyle = 'black';
-	ctx.fillText(cubeValue.toString(), xPos, yPos);
+	ctx.fillText(cubeValue, xPos, yPos);
 }
 
 function drawDieAtPosition(ctx: CanvasRenderingContext2D, x: number, y: number, size: number, value: number, color:string) {

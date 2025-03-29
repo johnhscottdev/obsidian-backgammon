@@ -63,7 +63,10 @@ function renderBoard(el, boardData) {
       cubeY = boardHeight - checkerMargin;
     else if (boardData.cubeOwner === "O")
       cubeY = checkerMargin;
-    drawCubeAtPosition(ctx, columnWidth / 2, cubeY, boardData.cubeValue);
+    let cubeValue = boardData.cubeValue.toString();
+    if (boardData.crawford)
+      cubeValue = "Cr";
+    drawCubeAtPosition(ctx, columnWidth / 2, cubeY, cubeValue);
     const dieColor = boardData.turn === "X" ? "black" : "white";
     {
       let dieOffset = columnWidth * 2.5;
@@ -172,7 +175,7 @@ function drawCubeAtPosition(ctx, xPos, yPos, cubeValue) {
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.fillStyle = "black";
-  ctx.fillText(cubeValue.toString(), xPos, yPos);
+  ctx.fillText(cubeValue, xPos, yPos);
 }
 function drawDieAtPosition(ctx, x, y, size, value, color) {
   const dieValue = Math.max(1, Math.min(value, 6));
@@ -295,8 +298,14 @@ function parseXGID(xgid) {
   const cubeOwnerCode = parseInt(parts[2], 10);
   const cubeValue = Math.pow(2, parseInt(parts[1], 10));
   const turn = parseInt(parts[3], 10);
-  const die1 = parseInt(parts[4][0]);
-  const die2 = parseInt(parts[4][1]);
+  let die1 = 0;
+  let die2 = 0;
+  die1 = parseInt(parts[4][0]);
+  die2 = parseInt(parts[4][1]);
+  if (isNaN(die1))
+    die1 = 0;
+  if (isNaN(die2))
+    die2 = 0;
   const scoreX = parseInt(parts[5], 10);
   const scoreO = parseInt(parts[6], 10);
   const rulesFlags = parseInt(parts[7], 10);
@@ -308,6 +317,7 @@ function parseXGID(xgid) {
   }));
   const jacoby = rulesFlags % 2 === 1;
   const beaver = rulesFlags % 4 === 1;
+  const crawford = matchLength > 0 && jacoby;
   const checkersOnBoardX = countCheckers(points, "X");
   const checkersOnBoardO = countCheckers(points, "O");
   const borneOffX = 15 - checkersOnBoardX;
@@ -316,7 +326,7 @@ function parseXGID(xgid) {
     points,
     borneOffX,
     borneOffO,
-    turn: turn === -1 ? "X" : "O",
+    turn: turn === -1 ? "O" : "X",
     die1,
     die2,
     cubeOwner,
@@ -325,7 +335,8 @@ function parseXGID(xgid) {
     scoreO,
     beaver,
     jacoby,
-    matchLength
+    matchLength,
+    crawford
   };
   return boardData;
 }
