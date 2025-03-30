@@ -83,3 +83,32 @@ export function parseXGID(xgid: string): BoardData {
 
 	return boardData;
 }
+
+
+// Original working for just checker play
+// export function extractMoveBlocks(text: string): string[] {
+// 	const moveBlockRegex = /^\s*\d+\..*?(?:\n\s{2,}Player:.*?\n\s{2,}Opponent:.*?)(?=\n\s*\d+\.|\n\n|$)/gms;
+// 	const matches = [...text.matchAll(moveBlockRegex)].map((m) => m[0].trim());
+// 	return matches;
+//   }
+  
+
+export function extractMoveBlocks(text: string): string[] {
+  const moveBlockRegex = /^\s*\d+\..*?(?:\n\s{2,}Player:.*?\n\s{2,}Opponent:.*?)(?=\n\s*\d+\.|\n\n|$)/gms;
+  const moveMatches = [...text.matchAll(moveBlockRegex)].map((m) => m[0].trim());
+
+  if (moveMatches.length > 0) {
+    return moveMatches;
+  } else {
+    // Match from "Analyzed in XG Roller+" up to but NOT including "eXtreme Gammon Version:"
+    const analysisRegex = /Analyzed in XG Roller\+([\s\S]*?)^\s*eXtreme Gammon Version:/m;
+    const match = text.match(analysisRegex);
+    if (match) {
+      const cleaned = "Analyzed in XG Roller+" + match[1].trim();
+      return [cleaned];
+    }
+  }
+
+  return [];
+  }
+  

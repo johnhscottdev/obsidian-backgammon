@@ -8,6 +8,7 @@ import { Plugin } from 'obsidian';
 import { BoardData } from './types';
 import { renderBoard } from './utils';
 import { parseXGID } from './utils/parseXGID';
+import { extractMoveBlocks as extractDecisionAnalysis } from './utils/parseXGID';
 
 
 export default class BackgammonPlugin extends Plugin {
@@ -15,8 +16,17 @@ export default class BackgammonPlugin extends Plugin {
         this.registerMarkdownCodeBlockProcessor('xgid', (source, el) => {
             const xgid = source.trim(); // assume raw XGID string
             const boardData = parseXGID(xgid);
+            const decisions = extractDecisionAnalysis(source);
             //console.log('[Processor] Parsed boardData:', boardData);
             renderBoard(el, boardData);
+
+            const container = el.createDiv({ cls: "my-container" });
+
+            decisions.forEach(item => {
+                const pre = container.createEl("pre");
+                const code = pre.createEl("code");
+                code.textContent = item;
+            });
         });
     }
 
