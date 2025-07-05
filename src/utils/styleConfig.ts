@@ -93,7 +93,7 @@ export const styleConfig: StyleConfig = {
 		scoreHeader: 'bold 8px sans-serif',
 		scoreValue: 'bold 16px sans-serif',
 		cubeValue: 'bold 16px sans-serif',
-		pointNumber: 'bold 12px sans-serif',
+		pointNumber: 'bold 16px sans-serif',
 	},
 	
 	sizing: {

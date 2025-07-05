@@ -74,7 +74,7 @@ var styleConfig = {
     scoreHeader: "bold 8px sans-serif",
     scoreValue: "bold 16px sans-serif",
     cubeValue: "bold 16px sans-serif",
-    pointNumber: "bold 12px sans-serif"
+    pointNumber: "bold 16px sans-serif"
   },
   sizing: {
     borderWidth: 3,
@@ -313,7 +313,7 @@ function renderPointNumbers(ctx, boardData) {
     const isTopRow = pointNumber > 12;
     const y = isTopRow ? 10 : (
       // Above the board
-      styleConfig.boardHeight - 10
+      styleConfig.boardHeight - 8
     );
     ctx.fillText(displayNumber.toString(), x, y);
   }

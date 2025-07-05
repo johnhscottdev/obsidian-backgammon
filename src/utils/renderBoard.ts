@@ -373,7 +373,7 @@ function renderPointNumbers(ctx: CanvasRenderingContext2D, boardData: BoardData)
 		const isTopRow = pointNumber > 12;
 		const y = isTopRow ? 
 			10 : // Above the board
-			styleConfig.boardHeight - 10; // Below the board
+			styleConfig.boardHeight - 8; // Below the board
 		
 		ctx.fillText(displayNumber.toString(), x, y);
 	}
