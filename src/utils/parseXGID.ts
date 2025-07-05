@@ -17,7 +17,20 @@ function countCheckers(points: { checkerCount: number; player: Player | null }[]
 }
 
 export function parseXGID(xgid: string): BoardData {
-	const parts = xgid.replace(/^XGID=/, '').split(':');
+	if (!xgid || typeof xgid !== 'string') {
+		throw new Error('Invalid XGID: input must be a non-empty string');
+	}
+
+	const cleanXgid = xgid.trim();
+	if (!cleanXgid.match(/^(XGID=)?[a-zA-Z-]+:[0-9]+:[-0-9]+:[-0-9]+:/)) {
+		throw new Error('Invalid XGID format: does not match expected pattern');
+	}
+
+	const parts = cleanXgid.replace(/^XGID=/, '').split(':');
+	
+	if (parts.length < 9) {
+		throw new Error(`Invalid XGID format: expected at least 9 parts, got ${parts.length}`);
+	}
 
 	const pointString = parts[0];	
 	const cubeOwnerCode = parseInt(parts[2], 10); // 0 = center, 1 = X, 2 = O

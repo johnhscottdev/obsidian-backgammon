@@ -293,7 +293,17 @@ function countCheckers(points, player) {
   return points.filter((p) => p.player === player).reduce((sum, p) => sum + p.checkerCount, 0);
 }
 function parseXGID(xgid) {
-  const parts = xgid.replace(/^XGID=/, "").split(":");
+  if (!xgid || typeof xgid !== "string") {
+    throw new Error("Invalid XGID: input must be a non-empty string");
+  }
+  const cleanXgid = xgid.trim();
+  if (!cleanXgid.match(/^(XGID=)?[a-zA-Z-]+:[0-9]+:[-0-9]+:[-0-9]+:/)) {
+    throw new Error("Invalid XGID format: does not match expected pattern");
+  }
+  const parts = cleanXgid.replace(/^XGID=/, "").split(":");
+  if (parts.length < 9) {
+    throw new Error(`Invalid XGID format: expected at least 9 parts, got ${parts.length}`);
+  }
   const pointString = parts[0];
   const cubeOwnerCode = parseInt(parts[2], 10);
   const cubeValue = Math.pow(2, parseInt(parts[1], 10));
@@ -360,16 +370,25 @@ function extractMoveBlocks(text) {
 var BackgammonPlugin = class extends import_obsidian.Plugin {
   async onload() {
     this.registerMarkdownCodeBlockProcessor("xgid", (source, el) => {
-      const xgid = source.trim();
-      const boardData = parseXGID(xgid);
-      const decisions = extractMoveBlocks(source);
-      renderBoard(el, boardData);
-      const container = el.createDiv({ cls: "my-container" });
-      decisions.forEach((item) => {
-        const pre = container.createEl("pre");
-        const code = pre.createEl("code");
-        code.textContent = item;
-      });
+      try {
+        const xgid = source.trim();
+        const boardData = parseXGID(xgid);
+        const decisions = extractMoveBlocks(source);
+        renderBoard(el, boardData);
+        const container = el.createDiv({ cls: "my-container" });
+        decisions.forEach((item) => {
+          const pre = container.createEl("pre");
+          const code = pre.createEl("code");
+          code.textContent = item;
+        });
+      } catch (error) {
+        const errorDiv = el.createDiv({ cls: "backgammon-error" });
+        errorDiv.style.cssText = "background-color: #ffe6e6; border: 1px solid #ffcccc; padding: 10px; border-radius: 4px; margin: 5px 0;";
+        errorDiv.createDiv().setText(source);
+        const errorMsg = errorDiv.createDiv();
+        errorMsg.setText(`\u26A0\uFE0F Error: ${error.message}`);
+        errorMsg.style.cssText = "color: #cc0000; font-weight: bold; margin-top: 5px;";
+      }
     });
   }
   onunload() {
