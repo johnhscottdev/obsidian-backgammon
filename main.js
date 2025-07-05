@@ -111,7 +111,7 @@ function renderBoard(el, boardData) {
     ctx.setTransform(scaleFactor, 0, 0, scaleFactor, 0, 0);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawBoard(ctx);
-    renderPointNumbers(ctx);
+    renderPointNumbers(ctx, boardData);
     drawCheckers(ctx, boardData);
     const boardTop = 20;
     const boardBottom = styleConfig.boardHeight - 20;
@@ -285,7 +285,7 @@ function drawCheckerAtPosition(ctx, xPos, yPos, color) {
   ctx.strokeStyle = styleConfig.colors.boardBorder;
   ctx.stroke();
 }
-function renderPointNumbers(ctx) {
+function renderPointNumbers(ctx, boardData) {
   const getPointX = (pointNumber) => {
     let index = 0;
     const centerOfPoint = styleConfig.pointWidth / 2;
@@ -306,12 +306,16 @@ function renderPointNumbers(ctx) {
   ctx.fillStyle = styleConfig.colors.pointNumber;
   for (let pointNumber = 1; pointNumber <= 24; pointNumber++) {
     const x = getPointX(pointNumber);
+    let displayNumber = pointNumber;
+    if (boardData.turn === "O") {
+      displayNumber = 25 - pointNumber;
+    }
     const isTopRow = pointNumber > 12;
     const y = isTopRow ? 10 : (
       // Above the board
       styleConfig.boardHeight - 10
     );
-    ctx.fillText(pointNumber.toString(), x, y);
+    ctx.fillText(displayNumber.toString(), x, y);
   }
 }
 function drawCheckers(ctx, boardData) {

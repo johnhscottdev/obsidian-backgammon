@@ -36,7 +36,7 @@ export function renderBoard(el: HTMLElement, boardData: BoardData): void {
 		ctx.setTransform(scaleFactor, 0, 0, scaleFactor, 0, 0);
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
 		drawBoard(ctx); // draw triangles/background
-		renderPointNumbers(ctx); // draw point numbers
+		renderPointNumbers(ctx, boardData); // draw point numbers
 		drawCheckers(ctx, boardData); // now using points[]
 
 		const boardTop = 20;
@@ -323,13 +323,14 @@ function drawCheckerAtPosition(ctx: CanvasRenderingContext2D, xPos:number, yPos:
 /**
  * Renders point numbers on the board for all 24 points.
  * 
- * Point numbers are displayed at the bottom of each triangle point, using the 
- * standard backgammon numbering system (1-24). Numbers are positioned to avoid
- * overlapping with checkers and triangles.
+ * Point numbers are displayed outside the board area, using the 
+ * standard backgammon numbering system (1-24). Numbers are shown from
+ * the current player's perspective - reversed when it's White's turn.
  * 
  * @param ctx - 2D canvas rendering context
+ * @param boardData - Board state containing current turn information
  */
-function renderPointNumbers(ctx: CanvasRenderingContext2D): void {
+function renderPointNumbers(ctx: CanvasRenderingContext2D, boardData: BoardData): void {
 	// Helper to get x-position from point number (1–24)
 	const getPointX = (pointNumber: number): number => {
 		let index = 0;
@@ -357,9 +358,16 @@ function renderPointNumbers(ctx: CanvasRenderingContext2D): void {
 	ctx.textBaseline = 'middle';
 	ctx.fillStyle = styleConfig.colors.pointNumber;
 
-	// Draw point numbers 1-24
+	// Draw point numbers 1-24, reversed perspective for White's turn
 	for (let pointNumber = 1; pointNumber <= 24; pointNumber++) {
 		const x = getPointX(pointNumber);
+		
+		// Determine the display number based on current player's perspective
+		let displayNumber = pointNumber;
+		if (boardData.turn === 'O') {
+			// For White's turn, reverse the numbering (1 becomes 24, 2 becomes 23, etc.)
+			displayNumber = 25 - pointNumber;
+		}
 		
 		// Position numbers outside the board area
 		const isTopRow = pointNumber > 12;
@@ -367,7 +375,7 @@ function renderPointNumbers(ctx: CanvasRenderingContext2D): void {
 			10 : // Above the board
 			styleConfig.boardHeight - 10; // Below the board
 		
-		ctx.fillText(pointNumber.toString(), x, y);
+		ctx.fillText(displayNumber.toString(), x, y);
 	}
 }
 
