@@ -29,7 +29,8 @@ var import_obsidian = require("obsidian");
 var styleConfig = {
   scale: 1,
   boardWidth: 500,
-  boardHeight: 400,
+  boardHeight: 440,
+  // Expanded to accommodate point numbers outside board
   boardColumns: 6 + 6 + 3,
   // all 12 points, the bar, and the bear off trays
   get columnWidth() {
@@ -65,13 +66,15 @@ var styleConfig = {
     cubeBorder: "black",
     scoreBackground: "white",
     scoreBorder: "black",
-    text: "black"
+    text: "black",
+    pointNumber: "black"
   },
   fonts: {
     checkerLabel: "bold 16px sans-serif",
     scoreHeader: "bold 8px sans-serif",
     scoreValue: "bold 16px sans-serif",
-    cubeValue: "bold 16px sans-serif"
+    cubeValue: "bold 16px sans-serif",
+    pointNumber: "bold 12px sans-serif"
   },
   sizing: {
     borderWidth: 3,
@@ -108,12 +111,16 @@ function renderBoard(el, boardData) {
     ctx.setTransform(scaleFactor, 0, 0, scaleFactor, 0, 0);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawBoard(ctx);
+    renderPointNumbers(ctx);
     drawCheckers(ctx, boardData);
-    let cubeY = styleConfig.boardHeight / 2;
+    const boardTop = 20;
+    const boardBottom = styleConfig.boardHeight - 20;
+    const boardHeight = boardBottom - boardTop;
+    let cubeY = boardTop + boardHeight / 2;
     if (boardData.cubeOwner === "X")
-      cubeY = styleConfig.boardHeight - styleConfig.checkerMargin;
+      cubeY = boardBottom - styleConfig.checkerMargin;
     else if (boardData.cubeOwner === "O")
-      cubeY = styleConfig.checkerMargin;
+      cubeY = boardTop + styleConfig.checkerMargin;
     let cubeValue = boardData.cubeValue.toString();
     if (boardData.crawford)
       cubeValue = "Cr";
@@ -127,14 +134,14 @@ function renderBoard(el, boardData) {
         dieSpacing *= -1;
       }
       let dieSize = styleConfig.checkerRadius * 2;
-      drawDieAtPosition(ctx, styleConfig.boardWidth / 2 + dieOffset, styleConfig.boardHeight / 2, dieSize, boardData.die1, dieColor);
-      drawDieAtPosition(ctx, styleConfig.boardWidth / 2 + dieOffset + dieSize * dieSpacing, styleConfig.boardHeight / 2, dieSize, boardData.die2, dieColor);
+      drawDieAtPosition(ctx, styleConfig.boardWidth / 2 + dieOffset, boardTop + boardHeight / 2, dieSize, boardData.die1, dieColor);
+      drawDieAtPosition(ctx, styleConfig.boardWidth / 2 + dieOffset + dieSize * dieSpacing, boardTop + boardHeight / 2, dieSize, boardData.die2, dieColor);
     }
     if (boardData.matchLength > 0) {
       const scoreX = styleConfig.boardWidth - styleConfig.columnWidth / 2;
-      drawScoreAtPosition(ctx, scoreX, styleConfig.checkerRadius * styleConfig.sizing.scoreMargin, boardData.scoreO, "White");
-      drawScoreAtPosition(ctx, scoreX, styleConfig.boardHeight - styleConfig.checkerRadius * styleConfig.sizing.scoreMargin, boardData.scoreX, "Black");
-      drawScoreAtPosition(ctx, scoreX, styleConfig.boardHeight / 2, boardData.matchLength, "Length");
+      drawScoreAtPosition(ctx, scoreX, boardTop + styleConfig.checkerRadius * styleConfig.sizing.scoreMargin, boardData.scoreO, "White");
+      drawScoreAtPosition(ctx, scoreX, boardBottom - styleConfig.checkerRadius * styleConfig.sizing.scoreMargin, boardData.scoreX, "Black");
+      drawScoreAtPosition(ctx, scoreX, boardTop + boardHeight / 2, boardData.matchLength, "Length");
     }
   };
   const observer = new ResizeObserver(() => {
@@ -147,21 +154,24 @@ function drawBoard(ctx) {
   ctx.strokeStyle = styleConfig.colors.boardBorder;
   ctx.lineWidth = 1;
   ctx.fillRect(0, 0, styleConfig.boardWidth, styleConfig.boardHeight);
+  const boardTop = 20;
+  const boardBottom = styleConfig.boardHeight - 20;
+  const boardHeight = boardBottom - boardTop;
   ctx.fillStyle = styleConfig.colors.bar;
-  ctx.strokeRect(styleConfig.boardWidth / 2 - styleConfig.barWidth / 2, 0, styleConfig.barWidth, styleConfig.boardHeight);
-  ctx.strokeRect(0, 0, styleConfig.barWidth, styleConfig.boardHeight);
-  ctx.strokeRect(styleConfig.boardWidth - styleConfig.columnWidth, 0, styleConfig.barWidth, styleConfig.boardHeight);
+  ctx.strokeRect(styleConfig.boardWidth / 2 - styleConfig.barWidth / 2, boardTop, styleConfig.barWidth, boardHeight);
+  ctx.strokeRect(0, boardTop, styleConfig.barWidth, boardHeight);
+  ctx.strokeRect(styleConfig.boardWidth - styleConfig.columnWidth, boardTop, styleConfig.barWidth, boardHeight);
   const colors = [styleConfig.colors.triangleDark, styleConfig.colors.triangleLight];
   const drawTriangle = (x, isBottomHalf, color) => {
     ctx.beginPath();
     if (isBottomHalf) {
-      ctx.moveTo(x, styleConfig.boardHeight);
-      ctx.lineTo(x + styleConfig.pointWidth / 2, styleConfig.boardHeight - styleConfig.triangleHeight);
-      ctx.lineTo(x + styleConfig.pointWidth, styleConfig.boardHeight);
+      ctx.moveTo(x, boardBottom);
+      ctx.lineTo(x + styleConfig.pointWidth / 2, boardBottom - styleConfig.triangleHeight);
+      ctx.lineTo(x + styleConfig.pointWidth, boardBottom);
     } else {
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x + styleConfig.pointWidth / 2, styleConfig.triangleHeight);
-      ctx.lineTo(x + styleConfig.pointWidth, 0);
+      ctx.moveTo(x, boardTop);
+      ctx.lineTo(x + styleConfig.pointWidth / 2, boardTop + styleConfig.triangleHeight);
+      ctx.lineTo(x + styleConfig.pointWidth, boardTop);
     }
     ctx.closePath();
     ctx.fillStyle = color;
@@ -187,7 +197,7 @@ function drawBoard(ctx) {
     drawTriangle(x, false, color);
   }
   ctx.lineWidth = styleConfig.sizing.borderWidth;
-  ctx.strokeRect(0, 0, styleConfig.boardWidth, styleConfig.boardHeight);
+  ctx.strokeRect(0, boardTop, styleConfig.boardWidth, boardHeight);
 }
 function drawCheckerLabel(ctx, x, y, text, checkerColor) {
   ctx.font = styleConfig.fonts.checkerLabel;
@@ -275,6 +285,35 @@ function drawCheckerAtPosition(ctx, xPos, yPos, color) {
   ctx.strokeStyle = styleConfig.colors.boardBorder;
   ctx.stroke();
 }
+function renderPointNumbers(ctx) {
+  const getPointX = (pointNumber) => {
+    let index = 0;
+    const centerOfPoint = styleConfig.pointWidth / 2;
+    if (pointNumber > 12) {
+      index = pointNumber - 12;
+    } else {
+      index = 13 - pointNumber;
+    }
+    if (index > 6) {
+      index++;
+    }
+    index++;
+    return index * styleConfig.pointWidth - centerOfPoint;
+  };
+  ctx.font = styleConfig.fonts.pointNumber;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillStyle = styleConfig.colors.pointNumber;
+  for (let pointNumber = 1; pointNumber <= 24; pointNumber++) {
+    const x = getPointX(pointNumber);
+    const isTopRow = pointNumber > 12;
+    const y = isTopRow ? 10 : (
+      // Above the board
+      styleConfig.boardHeight - 10
+    );
+    ctx.fillText(pointNumber.toString(), x, y);
+  }
+}
 function drawCheckers(ctx, boardData) {
   const getPointX = (absolutePointNumber) => {
     let index = 0;
@@ -304,7 +343,9 @@ function drawCheckers(ctx, boardData) {
     let margin = styleConfig.checkerMargin;
     if (onBar)
       margin += styleConfig.checkerRadius;
-    const yStart = isTop ? margin : styleConfig.boardHeight - margin;
+    const boardTop = 20;
+    const boardBottom = styleConfig.boardHeight - 20;
+    const yStart = isTop ? boardTop + margin : boardBottom - margin;
     const direction = isTop ? 1 : -1;
     ctx.lineWidth = 1;
     for (let j = 0; j < point.checkerCount; j++) {
@@ -317,13 +358,15 @@ function drawCheckers(ctx, boardData) {
   ;
   if (boardData.borneOffX > 0) {
     const xPos = styleConfig.boardColumns * styleConfig.columnWidth - styleConfig.columnWidth * 0.5;
-    const yPos = styleConfig.boardHeight - (styleConfig.checkerMargin + styleConfig.checkerRadius);
+    const boardBottom = styleConfig.boardHeight - 20;
+    const yPos = boardBottom - (styleConfig.checkerMargin + styleConfig.checkerRadius);
     drawCheckerAtPosition(ctx, xPos, yPos, styleConfig.colors.checkerBlack);
     drawCheckerLabel(ctx, xPos, yPos, boardData.borneOffX.toString(), styleConfig.colors.checkerWhite);
   }
   if (boardData.borneOffO > 0) {
     const xPos = styleConfig.boardColumns * styleConfig.columnWidth - styleConfig.columnWidth * 0.5;
-    const yPos = styleConfig.checkerMargin + styleConfig.checkerRadius;
+    const boardTop = 20;
+    const yPos = boardTop + styleConfig.checkerMargin + styleConfig.checkerRadius;
     drawCheckerAtPosition(ctx, xPos, yPos, styleConfig.colors.checkerWhite);
     drawCheckerLabel(ctx, xPos, yPos, boardData.borneOffO.toString(), styleConfig.colors.checkerBlack);
   }

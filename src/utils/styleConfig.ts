@@ -28,6 +28,7 @@ export interface StyleConfig {
 		scoreBackground: string;
 		scoreBorder: string;
 		text: string;
+		pointNumber: string;
 	};
 	
 	// Fonts
@@ -36,6 +37,7 @@ export interface StyleConfig {
 		scoreHeader: string;
 		scoreValue: string;
 		cubeValue: string;
+		pointNumber: string;
 	};
 	
 	// Sizing
@@ -59,7 +61,7 @@ export interface StyleConfig {
 export const styleConfig: StyleConfig = {
 	scale: 1,
 	boardWidth: 500,
-	boardHeight: 400,
+	boardHeight: 440, // Expanded to accommodate point numbers outside board
 	boardColumns: 6 + 6 + 3, // all 12 points, the bar, and the bear off trays
 	
 	get columnWidth() { return this.boardWidth / this.boardColumns; },
@@ -83,6 +85,7 @@ export const styleConfig: StyleConfig = {
 		scoreBackground: 'white',
 		scoreBorder: 'black',
 		text: 'black',
+		pointNumber: 'black',
 	},
 	
 	fonts: {
@@ -90,6 +93,7 @@ export const styleConfig: StyleConfig = {
 		scoreHeader: 'bold 8px sans-serif',
 		scoreValue: 'bold 16px sans-serif',
 		cubeValue: 'bold 16px sans-serif',
+		pointNumber: 'bold 12px sans-serif',
 	},
 	
 	sizing: {

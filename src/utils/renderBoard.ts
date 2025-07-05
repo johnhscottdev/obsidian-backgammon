@@ -36,13 +36,17 @@ export function renderBoard(el: HTMLElement, boardData: BoardData): void {
 		ctx.setTransform(scaleFactor, 0, 0, scaleFactor, 0, 0);
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
 		drawBoard(ctx); // draw triangles/background
+		renderPointNumbers(ctx); // draw point numbers
 		drawCheckers(ctx, boardData); // now using points[]
 
-		let cubeY = styleConfig.boardHeight/2;
+		const boardTop = 20;
+		const boardBottom = styleConfig.boardHeight - 20;
+		const boardHeight = boardBottom - boardTop;
+		let cubeY = boardTop + boardHeight/2;
 		if(boardData.cubeOwner === 'X')
-			cubeY = styleConfig.boardHeight - styleConfig.checkerMargin;
+			cubeY = boardBottom - styleConfig.checkerMargin;
 		else if (boardData.cubeOwner === 'O')
-			cubeY = styleConfig.checkerMargin;
+			cubeY = boardTop + styleConfig.checkerMargin;
 
 		let cubeValue = boardData.cubeValue.toString();
 		if(boardData.crawford)
@@ -61,16 +65,16 @@ export function renderBoard(el: HTMLElement, boardData: BoardData): void {
 			}
 
 			let dieSize = styleConfig.checkerRadius*2;
-			drawDieAtPosition(ctx, styleConfig.boardWidth/2+dieOffset, styleConfig.boardHeight/2, dieSize, boardData.die1, dieColor);
-			drawDieAtPosition(ctx, styleConfig.boardWidth/2+dieOffset + dieSize * dieSpacing, styleConfig.boardHeight/2, dieSize, boardData.die2, dieColor);
+			drawDieAtPosition(ctx, styleConfig.boardWidth/2+dieOffset, boardTop + boardHeight/2, dieSize, boardData.die1, dieColor);
+			drawDieAtPosition(ctx, styleConfig.boardWidth/2+dieOffset + dieSize * dieSpacing, boardTop + boardHeight/2, dieSize, boardData.die2, dieColor);
 		}
 
 		if(boardData.matchLength > 0)
 		{
 			const scoreX = styleConfig.boardWidth - styleConfig.columnWidth/2;
-			drawScoreAtPosition(ctx, scoreX , styleConfig.checkerRadius*styleConfig.sizing.scoreMargin, boardData.scoreO, "White");
-			drawScoreAtPosition(ctx, scoreX, styleConfig.boardHeight - styleConfig.checkerRadius*styleConfig.sizing.scoreMargin, boardData.scoreX, "Black");
-			drawScoreAtPosition(ctx, scoreX, styleConfig.boardHeight/2, boardData.matchLength, "Length");
+			drawScoreAtPosition(ctx, scoreX , boardTop + styleConfig.checkerRadius*styleConfig.sizing.scoreMargin, boardData.scoreO, "White");
+			drawScoreAtPosition(ctx, scoreX, boardBottom - styleConfig.checkerRadius*styleConfig.sizing.scoreMargin, boardData.scoreX, "Black");
+			drawScoreAtPosition(ctx, scoreX, boardTop + boardHeight/2, boardData.matchLength, "Length");
 		}
 	};
 
@@ -97,24 +101,29 @@ function drawBoard(ctx: CanvasRenderingContext2D): void {
 	ctx.lineWidth = 1;
 	ctx.fillRect(0, 0, styleConfig.boardWidth, styleConfig.boardHeight);
 
+	// Define the actual board area (excluding space for point numbers)
+	const boardTop = 20;
+	const boardBottom = styleConfig.boardHeight - 20;
+	const boardHeight = boardBottom - boardTop;
+
 	// draw the bar
 	ctx.fillStyle = styleConfig.colors.bar;
-	ctx.strokeRect(styleConfig.boardWidth / 2 - styleConfig.barWidth / 2, 0, styleConfig.barWidth, styleConfig.boardHeight);
-	ctx.strokeRect(0, 0, styleConfig.barWidth, styleConfig.boardHeight);
-	ctx.strokeRect(styleConfig.boardWidth-styleConfig.columnWidth, 0, styleConfig.barWidth, styleConfig.boardHeight);
+	ctx.strokeRect(styleConfig.boardWidth / 2 - styleConfig.barWidth / 2, boardTop, styleConfig.barWidth, boardHeight);
+	ctx.strokeRect(0, boardTop, styleConfig.barWidth, boardHeight);
+	ctx.strokeRect(styleConfig.boardWidth-styleConfig.columnWidth, boardTop, styleConfig.barWidth, boardHeight);
 
 	const colors = [styleConfig.colors.triangleDark, styleConfig.colors.triangleLight];
 
 	const drawTriangle = (x: number, isBottomHalf: boolean, color: string) => {
 		ctx.beginPath();
 		if (isBottomHalf) {
-			ctx.moveTo(x, styleConfig.boardHeight);
-			ctx.lineTo(x + styleConfig.pointWidth / 2, styleConfig.boardHeight - styleConfig.triangleHeight);
-			ctx.lineTo(x + styleConfig.pointWidth, styleConfig.boardHeight);
+			ctx.moveTo(x, boardBottom);
+			ctx.lineTo(x + styleConfig.pointWidth / 2, boardBottom - styleConfig.triangleHeight);
+			ctx.lineTo(x + styleConfig.pointWidth, boardBottom);
 		} else {
-			ctx.moveTo(x, 0);
-			ctx.lineTo(x + styleConfig.pointWidth / 2, styleConfig.triangleHeight);
-			ctx.lineTo(x + styleConfig.pointWidth, 0);
+			ctx.moveTo(x, boardTop);
+			ctx.lineTo(x + styleConfig.pointWidth / 2, boardTop + styleConfig.triangleHeight);
+			ctx.lineTo(x + styleConfig.pointWidth, boardTop);
 		}
 		ctx.closePath();
 		ctx.fillStyle = color;
@@ -143,7 +152,7 @@ function drawBoard(ctx: CanvasRenderingContext2D): void {
 	}
 
 	ctx.lineWidth = styleConfig.sizing.borderWidth;
-	ctx.strokeRect(0, 0, styleConfig.boardWidth, styleConfig.boardHeight);
+	ctx.strokeRect(0, boardTop, styleConfig.boardWidth, boardHeight);
 }
 
 /**
@@ -311,6 +320,57 @@ function drawCheckerAtPosition(ctx: CanvasRenderingContext2D, xPos:number, yPos:
  * @param ctx - 2D canvas rendering context
  * @param boardData - Complete board state containing checker positions
  */
+/**
+ * Renders point numbers on the board for all 24 points.
+ * 
+ * Point numbers are displayed at the bottom of each triangle point, using the 
+ * standard backgammon numbering system (1-24). Numbers are positioned to avoid
+ * overlapping with checkers and triangles.
+ * 
+ * @param ctx - 2D canvas rendering context
+ */
+function renderPointNumbers(ctx: CanvasRenderingContext2D): void {
+	// Helper to get x-position from point number (1–24)
+	const getPointX = (pointNumber: number): number => {
+		let index = 0;
+		const centerOfPoint = (styleConfig.pointWidth / 2);
+		
+		if (pointNumber > 12) {
+			index = pointNumber - 12;
+		} else {
+			index = 13 - pointNumber;
+		}
+		
+		// Account for the bar
+		if (index > 6) {
+			index++;
+		}
+		
+		// Account for leftmost bearoff tray
+		index++;
+		
+		return (index * styleConfig.pointWidth) - centerOfPoint;
+	};
+
+	ctx.font = styleConfig.fonts.pointNumber;
+	ctx.textAlign = 'center';
+	ctx.textBaseline = 'middle';
+	ctx.fillStyle = styleConfig.colors.pointNumber;
+
+	// Draw point numbers 1-24
+	for (let pointNumber = 1; pointNumber <= 24; pointNumber++) {
+		const x = getPointX(pointNumber);
+		
+		// Position numbers outside the board area
+		const isTopRow = pointNumber > 12;
+		const y = isTopRow ? 
+			10 : // Above the board
+			styleConfig.boardHeight - 10; // Below the board
+		
+		ctx.fillText(pointNumber.toString(), x, y);
+	}
+}
+
 export function drawCheckers(ctx: CanvasRenderingContext2D, boardData: BoardData): void {
 
 	// Helper to get x-position from point number (1–24)
@@ -353,7 +413,9 @@ export function drawCheckers(ctx: CanvasRenderingContext2D, boardData: BoardData
 		let margin = styleConfig.checkerMargin;
 		if(onBar)
 			margin += styleConfig.checkerRadius;
-		const yStart = isTop ? margin : styleConfig.boardHeight - margin;
+		const boardTop = 20;
+		const boardBottom = styleConfig.boardHeight - 20;
+		const yStart = isTop ? boardTop + margin : boardBottom - margin;
 		
 		const direction = isTop ? 1 : -1;
 		ctx.lineWidth = 1;
@@ -371,14 +433,16 @@ export function drawCheckers(ctx: CanvasRenderingContext2D, boardData: BoardData
 	if(boardData.borneOffX > 0)
 	{
 		const xPos = (styleConfig.boardColumns * styleConfig.columnWidth) - styleConfig.columnWidth * .5;
-		const yPos = styleConfig.boardHeight - (styleConfig.checkerMargin + styleConfig.checkerRadius);
+		const boardBottom = styleConfig.boardHeight - 20;
+		const yPos = boardBottom - (styleConfig.checkerMargin + styleConfig.checkerRadius);
 		drawCheckerAtPosition(ctx, xPos, yPos, styleConfig.colors.checkerBlack);
 		drawCheckerLabel(ctx, xPos, yPos, boardData.borneOffX.toString(), styleConfig.colors.checkerWhite);
 	}
 	if(boardData.borneOffO > 0)
 	{
 		const xPos = (styleConfig.boardColumns * styleConfig.columnWidth) - styleConfig.columnWidth * .5;
-		const yPos = styleConfig.checkerMargin + styleConfig.checkerRadius;
+		const boardTop = 20;
+		const yPos = boardTop + styleConfig.checkerMargin + styleConfig.checkerRadius;
 		drawCheckerAtPosition(ctx, xPos, yPos, styleConfig.colors.checkerWhite);
 		drawCheckerLabel(ctx, xPos, yPos, boardData.borneOffO.toString(), styleConfig.colors.checkerBlack);
 	}
