@@ -1,6 +1,16 @@
 import type { BoardData } from '../types/board';
 import { styleConfig } from './styleConfig';
 
+/**
+ * Renders a backgammon board to a canvas element within the provided HTML element.
+ * 
+ * Creates a responsive canvas that scales based on container width and uses ResizeObserver
+ * to handle dynamic resizing. Renders the complete game state including board, checkers,
+ * dice, doubling cube, and match scores.
+ * 
+ * @param el - The HTML element to contain the canvas
+ * @param boardData - Complete board state data including positions, cube, scores, etc.
+ */
 export function renderBoard(el: HTMLElement, boardData: BoardData): void {
 	const canvas: HTMLCanvasElement = document.createElement('canvas');
 	el.appendChild(canvas);
@@ -71,6 +81,15 @@ export function renderBoard(el: HTMLElement, boardData: BoardData): void {
 	//resizeCanvas();
 }
 
+/**
+ * Draws the backgammon board background including triangular points and borders.
+ * 
+ * Renders the board structure with alternating colored triangles for points,
+ * the central bar, and bearoff areas. Uses a 15-column layout with proper
+ * spacing for the standard backgammon board.
+ * 
+ * @param ctx - 2D canvas rendering context
+ */
 function drawBoard(ctx: CanvasRenderingContext2D): void {
 	// clear the canvas
 	ctx.fillStyle = styleConfig.colors.background;
@@ -127,6 +146,15 @@ function drawBoard(ctx: CanvasRenderingContext2D): void {
 	ctx.strokeRect(0, 0, styleConfig.boardWidth, styleConfig.boardHeight);
 }
 
+/**
+ * Draws text labels on checkers (typically used for borne-off checker counts).
+ * 
+ * @param ctx - 2D canvas rendering context
+ * @param x - X coordinate for label center
+ * @param y - Y coordinate for label center
+ * @param text - Text to display on the checker
+ * @param checkerColor - Color of the text ('black' or 'white')
+ */
 function drawCheckerLabel(ctx: CanvasRenderingContext2D, x: number, y: number, text: string, checkerColor: 'black' | 'white'): void {
 	ctx.font = styleConfig.fonts.checkerLabel;
 	ctx.textAlign = 'center';
@@ -134,6 +162,15 @@ function drawCheckerLabel(ctx: CanvasRenderingContext2D, x: number, y: number, t
 	ctx.fillStyle = checkerColor;
 	ctx.fillText(text, x, y);
 }
+/**
+ * Draws a score display box showing match scores or match length.
+ * 
+ * @param ctx - 2D canvas rendering context
+ * @param xPos - X coordinate for score box center
+ * @param yPos - Y coordinate for score box center
+ * @param score - Numeric score value to display
+ * @param header - Header text (e.g., "White", "Black", "Length")
+ */
 function drawScoreAtPosition(ctx: CanvasRenderingContext2D, xPos:number, yPos:number, score:number, header:string)
 {
 	const sizeX = styleConfig.columnWidth;
@@ -158,6 +195,14 @@ function drawScoreAtPosition(ctx: CanvasRenderingContext2D, xPos:number, yPos:nu
 	ctx.fillText(score.toString(), xPos, yPos + styleConfig.checkerRadius*.5);
 }
 
+/**
+ * Draws the doubling cube at a specified position.
+ * 
+ * @param ctx - 2D canvas rendering context
+ * @param xPos - X coordinate for cube center
+ * @param yPos - Y coordinate for cube center
+ * @param cubeValue - Value to display on cube (number or "Cr" for Crawford)
+ */
 function drawCubeAtPosition(ctx: CanvasRenderingContext2D, xPos:number, yPos:number, cubeValue:string)
 {
 	const size = styleConfig.columnWidth - styleConfig.sizing.cubeSize;
@@ -173,6 +218,19 @@ function drawCubeAtPosition(ctx: CanvasRenderingContext2D, xPos:number, yPos:num
 	ctx.fillText(cubeValue, xPos, yPos);
 }
 
+/**
+ * Draws a die with the specified value and color at the given position.
+ * 
+ * Renders a rounded rectangle die with appropriate pip patterns for values 1-6.
+ * Value 0 results in a blank die (no pips displayed).
+ * 
+ * @param ctx - 2D canvas rendering context
+ * @param x - X coordinate for die center
+ * @param y - Y coordinate for die center
+ * @param size - Size of the die (width/height)
+ * @param value - Die value (0-6, where 0 shows no pips)
+ * @param color - Background color of the die
+ */
 function drawDieAtPosition(ctx: CanvasRenderingContext2D, x: number, y: number, size: number, value: number, color:string) {
 	// Clamp value between 1 and 6
 	const dieValue = Math.max(1, Math.min(value, 6));
@@ -224,6 +282,14 @@ function drawDieAtPosition(ctx: CanvasRenderingContext2D, x: number, y: number, 
 	}
 }
 
+/**
+ * Draws a single checker at the specified position.
+ * 
+ * @param ctx - 2D canvas rendering context
+ * @param xPos - X coordinate for checker center
+ * @param yPos - Y coordinate for checker center
+ * @param color - Color of the checker
+ */
 function drawCheckerAtPosition(ctx: CanvasRenderingContext2D, xPos:number, yPos:number, color:string)
 {
 	ctx.beginPath();
@@ -235,6 +301,16 @@ function drawCheckerAtPosition(ctx: CanvasRenderingContext2D, xPos:number, yPos:
 	ctx.stroke();		
 }
 
+/**
+ * Draws all checkers on the board based on the current board state.
+ * 
+ * Renders checkers for all 26 points (including bar positions 0 and 25),
+ * handles stacking of multiple checkers, and draws borne-off checkers
+ * in the bearoff areas with count labels.
+ * 
+ * @param ctx - 2D canvas rendering context
+ * @param boardData - Complete board state containing checker positions
+ */
 export function drawCheckers(ctx: CanvasRenderingContext2D, boardData: BoardData): void {
 
 	// Helper to get x-position from point number (1–24)

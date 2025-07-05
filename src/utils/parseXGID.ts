@@ -1,5 +1,13 @@
 import type { BoardData, Player } from '../types/board';
 
+/**
+ * Converts a character from XGID position string to checker count and player.
+ * @param c - Character from XGID position string
+ * @returns Tuple of [checker count, player] where:
+ *   - lowercase letters (a-z) represent 1-26 checkers for player O
+ *   - uppercase letters (A-Z) represent 1-26 checkers for player X
+ *   - other characters represent empty points
+ */
 function charToCount(c: string): [number, Player | null] {
 	if (c >= 'a' && c <= 'z') {
 		return [c.charCodeAt(0) - 'a'.charCodeAt(0) + 1, 'O'];
@@ -10,12 +18,33 @@ function charToCount(c: string): [number, Player | null] {
 	return [0, null];
 }
 
+/**
+ * Counts the total number of checkers on the board for a specific player.
+ * @param points - Array of point objects containing checker counts and player ownership
+ * @param player - The player ('X' or 'O') to count checkers for
+ * @returns Total number of checkers on the board for the specified player
+ */
 function countCheckers(points: { checkerCount: number; player: Player | null }[], player: Player): number {
 	return points
 		.filter(p => p.player === player)
 		.reduce((sum, p) => sum + p.checkerCount, 0);
 }
 
+/**
+ * Parses an XGID (eXtreme Gammon ID) string into structured board data.
+ * 
+ * XGID format: position:cube:turn:dice:scores:rules
+ * - Position: Encoded using a-z (O player) and A-Z (X player) for checker counts
+ * - Cube: owner:value encoding (0=center, 1=X, 2=O)
+ * - Turn: Player to move (0=X, 1=O)
+ * - Dice: Two-digit dice values or special codes (D=double, B=beaver, etc.)
+ * - Scores: X:O format
+ * - Rules: Bit flags for game rules (Jacoby, Crawford, etc.)
+ * 
+ * @param xgid - The XGID string to parse (with or without 'XGID=' prefix)
+ * @returns BoardData object containing complete game state
+ * @throws Error if XGID format is invalid or incomplete
+ */
 export function parseXGID(xgid: string): BoardData {
 	if (!xgid || typeof xgid !== 'string') {
 		throw new Error('Invalid XGID: input must be a non-empty string');
@@ -98,14 +127,15 @@ export function parseXGID(xgid: string): BoardData {
 }
 
 
-// Original working for just checker play
-// export function extractMoveBlocks(text: string): string[] {
-// 	const moveBlockRegex = /^\s*\d+\..*?(?:\n\s{2,}Player:.*?\n\s{2,}Opponent:.*?)(?=\n\s*\d+\.|\n\n|$)/gms;
-// 	const matches = [...text.matchAll(moveBlockRegex)].map((m) => m[0].trim());
-// 	return matches;
-//   }
-  
-
+/**
+ * Extracts XG analysis blocks from text, handling both move analysis and general analysis formats.
+ * 
+ * First attempts to find numbered move blocks (e.g., "1. Move analysis...").
+ * If no move blocks are found, extracts general analysis starting from "Analyzed in XG Roller+".
+ * 
+ * @param text - The text to search for analysis blocks
+ * @returns Array of analysis block strings, or empty array if none found
+ */
 export function extractMoveBlocks(text: string): string[] {
   const moveBlockRegex = /^\s*\d+\..*?(?:\n\s{2,}Player:.*?\n\s{2,}Opponent:.*?)(?=\n\s*\d+\.|\n\n|$)/gms;
   const moveMatches = [...text.matchAll(moveBlockRegex)].map((m) => m[0].trim());
