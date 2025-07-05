@@ -386,7 +386,8 @@ var BackgammonPlugin = class extends import_obsidian.Plugin {
         errorDiv.style.cssText = "background-color: #ffe6e6; border: 1px solid #ffcccc; padding: 10px; border-radius: 4px; margin: 5px 0;";
         errorDiv.createDiv().setText(source);
         const errorMsg = errorDiv.createDiv();
-        errorMsg.setText(`\u26A0\uFE0F Error: ${error.message}`);
+        const message = error instanceof Error ? error.message : String(error);
+        errorMsg.setText(`\u26A0\uFE0F Error: ${message}`);
         errorMsg.style.cssText = "color: #cc0000; font-weight: bold; margin-top: 5px;";
       }
     });
