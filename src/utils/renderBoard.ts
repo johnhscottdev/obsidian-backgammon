@@ -37,6 +37,7 @@ export function renderBoard(el: HTMLElement, boardData: BoardData): void {
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
 		drawBoard(ctx); // draw triangles/background
 		renderPointNumbers(ctx, boardData); // draw point numbers
+		renderPipCounts(ctx, boardData); // draw pip counts
 		drawCheckers(ctx, boardData); // now using points[]
 
 		const boardTop = 20;
@@ -379,6 +380,70 @@ function renderPointNumbers(ctx: CanvasRenderingContext2D, boardData: BoardData)
 	}
 }
 
+/**
+ * Calculates the pip count for a specific player.
+ * 
+ * The pip count is the total number of pips (points) a player needs to move
+ * to bear off all their checkers. For each checker, multiply its distance
+ * from the bear-off by the number of checkers on that point.
+ * 
+ * @param boardData - Complete board state
+ * @param player - Player to calculate pip count for ('X' or 'O')
+ * @returns Total pip count for the player
+ */
+function calculatePipCount(boardData: BoardData, player: 'X' | 'O'): number {
+	let pipCount = 0;
+	
+	for (let i = 0; i < boardData.points.length; i++) {
+		const point = boardData.points[i];
+		if (point.player === player && point.checkerCount > 0) {
+			let distance = 0;
+			
+			if (i === 0 || i === 25) {
+				distance = 25; // Bar positions
+			} else if (player === 'X') {
+				distance = i; // For X player: point number = distance
+			} else {
+				distance = 25 - i; // For O player: reverse distance
+			}
+			
+			pipCount += distance * point.checkerCount;
+		}
+	}
+	
+	return pipCount;
+}
+
+/**
+ * Renders pip counts for both players on the board.
+ * 
+ * Pip counts are displayed on the bar area in the center of the board,
+ * showing each player's total pip count (total pips needed to bear off all checkers).
+ * 
+ * @param ctx - 2D canvas rendering context
+ * @param boardData - Complete board state
+ */
+function renderPipCounts(ctx: CanvasRenderingContext2D, boardData: BoardData): void {
+	const xPipCount = calculatePipCount(boardData, 'X');
+	const oPipCount = calculatePipCount(boardData, 'O');
+	
+	ctx.font = styleConfig.fonts.pipCount;
+	ctx.textAlign = 'center';
+	ctx.textBaseline = 'middle';
+	ctx.fillStyle = styleConfig.colors.pipCount;
+	
+	const boardTop = 20;
+	const boardBottom = styleConfig.boardHeight - 20;
+	const barCenterX = styleConfig.boardWidth / 2;
+	const margin = 15;
+	
+	// X player pip count (bottom edge of board)
+	ctx.fillText(`${xPipCount}`, barCenterX, boardBottom - margin);
+	
+	// O player pip count (top edge of board)
+	ctx.fillText(`${oPipCount}`, barCenterX, boardTop + margin);
+}
+
 export function drawCheckers(ctx: CanvasRenderingContext2D, boardData: BoardData): void {
 
 	// Helper to get x-position from point number (1–24)
@@ -420,7 +485,7 @@ export function drawCheckers(ctx: CanvasRenderingContext2D, boardData: BoardData
 		const x = getPointX(absolutePointNumber);
 		let margin = styleConfig.checkerMargin;
 		if(onBar)
-			margin += styleConfig.checkerRadius;
+			margin += styleConfig.checkerRadius * 2;
 		const boardTop = 20;
 		const boardBottom = styleConfig.boardHeight - 20;
 		const yStart = isTop ? boardTop + margin : boardBottom - margin;

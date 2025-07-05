@@ -67,14 +67,16 @@ var styleConfig = {
     scoreBackground: "white",
     scoreBorder: "black",
     text: "black",
-    pointNumber: "black"
+    pointNumber: "black",
+    pipCount: "black"
   },
   fonts: {
     checkerLabel: "bold 16px sans-serif",
     scoreHeader: "bold 8px sans-serif",
     scoreValue: "bold 16px sans-serif",
     cubeValue: "bold 16px sans-serif",
-    pointNumber: "bold 16px sans-serif"
+    pointNumber: "bold 16px sans-serif",
+    pipCount: "bold 14px sans-serif"
   },
   sizing: {
     borderWidth: 3,
@@ -112,6 +114,7 @@ function renderBoard(el, boardData) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawBoard(ctx);
     renderPointNumbers(ctx, boardData);
+    renderPipCounts(ctx, boardData);
     drawCheckers(ctx, boardData);
     const boardTop = 20;
     const boardBottom = styleConfig.boardHeight - 20;
@@ -318,6 +321,38 @@ function renderPointNumbers(ctx, boardData) {
     ctx.fillText(displayNumber.toString(), x, y);
   }
 }
+function calculatePipCount(boardData, player) {
+  let pipCount = 0;
+  for (let i = 0; i < boardData.points.length; i++) {
+    const point = boardData.points[i];
+    if (point.player === player && point.checkerCount > 0) {
+      let distance = 0;
+      if (i === 0 || i === 25) {
+        distance = 25;
+      } else if (player === "X") {
+        distance = i;
+      } else {
+        distance = 25 - i;
+      }
+      pipCount += distance * point.checkerCount;
+    }
+  }
+  return pipCount;
+}
+function renderPipCounts(ctx, boardData) {
+  const xPipCount = calculatePipCount(boardData, "X");
+  const oPipCount = calculatePipCount(boardData, "O");
+  ctx.font = styleConfig.fonts.pipCount;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillStyle = styleConfig.colors.pipCount;
+  const boardTop = 20;
+  const boardBottom = styleConfig.boardHeight - 20;
+  const barCenterX = styleConfig.boardWidth / 2;
+  const margin = 15;
+  ctx.fillText(`${xPipCount}`, barCenterX, boardBottom - margin);
+  ctx.fillText(`${oPipCount}`, barCenterX, boardTop + margin);
+}
 function drawCheckers(ctx, boardData) {
   const getPointX = (absolutePointNumber) => {
     let index = 0;
@@ -346,7 +381,7 @@ function drawCheckers(ctx, boardData) {
     const x = getPointX(absolutePointNumber);
     let margin = styleConfig.checkerMargin;
     if (onBar)
-      margin += styleConfig.checkerRadius;
+      margin += styleConfig.checkerRadius * 2;
     const boardTop = 20;
     const boardBottom = styleConfig.boardHeight - 20;
     const yStart = isTop ? boardTop + margin : boardBottom - margin;

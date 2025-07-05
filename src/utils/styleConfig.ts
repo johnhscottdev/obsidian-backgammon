@@ -29,6 +29,7 @@ export interface StyleConfig {
 		scoreBorder: string;
 		text: string;
 		pointNumber: string;
+		pipCount: string;
 	};
 	
 	// Fonts
@@ -38,6 +39,7 @@ export interface StyleConfig {
 		scoreValue: string;
 		cubeValue: string;
 		pointNumber: string;
+		pipCount: string;
 	};
 	
 	// Sizing
@@ -86,6 +88,7 @@ export const styleConfig: StyleConfig = {
 		scoreBorder: 'black',
 		text: 'black',
 		pointNumber: 'black',
+		pipCount: 'black',
 	},
 	
 	fonts: {
@@ -94,6 +97,7 @@ export const styleConfig: StyleConfig = {
 		scoreValue: 'bold 16px sans-serif',
 		cubeValue: 'bold 16px sans-serif',
 		pointNumber: 'bold 16px sans-serif',
+		pipCount: 'bold 14px sans-serif',
 	},
 	
 	sizing: {
