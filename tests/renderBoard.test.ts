@@ -275,6 +275,9 @@ function createMinimalBoardData(): BackgammonPosition {
     jacoby: false,
     matchLength: 0,
     crawford: false,
+    pipCountO:0,
+    pipCountX:0,
+    xgid:"",
   };
 }
 

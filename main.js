@@ -321,27 +321,7 @@ function renderPointNumbers(ctx, boardData) {
     ctx.fillText(displayNumber.toString(), x, y);
   }
 }
-function calculatePipCount(boardData, player) {
-  let pipCount = 0;
-  for (let i = 0; i < boardData.points.length; i++) {
-    const point = boardData.points[i];
-    if (point.player === player && point.checkerCount > 0) {
-      let distance = 0;
-      if (i === 0 || i === 25) {
-        distance = 25;
-      } else if (player === "X") {
-        distance = i;
-      } else {
-        distance = 25 - i;
-      }
-      pipCount += distance * point.checkerCount;
-    }
-  }
-  return pipCount;
-}
 function renderPipCounts(ctx, boardData) {
-  const xPipCount = calculatePipCount(boardData, "X");
-  const oPipCount = calculatePipCount(boardData, "O");
   ctx.font = styleConfig.fonts.pipCount;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
@@ -350,8 +330,8 @@ function renderPipCounts(ctx, boardData) {
   const boardBottom = styleConfig.boardHeight - 20;
   const barCenterX = styleConfig.boardWidth / 2;
   const margin = 15;
-  ctx.fillText(`${xPipCount}`, barCenterX, boardBottom - margin);
-  ctx.fillText(`${oPipCount}`, barCenterX, boardTop + margin);
+  ctx.fillText(`${boardData.pipCountX}`, barCenterX, boardBottom - margin);
+  ctx.fillText(`${boardData.pipCountO}`, barCenterX, boardTop + margin);
 }
 function drawCheckers(ctx, boardData) {
   const getPointX = (absolutePointNumber) => {
@@ -485,9 +465,31 @@ function parseXGID(xgid) {
     jacoby,
     matchLength,
     crawford,
-    xgid: xgidString
+    xgid: xgidString,
+    pipCountX: 0,
+    pipCountO: 0
   };
+  boardData.pipCountX = calculatePipCount(boardData, "X");
+  boardData.pipCountO = calculatePipCount(boardData, "O");
   return boardData;
+}
+function calculatePipCount(boardData, player) {
+  let pipCount = 0;
+  for (let i = 0; i < boardData.points.length; i++) {
+    const point = boardData.points[i];
+    if (point.player === player && point.checkerCount > 0) {
+      let distance = 0;
+      if (i === 0 || i === 25) {
+        distance = 25;
+      } else if (player === "X") {
+        distance = i;
+      } else {
+        distance = 25 - i;
+      }
+      pipCount += distance * point.checkerCount;
+    }
+  }
+  return pipCount;
 }
 function extractMoveBlocks(text) {
   const moveBlockRegex = /^\s*\d+\..*?(?:\n\s{2,}Player:.*?\n\s{2,}Opponent:.*?)(?=\n\s*\d+\.|\n\n|$)/gms;

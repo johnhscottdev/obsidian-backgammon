@@ -131,11 +131,50 @@ export function parseXGID(xgid: string): BackgammonPosition {
 		matchLength:matchLength,
 		crawford:crawford,
 		xgid: xgidString,
+		pipCountX:0,
+		pipCountO:0
 	};
+
+	boardData.pipCountX = calculatePipCount(boardData, 'X');
+	boardData.pipCountO = calculatePipCount(boardData, 'O');
 
 
 	return boardData;
 }
+	
+	/**
+	 * Calculates the pip count for a specific player.
+	 * 
+	 * The pip count is the total number of pips (points) a player needs to move
+	 * to bear off all their checkers. For each checker, multiply its distance
+	 * from the bear-off by the number of checkers on that point.
+	 * 
+	 * @param boardData - Complete board state
+	 * @param player - Player to calculate pip count for ('X' or 'O')
+	 * @returns Total pip count for the player
+	 */
+	function calculatePipCount(boardData: BackgammonPosition, player: 'X' | 'O'): number {
+		let pipCount = 0;
+		
+		for (let i = 0; i < boardData.points.length; i++) {
+			const point = boardData.points[i];
+			if (point.player === player && point.checkerCount > 0) {
+				let distance = 0;
+				
+				if (i === 0 || i === 25) {
+					distance = 25; // Bar positions
+				} else if (player === 'X') {
+					distance = i; // For X player: point number = distance
+				} else {
+					distance = 25 - i; // For O player: reverse distance
+				}
+				
+				pipCount += distance * point.checkerCount;
+			}
+		}
+		
+		return pipCount;
+	}
 
 
 /**

@@ -24,4 +24,6 @@ export interface BackgammonPosition {
 	matchLength: number;
 	crawford:boolean;
 	xgid: string;
+	pipCountX:number;
+	pipCountO:number;
 }
