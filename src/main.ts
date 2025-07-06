@@ -6,32 +6,40 @@
 
 import { Plugin } from 'obsidian';
 import { BackgammonPosition } from './types';
-import { renderBoard } from './utils';
-import { parseXGID } from './utils/parseXGID';
-import { extractMoveBlocks as extractDecisionAnalysis } from './utils/parseXGID';
+import { renderBoard, parseXGID, extractAnalysisText, parseAnalysis, renderAnalysis } from './utils';
 
 
 export default class BackgammonPlugin extends Plugin {
     async onload(): Promise<void> {
         this.registerMarkdownCodeBlockProcessor('xgid', (source, el) => {
             try {
-                const xgid = source.trim(); // assume raw XGID string
-                const boardData = parseXGID(xgid);
-                const decisions = extractDecisionAnalysis(source);
-                //console.log('[Processor] Parsed boardData:', boardData);
+                // Extract XGID from first line that starts with XGID=
+                const lines = source.split('\n');
+                const xgidLine = lines.find(line => line.trim().startsWith('XGID='));
+                
+                if (!xgidLine) {
+                    throw new Error('No XGID found in code block');
+                }
+                
+                const boardData = parseXGID(xgidLine);
+                
+                // Render the board
                 renderBoard(el, boardData);
 
+                // Display XGID string
                 const xgidContainer = el.createDiv({ cls: "xgid-display" });
                 xgidContainer.style.cssText = "margin-top: 10px; padding: 8px; background-color: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 12px; color: #333;";
-                xgidContainer.setText(`XGID=${xgid}`);
+                xgidContainer.setText(xgidLine);
 
-                const container = el.createDiv({ cls: "my-container" });
-
-                decisions.forEach(item => {
-                    const pre = container.createEl("pre");
-                    const code = pre.createEl("code");
-                    code.textContent = item;
-                });
+                // Parse and render analysis if present
+                const analysisText = extractAnalysisText(source);
+                if (analysisText) {
+                    const analysis = parseAnalysis(analysisText);
+                    if (analysis) {
+                        const analysisElement = renderAnalysis(analysis);
+                        el.appendChild(analysisElement);
+                    }
+                }
             } catch (error) {
                 const errorDiv = el.createDiv({ cls: "backgammon-error" });
                 errorDiv.style.cssText = "background-color: #ffe6e6; border: 1px solid #ffcccc; padding: 10px; border-radius: 4px; margin: 5px 0;";

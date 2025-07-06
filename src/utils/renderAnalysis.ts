@@ -1,0 +1,276 @@
+import { AnalysisData, MoveAnalysis, CubeAnalysis, MoveData } from '../types/analysis';
+
+/**
+ * Determines move color based on equity difference
+ * Black: Good moves (equity loss < 0.2)
+ * Green: Errors (equity loss 0.2-0.8)
+ * Red: Blunders (equity loss > 0.8)
+ */
+function getMoveColor(equityDiff: number): string {
+    const absEquityDiff = Math.abs(equityDiff);
+    
+    if (absEquityDiff < 0.2) {
+        return '#000000'; // Black for good moves
+    } else if (absEquityDiff < 0.8) {
+        return '#008000'; // Green for errors
+    } else {
+        return '#ff0000'; // Red for blunders
+    }
+}
+
+/**
+ * Renders analysis data as HTML content
+ */
+export function renderAnalysis(analysis: AnalysisData): HTMLDivElement {
+    const container = document.createElement('div');
+    container.className = 'backgammon-analysis';
+    
+    // Add CSS styles
+    const style = document.createElement('style');
+    style.textContent = `
+        .backgammon-analysis {
+            margin-top: 20px;
+            font-family: monospace;
+            font-size: 12px;
+            line-height: 1.4;
+            background: #f8f8f8;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+        }
+        
+        .analysis-move {
+            margin-bottom: 8px;
+        }
+        
+        .move-line {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2px;
+        }
+        
+        .move-text {
+            font-weight: bold;
+        }
+        
+        .move-equity {
+            font-weight: bold;
+            text-align: right;
+        }
+        
+        .move-stats {
+            font-size: 10px;
+            color: #666;
+            margin-left: 20px;
+        }
+        
+        .cube-analysis {
+            margin-bottom: 12px;
+        }
+        
+        .cube-section {
+            margin-bottom: 8px;
+        }
+        
+        .cube-title {
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        
+        .cube-line {
+            margin-bottom: 2px;
+        }
+        
+        .equity-table {
+            margin: 8px 0;
+        }
+        
+        .equity-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2px;
+        }
+        
+        .best-action {
+            font-weight: bold;
+            color: #0066cc;
+            margin-top: 8px;
+        }
+    `;
+    
+    container.appendChild(style);
+    
+    if (analysis.type === 'move') {
+        renderMoveAnalysis(container, analysis);
+    } else {
+        renderCubeAnalysis(container, analysis);
+    }
+    
+    return container;
+}
+
+/**
+ * Renders move analysis
+ */
+function renderMoveAnalysis(container: HTMLDivElement, analysis: MoveAnalysis): void {
+    analysis.moves.forEach((move) => {
+        const moveDiv = document.createElement('div');
+        moveDiv.className = 'analysis-move';
+        
+        // Main move line
+        const moveLine = document.createElement('div');
+        moveLine.className = 'move-line';
+        
+        const moveText = document.createElement('span');
+        moveText.className = 'move-text';
+        moveText.style.color = getMoveColor(move.equityDiff);
+        
+        const moveNotation = `${move.rank}. ${move.analysisLevel} ${move.move}`;
+        moveText.textContent = moveNotation;
+        
+        const equityText = document.createElement('span');
+        equityText.className = 'move-equity';
+        equityText.style.color = getMoveColor(move.equityDiff);
+        
+        let equityDisplay = move.equity >= 0 ? `+${move.equity.toFixed(3)}` : move.equity.toFixed(3);
+        if (move.equityDiff !== 0) {
+            const diffDisplay = move.equityDiff >= 0 ? `+${move.equityDiff.toFixed(3)}` : move.equityDiff.toFixed(3);
+            equityDisplay += ` (${diffDisplay})`;
+        }
+        equityText.textContent = equityDisplay;
+        
+        moveLine.appendChild(moveText);
+        moveLine.appendChild(equityText);
+        moveDiv.appendChild(moveLine);
+        
+        // Player stats
+        if (move.playerStats) {
+            const playerStats = document.createElement('div');
+            playerStats.className = 'move-stats';
+            playerStats.innerHTML = `P: ${move.playerStats.win.toFixed(1)} ${move.playerStats.gammon.toFixed(1)} ${move.playerStats.backgammon.toFixed(1)} &nbsp;&nbsp; O: ${move.opponentStats?.win.toFixed(1) || '0.0'} ${move.opponentStats?.gammon.toFixed(1) || '0.0'} ${move.opponentStats?.backgammon.toFixed(1) || '0.0'}`;
+            moveDiv.appendChild(playerStats);
+        }
+        
+        container.appendChild(moveDiv);
+    });
+}
+
+/**
+ * Renders cube analysis
+ */
+function renderCubeAnalysis(container: HTMLDivElement, analysis: CubeAnalysis): void {
+    const cubeDiv = document.createElement('div');
+    cubeDiv.className = 'cube-analysis';
+    
+    // Winning chances
+    if (analysis.playerWinning && analysis.opponentWinning) {
+        const winningDiv = document.createElement('div');
+        winningDiv.className = 'cube-section';
+        
+        const playerLine = document.createElement('div');
+        playerLine.className = 'cube-line';
+        playerLine.textContent = `Player Winning Chances: ${analysis.playerWinning.win.toFixed(2)}% (G:${analysis.playerWinning.gammon.toFixed(2)}% B:${analysis.playerWinning.backgammon.toFixed(2)}%)`;
+        
+        const opponentLine = document.createElement('div');
+        opponentLine.className = 'cube-line';
+        opponentLine.textContent = `Opponent Winning Chances: ${analysis.opponentWinning.win.toFixed(2)}% (G:${analysis.opponentWinning.gammon.toFixed(2)}% B:${analysis.opponentWinning.backgammon.toFixed(2)}%)`;
+        
+        winningDiv.appendChild(playerLine);
+        winningDiv.appendChild(opponentLine);
+        cubeDiv.appendChild(winningDiv);
+    }
+    
+    // Cubeless equities
+    if (analysis.cubelessEquities) {
+        const cubelessDiv = document.createElement('div');
+        cubelessDiv.className = 'cube-section';
+        
+        const title = document.createElement('div');
+        title.className = 'cube-title';
+        title.textContent = 'Cubeless Equities:';
+        
+        const equityLine = document.createElement('div');
+        equityLine.className = 'cube-line';
+        const noDouble = analysis.cubelessEquities.noDouble >= 0 ? `+${analysis.cubelessEquities.noDouble.toFixed(3)}` : analysis.cubelessEquities.noDouble.toFixed(3);
+        const double = analysis.cubelessEquities.double >= 0 ? `+${analysis.cubelessEquities.double.toFixed(3)}` : analysis.cubelessEquities.double.toFixed(3);
+        equityLine.textContent = `No Double=${noDouble}, Double=${double}`;
+        
+        cubelessDiv.appendChild(title);
+        cubelessDiv.appendChild(equityLine);
+        cubeDiv.appendChild(cubelessDiv);
+    }
+    
+    // Cubeful equities
+    if (analysis.cubefulEquities) {
+        const cubefulDiv = document.createElement('div');
+        cubefulDiv.className = 'cube-section';
+        
+        const title = document.createElement('div');
+        title.className = 'cube-title';
+        title.textContent = 'Cubeful Equities:';
+        
+        const equityTable = document.createElement('div');
+        equityTable.className = 'equity-table';
+        
+        if (analysis.cubefulEquities.noDouble !== undefined) {
+            const row = document.createElement('div');
+            row.className = 'equity-row';
+            const label = document.createElement('span');
+            label.textContent = 'No double:';
+            const value = document.createElement('span');
+            value.textContent = analysis.cubefulEquities.noDouble >= 0 ? `+${analysis.cubefulEquities.noDouble.toFixed(3)}` : analysis.cubefulEquities.noDouble.toFixed(3);
+            row.appendChild(label);
+            row.appendChild(value);
+            equityTable.appendChild(row);
+        }
+        
+        if (analysis.cubefulEquities.doubleBeaver !== undefined) {
+            const row = document.createElement('div');
+            row.className = 'equity-row';
+            const label = document.createElement('span');
+            label.textContent = 'Double/Beaver:';
+            const value = document.createElement('span');
+            let valueText = analysis.cubefulEquities.doubleBeaver >= 0 ? `+${analysis.cubefulEquities.doubleBeaver.toFixed(3)}` : analysis.cubefulEquities.doubleBeaver.toFixed(3);
+            if (analysis.cubefulEquities.doubleBeaverDiff !== undefined) {
+                const diff = analysis.cubefulEquities.doubleBeaverDiff >= 0 ? `+${analysis.cubefulEquities.doubleBeaverDiff.toFixed(3)}` : analysis.cubefulEquities.doubleBeaverDiff.toFixed(3);
+                valueText += ` (${diff})`;
+            }
+            value.textContent = valueText;
+            row.appendChild(label);
+            row.appendChild(value);
+            equityTable.appendChild(row);
+        }
+        
+        if (analysis.cubefulEquities.doublePass !== undefined) {
+            const row = document.createElement('div');
+            row.className = 'equity-row';
+            const label = document.createElement('span');
+            label.textContent = 'Double/Pass:';
+            const value = document.createElement('span');
+            let valueText = analysis.cubefulEquities.doublePass >= 0 ? `+${analysis.cubefulEquities.doublePass.toFixed(3)}` : analysis.cubefulEquities.doublePass.toFixed(3);
+            if (analysis.cubefulEquities.doublePassDiff !== undefined) {
+                const diff = analysis.cubefulEquities.doublePassDiff >= 0 ? `+${analysis.cubefulEquities.doublePassDiff.toFixed(3)}` : analysis.cubefulEquities.doublePassDiff.toFixed(3);
+                valueText += ` (${diff})`;
+            }
+            value.textContent = valueText;
+            row.appendChild(label);
+            row.appendChild(value);
+            equityTable.appendChild(row);
+        }
+        
+        cubefulDiv.appendChild(title);
+        cubefulDiv.appendChild(equityTable);
+        cubeDiv.appendChild(cubefulDiv);
+    }
+    
+    // Best action
+    if (analysis.bestAction) {
+        const actionDiv = document.createElement('div');
+        actionDiv.className = 'best-action';
+        actionDiv.textContent = `Best Cube action: ${analysis.bestAction}`;
+        cubeDiv.appendChild(actionDiv);
+    }
+    
+    container.appendChild(cubeDiv);
+}

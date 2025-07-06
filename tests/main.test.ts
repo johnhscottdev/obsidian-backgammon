@@ -102,7 +102,7 @@ describe('BackgammonPlugin', () => {
         
         processorCallback(xgidWithWhitespace, mockElement);
         
-        expect(mockParseXGID).toHaveBeenCalledWith(xgidWithWhitespace.trim());
+        expect(mockParseXGID).toHaveBeenCalledWith('  XGID=-a----E-C---eE---c-e----B-:1:1:11:0:0:0:0:10  ');
       });
 
       it('should process move analysis blocks', () => {
@@ -122,7 +122,7 @@ describe('BackgammonPlugin', () => {
 
       it('should handle parsing errors gracefully', () => {
         const invalidXGID = 'invalid-xgid-format';
-        const errorMessage = 'Invalid XGID format';
+        const errorMessage = 'No XGID found in code block';
         
         mockParseXGID.mockImplementation(() => {
           throw new Error(errorMessage);
@@ -136,7 +136,7 @@ describe('BackgammonPlugin', () => {
 
       it('should display error message in error div', () => {
         const invalidXGID = 'invalid-xgid-format';
-        const errorMessage = 'Invalid XGID format';
+        const errorMessage = 'No XGID found in code block';
         
         const mockErrorDiv = {
           createDiv: jest.fn().mockReturnValue({
@@ -163,7 +163,7 @@ describe('BackgammonPlugin', () => {
       });
 
       it('should handle non-Error exceptions', () => {
-        const invalidXGID = 'invalid-xgid-format';
+        const invalidXGID = 'XGID=invalid-xgid-format';
         const errorMessage = 'String error';
         
         const mockErrorDiv = {
@@ -244,8 +244,8 @@ describe('BackgammonPlugin', () => {
         
         processorCallback(validXGID, testMockElement as any);
         
-        // Should create container for analysis blocks (even if empty)
-        expect(testMockElement.createDiv).toHaveBeenCalledWith({ cls: "my-container" });
+        // Should create container for XGID display
+        expect(testMockElement.createDiv).toHaveBeenCalledWith({ cls: "xgid-display" });
         // Don't test for specific analysis extraction since that's tested separately
       });
     });
@@ -317,7 +317,7 @@ describe('BackgammonPlugin', () => {
       
       expect(mockParseXGID).toHaveBeenCalledWith(validXGID);
       expect(mockRenderBoard).toHaveBeenCalledWith(mockElement, mockBoardData);
-      expect(mockElement.createDiv).toHaveBeenCalledWith({ cls: "my-container" });
+      expect(mockElement.createDiv).toHaveBeenCalledWith({ cls: "xgid-display" });
     });
   });
 });

@@ -491,20 +491,389 @@ function calculatePipCount(boardData, player) {
   }
   return pipCount;
 }
-function extractMoveBlocks(text) {
-  const moveBlockRegex = /^\s*\d+\..*?(?:\n\s{2,}Player:.*?\n\s{2,}Opponent:.*?)(?=\n\s*\d+\.|\n\n|$)/gms;
-  const moveMatches = [...text.matchAll(moveBlockRegex)].map((m) => m[0].trim());
-  if (moveMatches.length > 0) {
-    return moveMatches;
-  } else {
-    const analysisRegex = /Analyzed in XG Roller\+([\s\S]*?)^\s*eXtreme Gammon Version:/m;
-    const match = text.match(analysisRegex);
-    if (match) {
-      const cleaned = "Analyzed in XG Roller+" + match[1].trim();
-      return [cleaned];
+
+// src/utils/parseAnalysis.ts
+function extractAnalysisText(content) {
+  const lines = content.split("\n");
+  const xgidIndex = lines.findIndex((line) => line.trim().startsWith("XGID="));
+  if (xgidIndex === -1) return null;
+  let analysisStart = -1;
+  for (let i = xgidIndex + 1; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (line.match(/^\d+\.\s+/) || line.includes("Player Winning Chances:")) {
+      analysisStart = i;
+      break;
     }
   }
-  return [];
+  if (analysisStart === -1) return null;
+  return lines.slice(analysisStart).join("\n");
+}
+function parseAnalysis(analysisText) {
+  if (!analysisText) return null;
+  if (analysisText.includes("Player Winning Chances:")) {
+    return parseCubeAnalysis(analysisText);
+  } else if (analysisText.match(/^\s*\d+\.\s+/m)) {
+    return parseMoveAnalysis(analysisText);
+  }
+  return null;
+}
+function parseMoveAnalysis(text) {
+  const moves = [];
+  const lines = text.split("\n");
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    const moveMatch = line.match(/^(\d+)\.\s+(.+?)\s+eq:([\+\-]\d+\.\d+)(?:\s+\(([\+\-]\d+\.\d+)\))?/);
+    if (moveMatch) {
+      const [, rank, remainder, equity, equityDiff] = moveMatch;
+      const parts = remainder.trim().split(/\s+/);
+      let analysisLevel = "";
+      let move = "";
+      let moveStartIndex = -1;
+      for (let j = 0; j < parts.length; j++) {
+        if (parts[j].includes("/") || parts[j].includes("(") || /^\d/.test(parts[j])) {
+          moveStartIndex = j;
+          break;
+        }
+      }
+      if (moveStartIndex > 0) {
+        analysisLevel = parts.slice(0, moveStartIndex).join(" ");
+        move = parts.slice(moveStartIndex).join(" ");
+      } else {
+        analysisLevel = parts[0];
+        move = parts.slice(1).join(" ");
+      }
+      let playerStats = null;
+      let opponentStats = null;
+      if (i + 1 < lines.length) {
+        const nextLine = lines[i + 1].trim();
+        const playerMatch = nextLine.match(/Player:\s+([\d.]+)%\s+\(G:([\d.]+)%\s+B:([\d.]+)%\)/);
+        if (playerMatch) {
+          playerStats = {
+            win: parseFloat(playerMatch[1]),
+            gammon: parseFloat(playerMatch[2]),
+            backgammon: parseFloat(playerMatch[3])
+          };
+        }
+      }
+      if (i + 2 < lines.length) {
+        const opponentLine = lines[i + 2].trim();
+        const opponentMatch = opponentLine.match(/Opponent:\s+([\d.]+)%\s+\(G:([\d.]+)%\s+B:([\d.]+)%\)/);
+        if (opponentMatch) {
+          opponentStats = {
+            win: parseFloat(opponentMatch[1]),
+            gammon: parseFloat(opponentMatch[2]),
+            backgammon: parseFloat(opponentMatch[3])
+          };
+        }
+      }
+      moves.push({
+        rank: parseInt(rank),
+        move: move.trim(),
+        equity: parseFloat(equity),
+        equityDiff: equityDiff ? parseFloat(equityDiff) : 0,
+        analysisLevel: analysisLevel.trim(),
+        playerStats,
+        opponentStats
+      });
+    }
+  }
+  return {
+    type: "move",
+    moves
+  };
+}
+function parseCubeAnalysis(text) {
+  const lines = text.split("\n");
+  let playerWinning = null;
+  let opponentWinning = null;
+  let cubelessEquities = null;
+  let cubefulEquities = {};
+  let bestAction = null;
+  for (const line of lines) {
+    const trimmed = line.trim();
+    const playerMatch = trimmed.match(/Player Winning Chances:\s+([\d.]+)%\s+\(G:([\d.]+)%\s+B:([\d.]+)%\)/);
+    if (playerMatch) {
+      playerWinning = {
+        win: parseFloat(playerMatch[1]),
+        gammon: parseFloat(playerMatch[2]),
+        backgammon: parseFloat(playerMatch[3])
+      };
+    }
+    const opponentMatch = trimmed.match(/Opponent Winning Chances:\s+([\d.]+)%\s+\(G:([\d.]+)%\s+B:([\d.]+)%\)/);
+    if (opponentMatch) {
+      opponentWinning = {
+        win: parseFloat(opponentMatch[1]),
+        gammon: parseFloat(opponentMatch[2]),
+        backgammon: parseFloat(opponentMatch[3])
+      };
+    }
+    const cubelessMatch = trimmed.match(/Cubeless Equities:\s+No Double=([\+\-]\d+\.\d+),\s+Double=([\+\-]\d+\.\d+)/);
+    if (cubelessMatch) {
+      cubelessEquities = {
+        noDouble: parseFloat(cubelessMatch[1]),
+        double: parseFloat(cubelessMatch[2])
+      };
+    }
+    if (trimmed.includes("No double:")) {
+      const noDoubleMatch = trimmed.match(/No double:\s+([\+\-]\d+\.\d+)/);
+      if (noDoubleMatch) {
+        cubefulEquities = { ...cubefulEquities, noDouble: parseFloat(noDoubleMatch[1]) };
+      }
+    }
+    if (trimmed.includes("Double/Beaver:")) {
+      const beaverMatch = trimmed.match(/Double\/Beaver:\s+([\+\-]\d+\.\d+)\s+\(([\+\-]\d+\.\d+)\)/);
+      if (beaverMatch) {
+        cubefulEquities = {
+          ...cubefulEquities,
+          doubleBeaver: parseFloat(beaverMatch[1]),
+          doubleBeaverDiff: parseFloat(beaverMatch[2])
+        };
+      }
+    }
+    if (trimmed.includes("Double/Pass:")) {
+      const passMatch = trimmed.match(/Double\/Pass:\s+([\+\-]\d+\.\d+)\s+\(([\+\-]\d+\.\d+)\)/);
+      if (passMatch) {
+        cubefulEquities = {
+          ...cubefulEquities,
+          doublePass: parseFloat(passMatch[1]),
+          doublePassDiff: parseFloat(passMatch[2])
+        };
+      }
+    }
+    const actionMatch = trimmed.match(/Best Cube action:\s+(.+)/);
+    if (actionMatch) {
+      bestAction = actionMatch[1];
+    }
+  }
+  return {
+    type: "cube",
+    playerWinning,
+    opponentWinning,
+    cubelessEquities,
+    cubefulEquities: Object.keys(cubefulEquities).length > 0 ? cubefulEquities : null,
+    bestAction
+  };
+}
+
+// src/utils/renderAnalysis.ts
+function getMoveColor(equityDiff) {
+  const absEquityDiff = Math.abs(equityDiff);
+  if (absEquityDiff < 0.2) {
+    return "#000000";
+  } else if (absEquityDiff < 0.8) {
+    return "#008000";
+  } else {
+    return "#ff0000";
+  }
+}
+function renderAnalysis(analysis) {
+  const container = document.createElement("div");
+  container.className = "backgammon-analysis";
+  const style = document.createElement("style");
+  style.textContent = `
+        .backgammon-analysis {
+            margin-top: 20px;
+            font-family: monospace;
+            font-size: 12px;
+            line-height: 1.4;
+            background: #f8f8f8;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+        }
+        
+        .analysis-move {
+            margin-bottom: 8px;
+        }
+        
+        .move-line {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2px;
+        }
+        
+        .move-text {
+            font-weight: bold;
+        }
+        
+        .move-equity {
+            font-weight: bold;
+            text-align: right;
+        }
+        
+        .move-stats {
+            font-size: 10px;
+            color: #666;
+            margin-left: 20px;
+        }
+        
+        .cube-analysis {
+            margin-bottom: 12px;
+        }
+        
+        .cube-section {
+            margin-bottom: 8px;
+        }
+        
+        .cube-title {
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        
+        .cube-line {
+            margin-bottom: 2px;
+        }
+        
+        .equity-table {
+            margin: 8px 0;
+        }
+        
+        .equity-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2px;
+        }
+        
+        .best-action {
+            font-weight: bold;
+            color: #0066cc;
+            margin-top: 8px;
+        }
+    `;
+  container.appendChild(style);
+  if (analysis.type === "move") {
+    renderMoveAnalysis(container, analysis);
+  } else {
+    renderCubeAnalysis(container, analysis);
+  }
+  return container;
+}
+function renderMoveAnalysis(container, analysis) {
+  analysis.moves.forEach((move) => {
+    const moveDiv = document.createElement("div");
+    moveDiv.className = "analysis-move";
+    const moveLine = document.createElement("div");
+    moveLine.className = "move-line";
+    const moveText = document.createElement("span");
+    moveText.className = "move-text";
+    moveText.style.color = getMoveColor(move.equityDiff);
+    const moveNotation = `${move.rank}. ${move.analysisLevel} ${move.move}`;
+    moveText.textContent = moveNotation;
+    const equityText = document.createElement("span");
+    equityText.className = "move-equity";
+    equityText.style.color = getMoveColor(move.equityDiff);
+    let equityDisplay = move.equity >= 0 ? `+${move.equity.toFixed(3)}` : move.equity.toFixed(3);
+    if (move.equityDiff !== 0) {
+      const diffDisplay = move.equityDiff >= 0 ? `+${move.equityDiff.toFixed(3)}` : move.equityDiff.toFixed(3);
+      equityDisplay += ` (${diffDisplay})`;
+    }
+    equityText.textContent = equityDisplay;
+    moveLine.appendChild(moveText);
+    moveLine.appendChild(equityText);
+    moveDiv.appendChild(moveLine);
+    if (move.playerStats) {
+      const playerStats = document.createElement("div");
+      playerStats.className = "move-stats";
+      playerStats.innerHTML = `P: ${move.playerStats.win.toFixed(1)} ${move.playerStats.gammon.toFixed(1)} ${move.playerStats.backgammon.toFixed(1)} &nbsp;&nbsp; O: ${move.opponentStats?.win.toFixed(1) || "0.0"} ${move.opponentStats?.gammon.toFixed(1) || "0.0"} ${move.opponentStats?.backgammon.toFixed(1) || "0.0"}`;
+      moveDiv.appendChild(playerStats);
+    }
+    container.appendChild(moveDiv);
+  });
+}
+function renderCubeAnalysis(container, analysis) {
+  const cubeDiv = document.createElement("div");
+  cubeDiv.className = "cube-analysis";
+  if (analysis.playerWinning && analysis.opponentWinning) {
+    const winningDiv = document.createElement("div");
+    winningDiv.className = "cube-section";
+    const playerLine = document.createElement("div");
+    playerLine.className = "cube-line";
+    playerLine.textContent = `Player Winning Chances: ${analysis.playerWinning.win.toFixed(2)}% (G:${analysis.playerWinning.gammon.toFixed(2)}% B:${analysis.playerWinning.backgammon.toFixed(2)}%)`;
+    const opponentLine = document.createElement("div");
+    opponentLine.className = "cube-line";
+    opponentLine.textContent = `Opponent Winning Chances: ${analysis.opponentWinning.win.toFixed(2)}% (G:${analysis.opponentWinning.gammon.toFixed(2)}% B:${analysis.opponentWinning.backgammon.toFixed(2)}%)`;
+    winningDiv.appendChild(playerLine);
+    winningDiv.appendChild(opponentLine);
+    cubeDiv.appendChild(winningDiv);
+  }
+  if (analysis.cubelessEquities) {
+    const cubelessDiv = document.createElement("div");
+    cubelessDiv.className = "cube-section";
+    const title = document.createElement("div");
+    title.className = "cube-title";
+    title.textContent = "Cubeless Equities:";
+    const equityLine = document.createElement("div");
+    equityLine.className = "cube-line";
+    const noDouble = analysis.cubelessEquities.noDouble >= 0 ? `+${analysis.cubelessEquities.noDouble.toFixed(3)}` : analysis.cubelessEquities.noDouble.toFixed(3);
+    const double = analysis.cubelessEquities.double >= 0 ? `+${analysis.cubelessEquities.double.toFixed(3)}` : analysis.cubelessEquities.double.toFixed(3);
+    equityLine.textContent = `No Double=${noDouble}, Double=${double}`;
+    cubelessDiv.appendChild(title);
+    cubelessDiv.appendChild(equityLine);
+    cubeDiv.appendChild(cubelessDiv);
+  }
+  if (analysis.cubefulEquities) {
+    const cubefulDiv = document.createElement("div");
+    cubefulDiv.className = "cube-section";
+    const title = document.createElement("div");
+    title.className = "cube-title";
+    title.textContent = "Cubeful Equities:";
+    const equityTable = document.createElement("div");
+    equityTable.className = "equity-table";
+    if (analysis.cubefulEquities.noDouble !== void 0) {
+      const row = document.createElement("div");
+      row.className = "equity-row";
+      const label = document.createElement("span");
+      label.textContent = "No double:";
+      const value = document.createElement("span");
+      value.textContent = analysis.cubefulEquities.noDouble >= 0 ? `+${analysis.cubefulEquities.noDouble.toFixed(3)}` : analysis.cubefulEquities.noDouble.toFixed(3);
+      row.appendChild(label);
+      row.appendChild(value);
+      equityTable.appendChild(row);
+    }
+    if (analysis.cubefulEquities.doubleBeaver !== void 0) {
+      const row = document.createElement("div");
+      row.className = "equity-row";
+      const label = document.createElement("span");
+      label.textContent = "Double/Beaver:";
+      const value = document.createElement("span");
+      let valueText = analysis.cubefulEquities.doubleBeaver >= 0 ? `+${analysis.cubefulEquities.doubleBeaver.toFixed(3)}` : analysis.cubefulEquities.doubleBeaver.toFixed(3);
+      if (analysis.cubefulEquities.doubleBeaverDiff !== void 0) {
+        const diff = analysis.cubefulEquities.doubleBeaverDiff >= 0 ? `+${analysis.cubefulEquities.doubleBeaverDiff.toFixed(3)}` : analysis.cubefulEquities.doubleBeaverDiff.toFixed(3);
+        valueText += ` (${diff})`;
+      }
+      value.textContent = valueText;
+      row.appendChild(label);
+      row.appendChild(value);
+      equityTable.appendChild(row);
+    }
+    if (analysis.cubefulEquities.doublePass !== void 0) {
+      const row = document.createElement("div");
+      row.className = "equity-row";
+      const label = document.createElement("span");
+      label.textContent = "Double/Pass:";
+      const value = document.createElement("span");
+      let valueText = analysis.cubefulEquities.doublePass >= 0 ? `+${analysis.cubefulEquities.doublePass.toFixed(3)}` : analysis.cubefulEquities.doublePass.toFixed(3);
+      if (analysis.cubefulEquities.doublePassDiff !== void 0) {
+        const diff = analysis.cubefulEquities.doublePassDiff >= 0 ? `+${analysis.cubefulEquities.doublePassDiff.toFixed(3)}` : analysis.cubefulEquities.doublePassDiff.toFixed(3);
+        valueText += ` (${diff})`;
+      }
+      value.textContent = valueText;
+      row.appendChild(label);
+      row.appendChild(value);
+      equityTable.appendChild(row);
+    }
+    cubefulDiv.appendChild(title);
+    cubefulDiv.appendChild(equityTable);
+    cubeDiv.appendChild(cubefulDiv);
+  }
+  if (analysis.bestAction) {
+    const actionDiv = document.createElement("div");
+    actionDiv.className = "best-action";
+    actionDiv.textContent = `Best Cube action: ${analysis.bestAction}`;
+    cubeDiv.appendChild(actionDiv);
+  }
+  container.appendChild(cubeDiv);
 }
 
 // src/main.ts
@@ -512,19 +881,24 @@ var BackgammonPlugin = class extends import_obsidian.Plugin {
   async onload() {
     this.registerMarkdownCodeBlockProcessor("xgid", (source, el) => {
       try {
-        const xgid = source.trim();
-        const boardData = parseXGID(xgid);
-        const decisions = extractMoveBlocks(source);
+        const lines = source.split("\n");
+        const xgidLine = lines.find((line) => line.trim().startsWith("XGID="));
+        if (!xgidLine) {
+          throw new Error("No XGID found in code block");
+        }
+        const boardData = parseXGID(xgidLine);
         renderBoard(el, boardData);
         const xgidContainer = el.createDiv({ cls: "xgid-display" });
         xgidContainer.style.cssText = "margin-top: 10px; padding: 8px; background-color: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 12px; color: #333;";
-        xgidContainer.setText(`XGID=${xgid}`);
-        const container = el.createDiv({ cls: "my-container" });
-        decisions.forEach((item) => {
-          const pre = container.createEl("pre");
-          const code = pre.createEl("code");
-          code.textContent = item;
-        });
+        xgidContainer.setText(xgidLine);
+        const analysisText = extractAnalysisText(source);
+        if (analysisText) {
+          const analysis = parseAnalysis(analysisText);
+          if (analysis) {
+            const analysisElement = renderAnalysis(analysis);
+            el.appendChild(analysisElement);
+          }
+        }
       } catch (error) {
         const errorDiv = el.createDiv({ cls: "backgammon-error" });
         errorDiv.style.cssText = "background-color: #ffe6e6; border: 1px solid #ffcccc; padding: 10px; border-radius: 4px; margin: 5px 0;";
