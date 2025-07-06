@@ -1,4 +1,4 @@
-import type { BoardData, Player } from '../types/board';
+import type { BackgammonPosition, Player } from '../types/board';
 
 /**
  * Converts a character from XGID position string to checker count and player.
@@ -42,10 +42,10 @@ function countCheckers(points: { checkerCount: number; player: Player | null }[]
  * - Rules: Bit flags for game rules (Jacoby, Crawford, etc.)
  * 
  * @param xgid - The XGID string to parse (with or without 'XGID=' prefix)
- * @returns BoardData object containing complete game state
+ * @returns BackgammonPosition object containing complete game state
  * @throws Error if XGID format is invalid or incomplete
  */
-export function parseXGID(xgid: string): BoardData {
+export function parseXGID(xgid: string): BackgammonPosition {
 	if (!xgid || typeof xgid !== 'string') {
 		throw new Error('Invalid XGID: input must be a non-empty string');
 	}
@@ -115,7 +115,7 @@ export function parseXGID(xgid: string): BoardData {
 	const checkersOnBoardO = countCheckers(points, 'O');
 	const borneOffX = 15 - checkersOnBoardX;
 	const borneOffO = 15 - checkersOnBoardO;
-	let boardData:BoardData = {
+	let boardData:BackgammonPosition = {
 		points,
 		borneOffX,
 		borneOffO,

@@ -29,7 +29,7 @@ This is an Obsidian plugin that renders backgammon positions from XGID (eXtreme 
 ### Data Flow
 
 ```
-XGID Code Block → parseXGID() → BoardData → renderBoard() → Canvas Display
+XGID Code Block → parseXGID() → BackgammonPosition → renderBoard() → Canvas Display
                               ↓
                     extractMoveBlocks() → XG Analysis Text
 ```
@@ -77,5 +77,5 @@ src/
 
 - The plugin registers for 'xgid' code blocks (changed from 'backgammon')
 - All rendering is done via Canvas API for performance
-- BoardData interface represents complete game state including cube, scores, and rules
+- BackgammonPosition interface represents complete game state including cube, scores, and rules
 - XG analysis blocks are extracted and displayed as formatted text below the board

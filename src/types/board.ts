@@ -5,7 +5,7 @@ export interface Point {
 	player: Player | null;
 }
 
-export interface BoardData {
+export interface BackgammonPosition {
 	points: {
 		checkerCount: number;
 		player: Player | null;

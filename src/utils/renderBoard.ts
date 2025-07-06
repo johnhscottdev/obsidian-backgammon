@@ -1,4 +1,4 @@
-import type { BoardData } from '../types/board';
+import type { BackgammonPosition } from '../types/board';
 import { styleConfig } from './styleConfig';
 
 /**
@@ -11,7 +11,7 @@ import { styleConfig } from './styleConfig';
  * @param el - The HTML element to contain the canvas
  * @param boardData - Complete board state data including positions, cube, scores, etc.
  */
-export function renderBoard(el: HTMLElement, boardData: BoardData): void {
+export function renderBoard(el: HTMLElement, boardData: BackgammonPosition): void {
 	const canvas: HTMLCanvasElement = document.createElement('canvas');
 	el.appendChild(canvas);
 	const ctx: CanvasRenderingContext2D | null = canvas.getContext('2d');
@@ -331,7 +331,7 @@ function drawCheckerAtPosition(ctx: CanvasRenderingContext2D, xPos:number, yPos:
  * @param ctx - 2D canvas rendering context
  * @param boardData - Board state containing current turn information
  */
-function renderPointNumbers(ctx: CanvasRenderingContext2D, boardData: BoardData): void {
+function renderPointNumbers(ctx: CanvasRenderingContext2D, boardData: BackgammonPosition): void {
 	// Helper to get x-position from point number (1–24)
 	const getPointX = (pointNumber: number): number => {
 		let index = 0;
@@ -391,7 +391,7 @@ function renderPointNumbers(ctx: CanvasRenderingContext2D, boardData: BoardData)
  * @param player - Player to calculate pip count for ('X' or 'O')
  * @returns Total pip count for the player
  */
-function calculatePipCount(boardData: BoardData, player: 'X' | 'O'): number {
+function calculatePipCount(boardData: BackgammonPosition, player: 'X' | 'O'): number {
 	let pipCount = 0;
 	
 	for (let i = 0; i < boardData.points.length; i++) {
@@ -423,7 +423,7 @@ function calculatePipCount(boardData: BoardData, player: 'X' | 'O'): number {
  * @param ctx - 2D canvas rendering context
  * @param boardData - Complete board state
  */
-function renderPipCounts(ctx: CanvasRenderingContext2D, boardData: BoardData): void {
+function renderPipCounts(ctx: CanvasRenderingContext2D, boardData: BackgammonPosition): void {
 	const xPipCount = calculatePipCount(boardData, 'X');
 	const oPipCount = calculatePipCount(boardData, 'O');
 	
@@ -444,7 +444,7 @@ function renderPipCounts(ctx: CanvasRenderingContext2D, boardData: BoardData): v
 	ctx.fillText(`${oPipCount}`, barCenterX, boardTop + margin);
 }
 
-export function drawCheckers(ctx: CanvasRenderingContext2D, boardData: BoardData): void {
+export function drawCheckers(ctx: CanvasRenderingContext2D, boardData: BackgammonPosition): void {
 
 	// Helper to get x-position from point number (1–24)
 	const getPointX = (absolutePointNumber: number): number => {

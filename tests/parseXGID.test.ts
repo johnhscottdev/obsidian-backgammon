@@ -1,5 +1,5 @@
 import { parseXGID, extractMoveBlocks } from '../src/utils/parseXGID';
-import type { BoardData } from '../src/types/board';
+import type { BackgammonPosition } from '../src/types/board';
 
 describe('parseXGID', () => {
   describe('input validation', () => {

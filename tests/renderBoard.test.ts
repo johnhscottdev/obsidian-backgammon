@@ -1,5 +1,5 @@
 import { renderBoard } from '../src/utils/renderBoard';
-import type { BoardData } from '../src/types/board';
+import type { BackgammonPosition } from '../src/types/board';
 
 // Mock the styleConfig module
 jest.mock('../src/utils/styleConfig', () => ({
@@ -259,7 +259,7 @@ describe('renderBoard', () => {
 });
 
 // Helper functions to create test board data
-function createMinimalBoardData(): BoardData {
+function createMinimalBoardData(): BackgammonPosition {
   return {
     points: Array(26).fill(null).map(() => ({ checkerCount: 0, player: null })),
     borneOffX: 0,
@@ -278,7 +278,7 @@ function createMinimalBoardData(): BoardData {
   };
 }
 
-function createMatchPlayBoardData(): BoardData {
+function createMatchPlayBoardData(): BackgammonPosition {
   return {
     ...createMinimalBoardData(),
     matchLength: 7,
@@ -287,7 +287,7 @@ function createMatchPlayBoardData(): BoardData {
   };
 }
 
-function createBoardDataWithDice(): BoardData {
+function createBoardDataWithDice(): BackgammonPosition {
   return {
     ...createMinimalBoardData(),
     die1: 3,
@@ -296,7 +296,7 @@ function createBoardDataWithDice(): BoardData {
   };
 }
 
-function createBoardDataWithCube(): BoardData {
+function createBoardDataWithCube(): BackgammonPosition {
   return {
     ...createMinimalBoardData(),
     cubeOwner: 'X',
@@ -304,14 +304,14 @@ function createBoardDataWithCube(): BoardData {
   };
 }
 
-function createBoardDataWithCheckers(): BoardData {
+function createBoardDataWithCheckers(): BackgammonPosition {
   const boardData = createMinimalBoardData();
   boardData.points[1] = { checkerCount: 2, player: 'X' };
   boardData.points[24] = { checkerCount: 2, player: 'O' };
   return boardData;
 }
 
-function createBoardDataWithBorneOff(): BoardData {
+function createBoardDataWithBorneOff(): BackgammonPosition {
   return {
     ...createMinimalBoardData(),
     borneOffX: 5,
@@ -319,7 +319,7 @@ function createBoardDataWithBorneOff(): BoardData {
   };
 }
 
-function createCrawfordBoardData(): BoardData {
+function createCrawfordBoardData(): BackgammonPosition {
   return {
     ...createMinimalBoardData(),
     crawford: true,
@@ -329,7 +329,7 @@ function createCrawfordBoardData(): BoardData {
   };
 }
 
-function createBoardDataWithOTurn(): BoardData {
+function createBoardDataWithOTurn(): BackgammonPosition {
   return {
     ...createMinimalBoardData(),
     turn: 'O',
