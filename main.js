@@ -428,10 +428,16 @@ function parseXGID(xgid) {
   if (!xgid || typeof xgid !== "string") {
     throw new Error("Invalid XGID: input must be a non-empty string");
   }
-  const cleanXgid = xgid.trim();
-  if (!cleanXgid.match(/^(XGID=)?[a-zA-Z-]+:[0-9]+:[-0-9]+:[-0-9]+:/)) {
+  const lines = xgid.trim().split("\n");
+  const xgidLine = lines.find((line) => line.trim().startsWith("XGID="));
+  if (!xgidLine) {
+    throw new Error('No line found starting with "XGID="');
+  }
+  const cleanXgid = xgidLine.trim();
+  if (!cleanXgid.match(/^XGID=[a-zA-Z-]+:[0-9]+:[-0-9]+:[-0-9]+:/)) {
     throw new Error("Invalid XGID format: does not match expected pattern");
   }
+  const xgidString = cleanXgid;
   const parts = cleanXgid.replace(/^XGID=/, "").split(":");
   if (parts.length < 9) {
     throw new Error(`Invalid XGID format: expected at least 9 parts, got ${parts.length}`);
@@ -478,7 +484,8 @@ function parseXGID(xgid) {
     beaver,
     jacoby,
     matchLength,
-    crawford
+    crawford,
+    xgid: xgidString
   };
   return boardData;
 }
@@ -507,6 +514,9 @@ var BackgammonPlugin = class extends import_obsidian.Plugin {
         const boardData = parseXGID(xgid);
         const decisions = extractMoveBlocks(source);
         renderBoard(el, boardData);
+        const xgidContainer = el.createDiv({ cls: "xgid-display" });
+        xgidContainer.style.cssText = "margin-top: 10px; padding: 8px; background-color: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 12px; color: #333;";
+        xgidContainer.setText(boardData.xgid);
         const container = el.createDiv({ cls: "my-container" });
         decisions.forEach((item) => {
           const pre = container.createEl("pre");

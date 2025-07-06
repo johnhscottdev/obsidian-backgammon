@@ -23,4 +23,5 @@ export interface BoardData {
 	beaver:boolean;
 	matchLength: number;
 	crawford:boolean;
+	xgid: string;
 }

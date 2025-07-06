@@ -50,11 +50,21 @@ export function parseXGID(xgid: string): BoardData {
 		throw new Error('Invalid XGID: input must be a non-empty string');
 	}
 
-	const cleanXgid = xgid.trim();
-	if (!cleanXgid.match(/^(XGID=)?[a-zA-Z-]+:[0-9]+:[-0-9]+:[-0-9]+:/)) {
+	// Find the line that begins with "XGID="
+	const lines = xgid.trim().split('\n');
+	const xgidLine = lines.find(line => line.trim().startsWith('XGID='));
+	
+	if (!xgidLine) {
+		throw new Error('No line found starting with "XGID="');
+	}
+
+	const cleanXgid = xgidLine.trim();
+	if (!cleanXgid.match(/^XGID=[a-zA-Z-]+:[0-9]+:[-0-9]+:[-0-9]+:/)) {
 		throw new Error('Invalid XGID format: does not match expected pattern');
 	}
 
+	// Keep the full XGID string including "XGID=" prefix
+	const xgidString = cleanXgid;
 	const parts = cleanXgid.replace(/^XGID=/, '').split(':');
 	
 	if (parts.length < 9) {
@@ -120,6 +130,7 @@ export function parseXGID(xgid: string): BoardData {
 		jacoby:jacoby,
 		matchLength:matchLength,
 		crawford:crawford,
+		xgid: xgidString,
 	};
 
 

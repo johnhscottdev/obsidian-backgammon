@@ -21,6 +21,11 @@ export default class BackgammonPlugin extends Plugin {
                 //console.log('[Processor] Parsed boardData:', boardData);
                 renderBoard(el, boardData);
 
+                // Display XGID in ExtremeGammon format
+                const xgidContainer = el.createDiv({ cls: "xgid-display" });
+                xgidContainer.style.cssText = "margin-top: 10px; padding: 8px; background-color: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 12px; color: #333;";
+                xgidContainer.setText(boardData.xgid);
+
                 const container = el.createDiv({ cls: "my-container" });
 
                 decisions.forEach(item => {
