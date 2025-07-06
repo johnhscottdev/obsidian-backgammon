@@ -163,10 +163,10 @@ export function parseXGID(xgid: string): BackgammonPosition {
 				
 				if (i === 0 || i === 25) {
 					distance = 25; // Bar positions
-				} else if (player === 'X') {
-					distance = i; // For X player: point number = distance
+				} else if (player === 'O') {
+					distance = i; // For O player: point number = distance
 				} else {
-					distance = 25 - i; // For O player: reverse distance
+					distance = 25 - i; // For X player: reverse distance
 				}
 				
 				pipCount += distance * point.checkerCount;

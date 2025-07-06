@@ -481,7 +481,7 @@ function calculatePipCount(boardData, player) {
       let distance = 0;
       if (i === 0 || i === 25) {
         distance = 25;
-      } else if (player === "X") {
+      } else if (player === "O") {
         distance = i;
       } else {
         distance = 25 - i;
