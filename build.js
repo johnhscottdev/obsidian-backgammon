@@ -1,6 +1,7 @@
 const esbuild = require('esbuild');
 const fs = require('fs');
 const path = require('path');
+const { execSync } = require('child_process');
 
 const OBSIDIAN_PLUGINS_PATH = '/mnt/f/ObsidianVault/.obsidian/plugins/obsidian-backgammon-xgid';
 
@@ -23,6 +24,17 @@ function copyToObsidian() {
   }
 }
 
+// Run TypeScript type checking first
+console.log('🔍 Type checking...');
+try {
+  execSync('npx tsc --noEmit', { stdio: 'inherit' });
+  console.log('✅ Type checking passed');
+} catch (error) {
+  console.error('❌ Type checking failed');
+  process.exit(1);
+}
+
+// Then run esbuild
 esbuild.build({
   entryPoints: ['src/main.ts'],
   bundle: true,

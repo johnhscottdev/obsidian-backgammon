@@ -165,7 +165,7 @@ function drawBoard(ctx: CanvasRenderingContext2D): void {
  * @param text - Text to display on the checker
  * @param checkerColor - Color of the text ('black' or 'white')
  */
-function drawCheckerLabel(ctx: CanvasRenderingContext2D, x: number, y: number, text: string, checkerColor: 'black' | 'white'): void {
+function drawCheckerLabel(ctx: CanvasRenderingContext2D, x: number, y: number, text: string, checkerColor: string): void {
 	ctx.font = styleConfig.fonts.checkerLabel;
 	ctx.textAlign = 'center';
 	ctx.textBaseline = 'middle';

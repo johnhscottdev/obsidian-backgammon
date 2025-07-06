@@ -434,7 +434,7 @@ function parseXGID(xgid) {
     throw new Error('No line found starting with "XGID="');
   }
   const cleanXgid = xgidLine.trim();
-  if (!cleanXgid.match(/^XGID=[a-zA-Z-]+:[0-9]+:[-0-9]+:[-0-9]+:/)) {
+  if (!cleanXgid.match(/^XGID=[a-zA-Z\-]+:[0-9]+:-?[0-9]+:-?[0-9]+:/)) {
     throw new Error("Invalid XGID format: does not match expected pattern");
   }
   const xgidString = cleanXgid;

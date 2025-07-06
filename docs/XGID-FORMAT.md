@@ -10,6 +10,16 @@ An XGID consists of 9 colon-separated fields:
 
 ```
 [XGID=]position:cube_value:cube_owner:turn:dice:score_x:score_o:rules:match_length
+**Breakdown**:
+- **Position**: `--b-C-E----bB-Bb-c----A--` (mid-game position)
+- **Cube Value**: `2` = 2^2 = 4
+- **Cube Owner**: `1` = X player owns cube
+- **Turn**: `0` = X player to move
+- **Dice**: `63` = 6 and 3
+- **Score X**: `2` points
+- **Score O**: `1` point
+- **Rules**: `0` = No special rules
+- **Match Length**: `7` = Match to 7 points
 ```
 
 ### Optional Prefix
@@ -86,7 +96,7 @@ For position `"-a----E-C---eE---c-e----B-"`:
 
 #### Standard Dice Values
 - `11` to `66` = Normal dice rolls (each digit represents one die)
-- `00` = No dice shown (game not in rolling state)
+- `00` = No dice shown (player has not yet rolled)
 
 #### Special Dice Codes
 - `DD` = Double offered (player must accept/reject)
