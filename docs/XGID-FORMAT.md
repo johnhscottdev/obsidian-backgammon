@@ -64,12 +64,12 @@ For position `"-a----E-C---eE---c-e----B-"`:
 - `6` = 2^6 = 64
 
 ### 3. Cube Owner (Field 2)
-**Format**: Integer (0, 1, or 2)
+**Format**: Integer (-1, 0, 1)
 **Purpose**: Indicates who owns the doubling cube
 
+- `-1` = O player owns the cube
 - `0` = Center (cube available to both players)
 - `1` = X player owns the cube
-- `2` = O player owns the cube
 
 **Special Case**: When cube owner is Center (0), the cube value is set to 64 regardless of field 1.
 

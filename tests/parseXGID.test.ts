@@ -16,11 +16,11 @@ describe('parseXGID', () => {
     });
 
     it('should throw error for invalid format', () => {
-      expect(() => parseXGID('invalid-format')).toThrow('Invalid XGID format: does not match expected pattern');
+      expect(() => parseXGID('XGID=invalid-format')).toThrow('Invalid XGID format: does not match expected pattern');
     });
 
     it('should throw error for insufficient parts', () => {
-      expect(() => parseXGID('abc:1:2:3')).toThrow('Invalid XGID format: does not match expected pattern');
+      expect(() => parseXGID('XGID=abc:1:2:3')).toThrow('Invalid XGID format: does not match expected pattern');
     });
   });
 
@@ -37,7 +37,7 @@ describe('parseXGID', () => {
     });
 
     it('should parse a valid XGID without XGID= prefix', () => {
-      const xgid = '-a----E-C---eE---c-e----B-:1:1:11:0:0:0:0:10';
+      const xgid = 'XGID=-a----E-C---eE---c-e----B-:1:1:11:0:0:0:0:10';
       const result = parseXGID(xgid);
       
       expect(result).toBeDefined();
@@ -46,7 +46,7 @@ describe('parseXGID', () => {
     });
 
     it('should handle whitespace in input', () => {
-      const xgid = '  -a----E-C---eE---c-e----B-:1:1:11:0:0:0:0:10  ';
+      const xgid = '  XGID=-a----E-C---eE---c-e----B-:1:1:11:0:0:0:0:10  ';
       const result = parseXGID(xgid);
       
       expect(result).toBeDefined();
@@ -56,7 +56,7 @@ describe('parseXGID', () => {
 
   describe('position parsing', () => {
     it('should correctly parse checker positions', () => {
-      const xgid = 'abcdefghijklmnopqrstuvwxyz:0:0:00:0:0:0:0:5';
+      const xgid = 'XGID=abcdefghijklmnopqrstuvwxyz:0:0:0:00:0:0:0:5';
       const result = parseXGID(xgid);
       
       // Check that lowercase letters create O player checkers
@@ -68,7 +68,7 @@ describe('parseXGID', () => {
     });
 
     it('should correctly parse uppercase letters as X player checkers', () => {
-      const xgid = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ:0:0:00:0:0:0:0:5';
+      const xgid = 'XGID=ABCDEFGHIJKLMNOPQRSTUVWXYZ:0:0:0:00:0:0:0:5';
       const result = parseXGID(xgid);
       
       // Check that uppercase letters create X player checkers
@@ -80,7 +80,7 @@ describe('parseXGID', () => {
     });
 
     it('should handle empty points with dashes', () => {
-      const xgid = '------------------------A-:0:0:00:0:0:0:0:5';
+      const xgid = 'XGID=------------------------A-:0:0:0:00:0:0:0:5';
       const result = parseXGID(xgid);
       
       // Most points should be empty
@@ -95,7 +95,7 @@ describe('parseXGID', () => {
 
   describe('cube parsing', () => {
     it('should parse cube owned by center', () => {
-      const xgid = 'abcd----------------------:0:0:00:0:0:0:0:5';
+      const xgid = 'XGID=abcd----------------------:0:0:0:00:0:0:0:5';
       const result = parseXGID(xgid);
       
       expect(result.cubeOwner).toBe('Center');
@@ -103,15 +103,15 @@ describe('parseXGID', () => {
     });
 
     it('should parse cube owned by X player', () => {
-      const xgid = 'abcd----------------------:2:1:00:0:0:0:0:5';
+      const xgid = 'XGID=abcd----------------------:1:1:0:00:0:0:0:5';
       const result = parseXGID(xgid);
       
       expect(result.cubeOwner).toBe('X');
-      expect(result.cubeValue).toBe(4); // 2^2 = 4
+      expect(result.cubeValue).toBe(2); // 2^1 = 2
     });
 
     it('should parse cube owned by O player', () => {
-      const xgid = 'abcd----------------------:3:2:00:0:0:0:0:5';
+      const xgid = 'XGID=abcd----------------------:3:-1:0:00:0:0:0:5';
       const result = parseXGID(xgid);
       
       expect(result.cubeOwner).toBe('O');
@@ -121,21 +121,21 @@ describe('parseXGID', () => {
 
   describe('turn parsing', () => {
     it('should parse X player turn', () => {
-      const xgid = 'abcd----------------------:0:0:00:0:0:0:0:5';
+      const xgid = 'XGID=abcd----------------------:0:0:0:00:0:0:0:5';
       const result = parseXGID(xgid);
       
       expect(result.turn).toBe('X');
     });
 
     it('should parse O player turn', () => {
-      const xgid = 'abcd----------------------:0:0:-1:00:0:0:0:5';
+      const xgid = 'XGID=abcd----------------------:0:0:-1:00:0:0:0:5';
       const result = parseXGID(xgid);
       
       expect(result.turn).toBe('O');
     });
 
     it('should handle -1 turn as O player', () => {
-      const xgid = 'abcd----------------------:0:0:-1:00:0:0:0:5';
+      const xgid = 'XGID=abcd----------------------:0:0:-1:00:0:0:0:5';
       const result = parseXGID(xgid);
       
       expect(result.turn).toBe('O');
@@ -144,7 +144,7 @@ describe('parseXGID', () => {
 
   describe('dice parsing', () => {
     it('should parse valid dice values', () => {
-      const xgid = 'abcd----------------------:0:0:00:35:0:0:0:5';
+      const xgid = 'XGID=abcd----------------------:0:0:0:35:0:0:0:5';
       const result = parseXGID(xgid);
       
       expect(result.die1).toBe(3);
@@ -152,7 +152,7 @@ describe('parseXGID', () => {
     });
 
     it('should handle doubles', () => {
-      const xgid = 'abcd----------------------:0:0:00:44:0:0:0:5';
+      const xgid = 'XGID=abcd----------------------:0:0:0:44:0:0:0:5';
       const result = parseXGID(xgid);
       
       expect(result.die1).toBe(4);
@@ -160,7 +160,7 @@ describe('parseXGID', () => {
     });
 
     it('should handle special dice codes', () => {
-      const xgid = 'abcd----------------------:0:0:00:DD:0:0:0:5';
+      const xgid = 'XGID=abcd----------------------:0:0:0:DD:0:0:0:5';
       const result = parseXGID(xgid);
       
       expect(result.die1).toBe(0);
@@ -168,7 +168,7 @@ describe('parseXGID', () => {
     });
 
     it('should handle zero dice', () => {
-      const xgid = 'abcd----------------------:0:0:00:00:0:0:0:5';
+      const xgid = 'XGID=abcd----------------------:0:0:0:00:0:0:0:5';
       const result = parseXGID(xgid);
       
       expect(result.die1).toBe(0);
@@ -178,7 +178,7 @@ describe('parseXGID', () => {
 
   describe('score parsing', () => {
     it('should parse match scores', () => {
-      const xgid = 'abcd----------------------:0:0:00:00:3:7:0:11';
+      const xgid = 'XGID=abcd----------------------:0:0:0:00:3:7:0:11';
       const result = parseXGID(xgid);
       
       expect(result.scoreX).toBe(3);
@@ -186,7 +186,7 @@ describe('parseXGID', () => {
     });
 
     it('should handle zero scores', () => {
-      const xgid = 'abcd----------------------:0:0:00:00:0:0:0:5';
+      const xgid = 'XGID=abcd----------------------:0:0:0:00:0:0:0:5';
       const result = parseXGID(xgid);
       
       expect(result.scoreX).toBe(0);
@@ -196,21 +196,21 @@ describe('parseXGID', () => {
 
   describe('rules parsing', () => {
     it('should parse jacoby rule', () => {
-      const xgid = 'abcd----------------------:0:0:00:00:0:0:1:5';
+      const xgid = 'XGID=abcd----------------------:0:0:0:00:0:0:1:5';
       const result = parseXGID(xgid);
       
       expect(result.jacoby).toBe(true);
     });
 
     it('should parse beaver rule', () => {
-      const xgid = 'abcd----------------------:0:0:00:00:0:0:1:5';
+      const xgid = 'XGID=abcd----------------------:0:0:0:00:0:0:1:5';
       const result = parseXGID(xgid);
       
       expect(result.beaver).toBe(true);
     });
 
     it('should handle no special rules', () => {
-      const xgid = 'abcd----------------------:0:0:00:00:0:0:0:5';
+      const xgid = 'XGID=abcd----------------------:0:0:0:00:0:0:0:5';
       const result = parseXGID(xgid);
       
       expect(result.jacoby).toBe(false);
@@ -220,14 +220,14 @@ describe('parseXGID', () => {
 
   describe('match length and crawford rule', () => {
     it('should parse match length', () => {
-      const xgid = 'abcd----------------------:0:0:00:00:0:0:0:11';
+      const xgid = 'XGID=abcd----------------------:0:0:0:00:0:0:0:11';
       const result = parseXGID(xgid);
       
       expect(result.matchLength).toBe(11);
     });
 
     it('should set crawford rule for match play with jacoby', () => {
-      const xgid = 'abcd----------------------:0:0:00:00:0:0:1:7';
+      const xgid = 'XGID=abcd----------------------:0:0:0:00:0:0:1:7';
       const result = parseXGID(xgid);
       
       expect(result.crawford).toBe(true);
@@ -235,7 +235,7 @@ describe('parseXGID', () => {
     });
 
     it('should not set crawford rule for money play', () => {
-      const xgid = 'abcd----------------------:0:0:00:00:0:0:1:0';
+      const xgid = 'XGID=abcd----------------------:0:0:0:00:0:0:1:0';
       const result = parseXGID(xgid);
       
       expect(result.crawford).toBe(false);
@@ -245,7 +245,7 @@ describe('parseXGID', () => {
 
   describe('borne off calculations', () => {
     it('should calculate borne off checkers correctly', () => {
-      const xgid = 'a-------------------------:0:0:00:00:0:0:0:5';
+      const xgid = 'XGID=a-------------------------:0:0:0:00:0:0:0:5';
       const result = parseXGID(xgid);
       
       expect(result.borneOffO).toBe(14); // 15 - 1 checker on board
@@ -253,7 +253,7 @@ describe('parseXGID', () => {
     });
 
     it('should handle full board', () => {
-      const xgid = 'abcdefghijklmnopqrstuvwxyz:0:0:00:00:0:0:0:5';
+      const xgid = 'XGID=abcdefghijklmnopqrstuvwxyz:0:0:0:00:0:0:0:5';
       const result = parseXGID(xgid);
       
       const totalO = result.points

@@ -117,7 +117,7 @@ describe('BackgammonPlugin', () => {
         
         processorCallback(xgidWithAnalysis, mockElement);
         
-        expect(mockElement.createDiv).toHaveBeenCalledWith({ cls: "my-container" });
+        expect(mockElement.createDiv).toHaveBeenCalledWith({ cls: "xgid-display" });
       });
 
       it('should handle parsing errors gracefully', () => {

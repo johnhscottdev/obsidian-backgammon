@@ -59,7 +59,7 @@ export function parseXGID(xgid: string): BoardData {
 	}
 
 	const cleanXgid = xgidLine.trim();
-	if (!cleanXgid.match(/^XGID=[a-zA-Z-]+:[0-9]+:[-0-9]+:[-0-9]+:/)) {
+	if (!cleanXgid.match(/^XGID=[a-zA-Z\-]+:[0-9]+:-?[0-9]+:-?[0-9]+:/)) {
 		throw new Error('Invalid XGID format: does not match expected pattern');
 	}
 

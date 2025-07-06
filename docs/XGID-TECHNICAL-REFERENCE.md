@@ -12,7 +12,7 @@
 const fields = xgid.replace(/^XGID=/, '').split(':');
 // fields[0] = position (26 chars)
 // fields[1] = cube_value (0-10) 
-// fields[2] = cube_owner (0,1,2)
+// fields[2] = cube_owner (-1,0,1)
 // fields[3] = turn (-1,0,1+)
 // fields[4] = dice (2 chars)
 // fields[5] = score_x (int)
@@ -165,8 +165,8 @@ function validateXGID(xgid) {
     }
     
     const cubeOwner = parseInt(parts[2], 10);
-    if (![0, 1, 2].includes(cubeOwner)) {
-        throw new Error('Cube owner must be 0, 1, or 2');
+    if (![-1, 0, 1].includes(cubeOwner)) {
+        throw new Error('Cube owner must be -1, 0, or 1');
     }
     
     // Validate dice format
