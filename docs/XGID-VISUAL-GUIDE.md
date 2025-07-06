@@ -3,28 +3,32 @@
 ## Backgammon Board Layout
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│  24  23  22  21  20  19      BAR      18  17  16  15  14  13 │
-│  ◐   ◐   ◐   ◐   ◐   ◐              ◑   ◑   ◑   ◑   ◑   ◑  │
-│  ◐   ◐   ◐   ◐   ◐   ◐              ◑   ◑   ◑   ◑   ◑   ◑  │
-│  O   O   O   O   O   O               X   X   X   X   X   X  │ ← O OUTER
-│  U   U   U   U   U   U               U   U   U   U   U   U  │   BOARD
-│  T   T   T   T   T   T               T   T   T   T   T   T  │
-│  E   E   E   E   E   E               E   E   E   E   E   E  │
-│  R   R   R   R   R   R               R   R   R   R   R   R  │
-│                                                             │
-│ OFF                                                     OFF │
-│                                                             │
-│  I   I   I   I   I   I               I   I   I   I   I   I  │
-│  N   N   N   N   N   N               N   N   N   N   N   N  │
-│  N   N   N   N   N   N               N   N   N   N   N   N  │
-│  E   E   E   E   E   E               E   E   E   E   E   E  │
-│  R   R   R   R   R   R               R   R   R   R   R   R  │ ← X OUTER
-│  ◑   ◑   ◑   ◑   ◑   ◑              ◐   ◐   ◐   ◐   ◐   ◐  │   BOARD  
-│  ◑   ◑   ◑   ◑   ◑   ◑              ◐   ◐   ◐   ◐   ◐   ◐  │
-│  12  11  10   9   8   7      BAR       6   5   4   3   2   1 │
-└─────────────────────────────────────────────────────────────┘
-     X HOME BOARD                           O HOME BOARD
+                 O HOME BOARD          O OUTER BOARD
+                ┌─────────────────────┬─────────────────────┐
+             OFF│24 23 22 21 20 19   │18 17 16 15 14 13   │OFF
+                │▼  ▼  ▼  ▼  ▼  ▼    │▼  ▼  ▼  ▼  ▼  ▼    │
+                │2              5     │            5       │
+                │○              ○     │            ●       │
+                │○              ○     │            ●       │
+                │               ○     │            ●       │
+                │               ○  B  │            ●       │
+                │               ○  A  │            ●       │
+                │                  R  │                    │
+                │                     │                    │
+                │                     │                    │
+                │                     │  3                 │
+                │▲  ▲  ▲  ▲  ▲  ▲    │▲  ●  ▲  ▲  ▲  ▲    │
+             OFF│1  2  3  4  5  6     │7  ●  9 10 11 12    │OFF
+                └─────────────────────┴─────────────────────┘
+                 X HOME BOARD          X OUTER BOARD
+                                      
+                Starting Position:
+                X: 2 on point 24, 5 on point 13, 3 on point 8, 5 on point 6
+                O: 2 on point 1, 5 on point 12, 3 on point 17, 5 on point 19
+
+Direction of travel:
+X player: Points 1→24 (counterclockwise, ● pieces)
+O player: Points 24→1 (clockwise, ○ pieces)
 ```
 
 ## XGID Position String Mapping
@@ -158,17 +162,25 @@ Board Point:  X_BAR 1 2 3 4 5 6 7 8 9...24 O_BAR
 
 ### Point Numbering Display
 ```
-From X Player's Perspective:
-Points 1-6:   X Home Board (bottom right)
-Points 7-12:  X Outer Board (bottom left)  
-Points 13-18: O Outer Board (top left)
-Points 19-24: O Home Board (top right)
+Standard Board Layout (as viewed by X player):
+Points 1-6:   X Home Board (bottom right quadrant)
+Points 7-12:  X Outer Board (bottom left quadrant)  
+Points 13-18: O Outer Board (top left quadrant)
+Points 19-24: O Home Board (top right quadrant)
 
-From O Player's Perspective (reversed):
-Points 24-19: O Home Board (bottom right)
-Points 18-13: O Outer Board (bottom left)
-Points 12-7:  X Outer Board (top left)  
-Points 6-1:   X Home Board (top right)
+Home Boards (6 points each):
+- X Home: Points 1-6 (where X bears off)
+- O Home: Points 19-24 (where O bears off)
+
+Outer Boards (6 points each):
+- X Outer: Points 7-12 
+- O Outer: Points 13-18
+
+Movement Direction:
+- X moves from 1→24 (counterclockwise)
+- O moves from 24→1 (clockwise)
+
+Total: 24 points + 2 bar positions = 26 XGID positions
 ```
 
 ### Checker Stack Visualization
