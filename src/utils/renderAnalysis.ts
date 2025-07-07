@@ -225,6 +225,23 @@ function renderCubeAnalysis(container: HTMLDivElement, analysis: CubeAnalysis): 
             equityTable.appendChild(row);
         }
         
+        if (analysis.cubefulEquities.doubleTake !== undefined) {
+            const row = document.createElement('div');
+            row.className = 'equity-row';
+            const label = document.createElement('span');
+            label.textContent = 'Double/Take:';
+            const value = document.createElement('span');
+            let valueText = analysis.cubefulEquities.doubleTake >= 0 ? `+${analysis.cubefulEquities.doubleTake.toFixed(3)}` : analysis.cubefulEquities.doubleTake.toFixed(3);
+            if (analysis.cubefulEquities.doubleTakeDiff !== undefined) {
+                const diff = analysis.cubefulEquities.doubleTakeDiff >= 0 ? `+${analysis.cubefulEquities.doubleTakeDiff.toFixed(3)}` : analysis.cubefulEquities.doubleTakeDiff.toFixed(3);
+                valueText += ` (${diff})`;
+            }
+            value.textContent = valueText;
+            row.appendChild(label);
+            row.appendChild(value);
+            equityTable.appendChild(row);
+        }
+        
         if (analysis.cubefulEquities.doubleBeaver !== undefined) {
             const row = document.createElement('div');
             row.className = 'equity-row';

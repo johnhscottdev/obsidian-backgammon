@@ -178,6 +178,52 @@ Best Cube action: No double / Beaver`;
             expect(result.bestAction).toBe('No double / Beaver');
         });
 
+        it('should parse cube analysis with Double/Take correctly', () => {
+            const analysisText = `Analyzed in XG Roller+
+Player Winning Chances:   67.98% (G:30.15% B:0.89%)
+Opponent Winning Chances: 32.02% (G:5.78% B:0.19%)
+
+Cubeless Equities: No Double=+0.610, Double=+1.262
+
+Cubeful Equities:
+       No double:     +0.828 (-0.172)
+       Double/Take:   +1.005 (+0.005)
+       Double/Pass:   +1.000
+
+Best Cube action: Double / Pass`;
+
+            const result = parseAnalysis(analysisText) as CubeAnalysis;
+            expect(result).toBeTruthy();
+            expect(result.type).toBe('cube');
+            
+            expect(result.playerWinning).toEqual({
+                win: 67.98,
+                gammon: 30.15,
+                backgammon: 0.89
+            });
+            
+            expect(result.opponentWinning).toEqual({
+                win: 32.02,
+                gammon: 5.78,
+                backgammon: 0.19
+            });
+            
+            expect(result.cubelessEquities).toEqual({
+                noDouble: 0.610,
+                double: 1.262
+            });
+            
+            expect(result.cubefulEquities).toEqual({
+                noDouble: 0.828,
+                doubleTake: 1.005,
+                doubleTakeDiff: 0.005,
+                doublePass: 1.000,
+                doublePassDiff: undefined
+            });
+            
+            expect(result.bestAction).toBe('Double / Pass');
+        });
+
         it('should return null for invalid analysis text', () => {
             const analysisText = `Some random text
 That doesn't match any pattern`;

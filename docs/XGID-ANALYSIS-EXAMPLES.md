@@ -131,8 +131,45 @@ eXtreme Gammon Version: 2.10
 
 
 
+# # This is an example of a more common cube analysis
+XGID=a--B-BCbB---cD-a-cAe---A--:0:0:1:00:0:0:0:9:10
+X:John   O:Bodger Millerd
 
-# This is an example of a cube analysis. 
+Score is X:0 O:0 9 pt.(s) match.
+ +13-14-15-16-17-18------19-20-21-22-23-24-+
+ | X     O     O  X |   | O           X    |
+ | X           O    |   | O                |
+ | X           O    |   | O                |
+ | X                |   | O                |
+ |                  |   | O                |
+ |                  |BAR|                  |
+ |                  | O |                  |
+ |                  |   |                  |
+ | O                |   | X                |
+ | O           X  O |   | X  X     X       |
+ | O           X  O |   | X  X     X       |
+ +12-11-10--9--8--7-------6--5--4--3--2--1-+
+Pip count  X: 143  O: 164 X-O: 0-0/9
+Cube: 1
+X on roll, cube action
+
+Analyzed in XG Roller+
+Player Winning Chances:   67.98% (G:30.15% B:0.89%)
+Opponent Winning Chances: 32.02% (G:5.78% B:0.19%)
+
+Cubeless Equities: No Double=+0.610, Double=+1.262
+
+Cubeful Equities:
+       No double:     +0.828 (-0.172)
+       Double/Take:   +1.005 (+0.005)
+       Double/Pass:   +1.000
+
+Best Cube action: Double / Pass
+
+eXtreme Gammon Version: 2.10, MET: Kazaross XG2
+
+
+# This is an example of a rare cube analysis that has a beaver instead of a take
 
 XGID=-b----E-C---eE---c-e----B-:0:0:1:00:0:0:3:0:10
 X:Player 1   O:Player 2

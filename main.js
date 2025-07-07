@@ -620,23 +620,33 @@ function parseCubeAnalysis(text) {
         cubefulEquities = { ...cubefulEquities, noDouble: parseFloat(noDoubleMatch[1]) };
       }
     }
+    if (trimmed.includes("Double/Take:")) {
+      const takeMatch = trimmed.match(/Double\/Take:\s+([\+\-]\d+\.\d+)(?:\s+\(([\+\-]\d+\.\d+)\))?/);
+      if (takeMatch) {
+        cubefulEquities = {
+          ...cubefulEquities,
+          doubleTake: parseFloat(takeMatch[1]),
+          doubleTakeDiff: takeMatch[2] ? parseFloat(takeMatch[2]) : void 0
+        };
+      }
+    }
     if (trimmed.includes("Double/Beaver:")) {
-      const beaverMatch = trimmed.match(/Double\/Beaver:\s+([\+\-]\d+\.\d+)\s+\(([\+\-]\d+\.\d+)\)/);
+      const beaverMatch = trimmed.match(/Double\/Beaver:\s+([\+\-]\d+\.\d+)(?:\s+\(([\+\-]\d+\.\d+)\))?/);
       if (beaverMatch) {
         cubefulEquities = {
           ...cubefulEquities,
           doubleBeaver: parseFloat(beaverMatch[1]),
-          doubleBeaverDiff: parseFloat(beaverMatch[2])
+          doubleBeaverDiff: beaverMatch[2] ? parseFloat(beaverMatch[2]) : void 0
         };
       }
     }
     if (trimmed.includes("Double/Pass:")) {
-      const passMatch = trimmed.match(/Double\/Pass:\s+([\+\-]\d+\.\d+)\s+\(([\+\-]\d+\.\d+)\)/);
+      const passMatch = trimmed.match(/Double\/Pass:\s+([\+\-]\d+\.\d+)(?:\s+\(([\+\-]\d+\.\d+)\))?/);
       if (passMatch) {
         cubefulEquities = {
           ...cubefulEquities,
           doublePass: parseFloat(passMatch[1]),
-          doublePassDiff: parseFloat(passMatch[2])
+          doublePassDiff: passMatch[2] ? parseFloat(passMatch[2]) : void 0
         };
       }
     }
@@ -827,6 +837,22 @@ function renderCubeAnalysis(container, analysis) {
       label.textContent = "No double:";
       const value = document.createElement("span");
       value.textContent = analysis.cubefulEquities.noDouble >= 0 ? `+${analysis.cubefulEquities.noDouble.toFixed(3)}` : analysis.cubefulEquities.noDouble.toFixed(3);
+      row.appendChild(label);
+      row.appendChild(value);
+      equityTable.appendChild(row);
+    }
+    if (analysis.cubefulEquities.doubleTake !== void 0) {
+      const row = document.createElement("div");
+      row.className = "equity-row";
+      const label = document.createElement("span");
+      label.textContent = "Double/Take:";
+      const value = document.createElement("span");
+      let valueText = analysis.cubefulEquities.doubleTake >= 0 ? `+${analysis.cubefulEquities.doubleTake.toFixed(3)}` : analysis.cubefulEquities.doubleTake.toFixed(3);
+      if (analysis.cubefulEquities.doubleTakeDiff !== void 0) {
+        const diff = analysis.cubefulEquities.doubleTakeDiff >= 0 ? `+${analysis.cubefulEquities.doubleTakeDiff.toFixed(3)}` : analysis.cubefulEquities.doubleTakeDiff.toFixed(3);
+        valueText += ` (${diff})`;
+      }
+      value.textContent = valueText;
       row.appendChild(label);
       row.appendChild(value);
       equityTable.appendChild(row);

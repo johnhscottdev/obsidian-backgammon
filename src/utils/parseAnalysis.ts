@@ -181,24 +181,35 @@ function parseCubeAnalysis(text: string): CubeAnalysis {
             }
         }
         
+        if (trimmed.includes('Double/Take:')) {
+            const takeMatch = trimmed.match(/Double\/Take:\s+([\+\-]\d+\.\d+)(?:\s+\(([\+\-]\d+\.\d+)\))?/);
+            if (takeMatch) {
+                cubefulEquities = { 
+                    ...cubefulEquities, 
+                    doubleTake: parseFloat(takeMatch[1]),
+                    doubleTakeDiff: takeMatch[2] ? parseFloat(takeMatch[2]) : undefined
+                };
+            }
+        }
+        
         if (trimmed.includes('Double/Beaver:')) {
-            const beaverMatch = trimmed.match(/Double\/Beaver:\s+([\+\-]\d+\.\d+)\s+\(([\+\-]\d+\.\d+)\)/);
+            const beaverMatch = trimmed.match(/Double\/Beaver:\s+([\+\-]\d+\.\d+)(?:\s+\(([\+\-]\d+\.\d+)\))?/);
             if (beaverMatch) {
                 cubefulEquities = { 
                     ...cubefulEquities, 
                     doubleBeaver: parseFloat(beaverMatch[1]),
-                    doubleBeaverDiff: parseFloat(beaverMatch[2])
+                    doubleBeaverDiff: beaverMatch[2] ? parseFloat(beaverMatch[2]) : undefined
                 };
             }
         }
         
         if (trimmed.includes('Double/Pass:')) {
-            const passMatch = trimmed.match(/Double\/Pass:\s+([\+\-]\d+\.\d+)\s+\(([\+\-]\d+\.\d+)\)/);
+            const passMatch = trimmed.match(/Double\/Pass:\s+([\+\-]\d+\.\d+)(?:\s+\(([\+\-]\d+\.\d+)\))?/);
             if (passMatch) {
                 cubefulEquities = { 
                     ...cubefulEquities, 
                     doublePass: parseFloat(passMatch[1]),
-                    doublePassDiff: parseFloat(passMatch[2])
+                    doublePassDiff: passMatch[2] ? parseFloat(passMatch[2]) : undefined
                 };
             }
         }
