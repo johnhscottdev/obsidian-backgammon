@@ -215,6 +215,7 @@ Best Cube action: Double / Pass`;
             
             expect(result.cubefulEquities).toEqual({
                 noDouble: 0.828,
+                noDoubleDiff: -0.172,
                 doubleTake: 1.005,
                 doubleTakeDiff: 0.005,
                 doublePass: 1.000,

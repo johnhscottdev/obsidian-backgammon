@@ -175,9 +175,13 @@ function parseCubeAnalysis(text: string): CubeAnalysis {
         
         // Cubeful Equities - parse multiple lines
         if (trimmed.includes('No double:')) {
-            const noDoubleMatch = trimmed.match(/No double:\s+([\+\-]\d+\.\d+)/);
+            const noDoubleMatch = trimmed.match(/No double:\s+([\+\-]\d+\.\d+)(?:\s+\(([\+\-]\d+\.\d+)\))?/);
             if (noDoubleMatch) {
-                cubefulEquities = { ...cubefulEquities, noDouble: parseFloat(noDoubleMatch[1]) };
+                cubefulEquities = { 
+                    ...cubefulEquities, 
+                    noDouble: parseFloat(noDoubleMatch[1]),
+                    noDoubleDiff: noDoubleMatch[2] ? parseFloat(noDoubleMatch[2]) : undefined
+                };
             }
         }
         

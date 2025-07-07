@@ -38,6 +38,7 @@ export interface CubelessEquities {
 
 export interface CubefulEquities {
     noDouble?: number;
+    noDoubleDiff?: number;
     doubleTake?: number;
     doubleTakeDiff?: number;
     doubleBeaver?: number;

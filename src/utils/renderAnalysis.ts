@@ -272,7 +272,12 @@ function renderCubeAnalysis(container: HTMLDivElement, analysis: CubeAnalysis): 
             const label = document.createElement('span');
             label.textContent = 'No double:';
             const value = document.createElement('span');
-            value.textContent = analysis.cubefulEquities.noDouble >= 0 ? `+${analysis.cubefulEquities.noDouble.toFixed(3)}` : analysis.cubefulEquities.noDouble.toFixed(3);
+            let valueText = analysis.cubefulEquities.noDouble >= 0 ? `+${analysis.cubefulEquities.noDouble.toFixed(3)}` : analysis.cubefulEquities.noDouble.toFixed(3);
+            if (analysis.cubefulEquities.noDoubleDiff !== undefined) {
+                const diff = analysis.cubefulEquities.noDoubleDiff >= 0 ? `+${analysis.cubefulEquities.noDoubleDiff.toFixed(3)}` : analysis.cubefulEquities.noDoubleDiff.toFixed(3);
+                valueText += ` (${diff})`;
+            }
+            value.textContent = valueText;
             row.appendChild(label);
             row.appendChild(value);
             equityTable.appendChild(row);
