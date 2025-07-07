@@ -781,8 +781,8 @@ function renderAnalysis(analysis) {
         }
         
         .equity-row {
-            display: flex;
-            justify-content: space-between;
+            font-family: monospace;
+            white-space: pre;
             margin-bottom: 2px;
         }
         
@@ -873,65 +873,49 @@ function renderCubeAnalysis(container, analysis) {
     if (analysis.cubefulEquities.noDouble !== void 0) {
       const row = document.createElement("div");
       row.className = "equity-row";
-      const label = document.createElement("span");
-      label.textContent = "No double:";
-      const value = document.createElement("span");
-      let valueText = analysis.cubefulEquities.noDouble >= 0 ? `+${analysis.cubefulEquities.noDouble.toFixed(3)}` : analysis.cubefulEquities.noDouble.toFixed(3);
+      let baseValue = analysis.cubefulEquities.noDouble >= 0 ? `+${analysis.cubefulEquities.noDouble.toFixed(3)}` : analysis.cubefulEquities.noDouble.toFixed(3);
+      let diffValue = "";
       if (analysis.cubefulEquities.noDoubleDiff !== void 0) {
         const diff = analysis.cubefulEquities.noDoubleDiff >= 0 ? `+${analysis.cubefulEquities.noDoubleDiff.toFixed(3)}` : analysis.cubefulEquities.noDoubleDiff.toFixed(3);
-        valueText += ` (${diff})`;
+        diffValue = ` (${diff})`;
       }
-      value.textContent = valueText;
-      row.appendChild(label);
-      row.appendChild(value);
+      row.textContent = "       No double:".padEnd(20) + baseValue + diffValue;
       equityTable.appendChild(row);
     }
     if (analysis.cubefulEquities.doubleTake !== void 0) {
       const row = document.createElement("div");
       row.className = "equity-row";
-      const label = document.createElement("span");
-      label.textContent = "Double/Take:";
-      const value = document.createElement("span");
-      let valueText = analysis.cubefulEquities.doubleTake >= 0 ? `+${analysis.cubefulEquities.doubleTake.toFixed(3)}` : analysis.cubefulEquities.doubleTake.toFixed(3);
+      let baseValue = analysis.cubefulEquities.doubleTake >= 0 ? `+${analysis.cubefulEquities.doubleTake.toFixed(3)}` : analysis.cubefulEquities.doubleTake.toFixed(3);
+      let diffValue = "";
       if (analysis.cubefulEquities.doubleTakeDiff !== void 0) {
         const diff = analysis.cubefulEquities.doubleTakeDiff >= 0 ? `+${analysis.cubefulEquities.doubleTakeDiff.toFixed(3)}` : analysis.cubefulEquities.doubleTakeDiff.toFixed(3);
-        valueText += ` (${diff})`;
+        diffValue = ` (${diff})`;
       }
-      value.textContent = valueText;
-      row.appendChild(label);
-      row.appendChild(value);
+      row.textContent = "       Double/Take:".padEnd(20) + baseValue + diffValue;
       equityTable.appendChild(row);
     }
     if (analysis.cubefulEquities.doubleBeaver !== void 0) {
       const row = document.createElement("div");
       row.className = "equity-row";
-      const label = document.createElement("span");
-      label.textContent = "Double/Beaver:";
-      const value = document.createElement("span");
-      let valueText = analysis.cubefulEquities.doubleBeaver >= 0 ? `+${analysis.cubefulEquities.doubleBeaver.toFixed(3)}` : analysis.cubefulEquities.doubleBeaver.toFixed(3);
+      let baseValue = analysis.cubefulEquities.doubleBeaver >= 0 ? `+${analysis.cubefulEquities.doubleBeaver.toFixed(3)}` : analysis.cubefulEquities.doubleBeaver.toFixed(3);
+      let diffValue = "";
       if (analysis.cubefulEquities.doubleBeaverDiff !== void 0) {
         const diff = analysis.cubefulEquities.doubleBeaverDiff >= 0 ? `+${analysis.cubefulEquities.doubleBeaverDiff.toFixed(3)}` : analysis.cubefulEquities.doubleBeaverDiff.toFixed(3);
-        valueText += ` (${diff})`;
+        diffValue = ` (${diff})`;
       }
-      value.textContent = valueText;
-      row.appendChild(label);
-      row.appendChild(value);
+      row.textContent = "       Double/Beaver:".padEnd(20) + baseValue + diffValue;
       equityTable.appendChild(row);
     }
     if (analysis.cubefulEquities.doublePass !== void 0) {
       const row = document.createElement("div");
       row.className = "equity-row";
-      const label = document.createElement("span");
-      label.textContent = "Double/Pass:";
-      const value = document.createElement("span");
-      let valueText = analysis.cubefulEquities.doublePass >= 0 ? `+${analysis.cubefulEquities.doublePass.toFixed(3)}` : analysis.cubefulEquities.doublePass.toFixed(3);
+      let baseValue = analysis.cubefulEquities.doublePass >= 0 ? `+${analysis.cubefulEquities.doublePass.toFixed(3)}` : analysis.cubefulEquities.doublePass.toFixed(3);
+      let diffValue = "";
       if (analysis.cubefulEquities.doublePassDiff !== void 0) {
         const diff = analysis.cubefulEquities.doublePassDiff >= 0 ? `+${analysis.cubefulEquities.doublePassDiff.toFixed(3)}` : analysis.cubefulEquities.doublePassDiff.toFixed(3);
-        valueText += ` (${diff})`;
+        diffValue = ` (${diff})`;
       }
-      value.textContent = valueText;
-      row.appendChild(label);
-      row.appendChild(value);
+      row.textContent = "       Double/Pass:".padEnd(20) + baseValue + diffValue;
       equityTable.appendChild(row);
     }
     cubefulDiv.appendChild(title);
