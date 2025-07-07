@@ -276,7 +276,7 @@ function renderCubeAnalysis(container: HTMLDivElement, analysis: CubeAnalysis): 
                 diffValue = ` (${diff})`;
             }
             // Use fixed-width formatting: label padded to 15 chars, then equity
-            row.textContent = '       No double:'.padEnd(20) + baseValue + diffValue;
+            row.textContent = 'No double:'.padEnd(20) + baseValue + diffValue;
             equityTable.appendChild(row);
         }
         
@@ -289,7 +289,7 @@ function renderCubeAnalysis(container: HTMLDivElement, analysis: CubeAnalysis): 
                 const diff = analysis.cubefulEquities.doubleTakeDiff >= 0 ? `+${analysis.cubefulEquities.doubleTakeDiff.toFixed(3)}` : analysis.cubefulEquities.doubleTakeDiff.toFixed(3);
                 diffValue = ` (${diff})`;
             }
-            row.textContent = '       Double/Take:'.padEnd(20) + baseValue + diffValue;
+            row.textContent = 'Double/Take:'.padEnd(20) + baseValue + diffValue;
             equityTable.appendChild(row);
         }
         
@@ -302,7 +302,7 @@ function renderCubeAnalysis(container: HTMLDivElement, analysis: CubeAnalysis): 
                 const diff = analysis.cubefulEquities.doubleBeaverDiff >= 0 ? `+${analysis.cubefulEquities.doubleBeaverDiff.toFixed(3)}` : analysis.cubefulEquities.doubleBeaverDiff.toFixed(3);
                 diffValue = ` (${diff})`;
             }
-            row.textContent = '       Double/Beaver:'.padEnd(20) + baseValue + diffValue;
+            row.textContent = 'Double/Beaver:'.padEnd(20) + baseValue + diffValue;
             equityTable.appendChild(row);
         }
         
@@ -315,7 +315,7 @@ function renderCubeAnalysis(container: HTMLDivElement, analysis: CubeAnalysis): 
                 const diff = analysis.cubefulEquities.doublePassDiff >= 0 ? `+${analysis.cubefulEquities.doublePassDiff.toFixed(3)}` : analysis.cubefulEquities.doublePassDiff.toFixed(3);
                 diffValue = ` (${diff})`;
             }
-            row.textContent = '       Double/Pass:'.padEnd(20) + baseValue + diffValue;
+            row.textContent = 'Double/Pass:'.padEnd(20) + baseValue + diffValue;
             equityTable.appendChild(row);
         }
         
