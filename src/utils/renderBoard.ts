@@ -19,7 +19,10 @@ export function renderBoard(el: HTMLElement, boardData: BackgammonPosition): voi
 		display: block;
 		border: 1px solid #2c3e50;
 		border-top: none;
-		border-radius: 0 0 4px 4px;
+		border-bottom: none;
+		border-left: 8px solid #34495e;
+		border-right: 8px solid #34495e;
+		border-radius: 0;
 		max-width: 500px;
 		box-sizing: border-box;
 	`;

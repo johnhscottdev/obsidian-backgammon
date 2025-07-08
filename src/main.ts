@@ -26,7 +26,7 @@ export default class BackgammonPlugin extends Plugin {
                 // Add header bar
                 const headerBar = el.createDiv({ cls: "backgammon-header" });
                 headerBar.style.cssText = `
-                    background: #2c3e50;
+                    background: #34495e;
                     color: white;
                     padding: 12px 16px;
                     font-family: "Segoe UI", system-ui, sans-serif;
@@ -34,6 +34,9 @@ export default class BackgammonPlugin extends Plugin {
                     font-size: 16px;
                     margin-bottom: 0;
                     border-radius: 4px 4px 0 0;
+                    border-left: 8px solid #34495e;
+                    border-right: 8px solid #34495e;
+                    border-top: 8px solid #34495e;
                     max-width: 500px;
                     box-sizing: border-box;
                 `;
@@ -59,11 +62,6 @@ export default class BackgammonPlugin extends Plugin {
                 // Render the board
                 renderBoard(el, boardData);
 
-                // Display XGID string (disabled for now)
-                // const xgidContainer = el.createDiv({ cls: "xgid-display" });
-                // xgidContainer.style.cssText = "margin-top: 10px; padding: 8px; background-color: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 12px; color: #333;";
-                // xgidContainer.setText(xgidLine);
-
                 // Parse and render analysis if present
                 const analysisText = extractAnalysisText(source);
                 if (analysisText) {
@@ -73,6 +71,25 @@ export default class BackgammonPlugin extends Plugin {
                         el.appendChild(analysisElement);
                     }
                 }
+
+                // Add footer bar
+                const footerBar = el.createDiv({ cls: "backgammon-footer" });
+                footerBar.style.cssText = `
+                    background: #34495e;
+                    height: 8px;
+                    margin-top: 0;
+                    border-radius: 0 0 4px 4px;
+                    border-left: 8px solid #34495e;
+                    border-right: 8px solid #34495e;
+                    border-bottom: 8px solid #34495e;
+                    max-width: 500px;
+                    box-sizing: border-box;
+                `;
+
+                // Display XGID string (disabled for now)
+                // const xgidContainer = el.createDiv({ cls: "xgid-display" });
+                // xgidContainer.style.cssText = "margin-top: 10px; padding: 8px; background-color: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 12px; color: #333;";
+                // xgidContainer.setText(xgidLine);
             } catch (error) {
                 const errorDiv = el.createDiv({ cls: "backgammon-error" });
                 errorDiv.style.cssText = "background-color: #ffe6e6; border: 1px solid #ffcccc; padding: 10px; border-radius: 4px; margin: 5px 0;";

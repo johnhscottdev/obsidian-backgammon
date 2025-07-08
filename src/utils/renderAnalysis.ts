@@ -29,13 +29,15 @@ export function renderAnalysis(analysis: AnalysisData): HTMLDivElement {
     const style = document.createElement('style');
     style.textContent = `
         .backgammon-analysis {
-            margin-top: 20px;
+            margin-top: 0;
             font-family: monospace;
             font-size: 12px;
             line-height: 1.4;
             background: #f8f8f8;
             border: 1px solid #ddd;
-            border-radius: 4px;
+            border-left: 8px solid #34495e;
+            border-right: 8px solid #34495e;
+            border-radius: 0;
             padding: 15px;
             max-width: 500px;
             width: 100%;
