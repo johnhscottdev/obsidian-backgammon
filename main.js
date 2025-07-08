@@ -325,8 +325,13 @@ function drawCheckerAtPosition(ctx, xPos, yPos, color) {
   ctx.fillStyle = color;
   ctx.arc(xPos, yPos, styleConfig.checkerRadius, 0, Math.PI * 2);
   ctx.fill();
-  ctx.strokeStyle = "#999999";
-  ctx.lineWidth = 0.5;
+  if (color === styleConfig.colors.checkerWhite) {
+    ctx.strokeStyle = "#666666";
+    ctx.lineWidth = 1.5;
+  } else {
+    ctx.strokeStyle = "#999999";
+    ctx.lineWidth = 0.5;
+  }
   ctx.stroke();
 }
 function renderPointNumbers(ctx, boardData) {

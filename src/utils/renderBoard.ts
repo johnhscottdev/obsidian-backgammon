@@ -383,9 +383,14 @@ function drawCheckerAtPosition(ctx: CanvasRenderingContext2D, xPos:number, yPos:
 	ctx.arc(xPos, yPos, styleConfig.checkerRadius, 0, Math.PI * 2);
 	ctx.fill();
 	
-	// Draw subtle border
-	ctx.strokeStyle = '#999999';
-	ctx.lineWidth = 0.5;
+	// Draw border - thicker for white checkers for better visibility
+	if (color === styleConfig.colors.checkerWhite) {
+		ctx.strokeStyle = '#666666';
+		ctx.lineWidth = 1.5;
+	} else {
+		ctx.strokeStyle = '#999999';
+		ctx.lineWidth = 0.5;
+	}
 	ctx.stroke();
 }
 
