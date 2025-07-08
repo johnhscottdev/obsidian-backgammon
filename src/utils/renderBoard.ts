@@ -13,6 +13,17 @@ import { styleConfig } from './styleConfig';
  */
 export function renderBoard(el: HTMLElement, boardData: BackgammonPosition): void {
 	const canvas: HTMLCanvasElement = document.createElement('canvas');
+	
+	// Style canvas to connect with header bar
+	canvas.style.cssText = `
+		display: block;
+		border: 1px solid #2c3e50;
+		border-top: none;
+		border-radius: 0 0 4px 4px;
+		max-width: 500px;
+		box-sizing: border-box;
+	`;
+	
 	el.appendChild(canvas);
 	const ctx: CanvasRenderingContext2D | null = canvas.getContext('2d');
 

@@ -5,7 +5,7 @@
  */
 
 import { Plugin } from 'obsidian';
-// import { BackgammonPosition } from './types'; // Unused import removed
+import { BackgammonPosition } from './types';
 import { renderBoard, parseXGID, extractAnalysisText, parseAnalysis, renderAnalysis } from './utils';
 
 
@@ -22,6 +22,39 @@ export default class BackgammonPlugin extends Plugin {
                 }
                 
                 const boardData = parseXGID(xgidLine);
+                
+                // Add header bar
+                const headerBar = el.createDiv({ cls: "backgammon-header" });
+                headerBar.style.cssText = `
+                    background: #2c3e50;
+                    color: white;
+                    padding: 12px 16px;
+                    font-family: "Segoe UI", system-ui, sans-serif;
+                    font-weight: 600;
+                    font-size: 16px;
+                    margin-bottom: 0;
+                    border-radius: 4px 4px 0 0;
+                    max-width: 500px;
+                    box-sizing: border-box;
+                `;
+                
+                // Determine the action text based on board state
+                const getActionText = (data: BackgammonPosition): string => {
+                    const playerName = data.turn === 'X' ? 'Black' : 'White';
+                    
+                    // Check if dice are rolled (move decision)
+                    if (data.die1 > 0 && data.die2 > 0) {
+                        const diceText = data.die1 === data.die2 ? 
+                            `${data.die1}${data.die1}` : // Doubles: "66"
+                            `${data.die1}${data.die2}`;  // Regular: "63"
+                        return `${playerName} to Play ${diceText}`;
+                    }
+                    
+                    // No dice rolled - cube decision
+                    return `${playerName} on Roll - Cube Decision`;
+                };
+                
+                headerBar.setText(getActionText(boardData));
                 
                 // Render the board
                 renderBoard(el, boardData);

@@ -96,6 +96,14 @@ var styleConfig = {
 // src/utils/renderBoard.ts
 function renderBoard(el, boardData) {
   const canvas = document.createElement("canvas");
+  canvas.style.cssText = `
+		display: block;
+		border: 1px solid #2c3e50;
+		border-top: none;
+		border-radius: 0 0 4px 4px;
+		max-width: 500px;
+		box-sizing: border-box;
+	`;
   el.appendChild(canvas);
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
@@ -1040,6 +1048,31 @@ var BackgammonPlugin = class extends import_obsidian.Plugin {
           throw new Error("No XGID found in code block");
         }
         const boardData = parseXGID(xgidLine);
+        const headerBar = el.createDiv({ cls: "backgammon-header" });
+        headerBar.style.cssText = `
+                    background: #2c3e50;
+                    color: white;
+                    padding: 12px 16px;
+                    font-family: "Segoe UI", system-ui, sans-serif;
+                    font-weight: 600;
+                    font-size: 16px;
+                    margin-bottom: 0;
+                    border-radius: 4px 4px 0 0;
+                    max-width: 500px;
+                    box-sizing: border-box;
+                `;
+        const getActionText = (data) => {
+          const playerName = data.turn === "X" ? "Black" : "White";
+          if (data.die1 > 0 && data.die2 > 0) {
+            const diceText = data.die1 === data.die2 ? `${data.die1}${data.die1}` : (
+              // Doubles: "66"
+              `${data.die1}${data.die2}`
+            );
+            return `${playerName} to Play ${diceText}`;
+          }
+          return `${playerName} on Roll - Cube Decision`;
+        };
+        headerBar.setText(getActionText(boardData));
         renderBoard(el, boardData);
         const analysisText = extractAnalysisText(source);
         if (analysisText) {
