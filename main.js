@@ -435,6 +435,8 @@ function drawCheckers(ctx, boardData) {
     let margin = styleConfig.checkerMargin;
     if (onBar)
       margin += styleConfig.checkerRadius * 2;
+    else
+      margin -= styleConfig.checkerRadius * 0.1;
     const boardTop = 20;
     const boardBottom = styleConfig.boardHeight - 20;
     const yStart = isTop ? boardTop + margin : boardBottom - margin;

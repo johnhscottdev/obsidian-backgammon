@@ -581,6 +581,8 @@ export function drawCheckers(ctx: CanvasRenderingContext2D, boardData: Backgammo
 		let margin = styleConfig.checkerMargin;
 		if(onBar)
 			margin += styleConfig.checkerRadius * 2;
+		else
+			margin -= styleConfig.checkerRadius * 0.1; // Move checkers slightly closer to edge
 		const boardTop = 20;
 		const boardBottom = styleConfig.boardHeight - 20;
 		const yStart = isTop ? boardTop + margin : boardBottom - margin;
