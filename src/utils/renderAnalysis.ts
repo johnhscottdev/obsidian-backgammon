@@ -2,16 +2,16 @@ import { AnalysisData, MoveAnalysis, CubeAnalysis, MoveData } from '../types/ana
 
 /**
  * Determines move color based on equity difference
- * Black: Good moves (equity loss < 0.2)
- * Green: Errors (equity loss 0.2-0.8)
- * Red: Blunders (equity loss > 0.8)
+ * Black: Good moves (equity loss < 0.02)
+ * Green: Errors (equity loss 0.02-0.08)
+ * Red: Blunders (equity loss > 0.08)
  */
 function getMoveColor(equityDiff: number): string {
     const absEquityDiff = Math.abs(equityDiff);
     
-    if (absEquityDiff < 0.2) {
+    if (absEquityDiff < 0.02) {
         return '#000000'; // Black for good moves
-    } else if (absEquityDiff < 0.8) {
+    } else if (absEquityDiff < 0.08) {
         return '#008000'; // Green for errors
     } else {
         return '#ff0000'; // Red for blunders

@@ -672,9 +672,9 @@ function parseCubeAnalysis(text) {
 // src/utils/renderAnalysis.ts
 function getMoveColor(equityDiff) {
   const absEquityDiff = Math.abs(equityDiff);
-  if (absEquityDiff < 0.2) {
+  if (absEquityDiff < 0.02) {
     return "#000000";
-  } else if (absEquityDiff < 0.8) {
+  } else if (absEquityDiff < 0.08) {
     return "#008000";
   } else {
     return "#ff0000";
