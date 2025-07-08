@@ -92,12 +92,12 @@ export const styleConfig: StyleConfig = {
 	},
 	
 	fonts: {
-		checkerLabel: 'bold 16px sans-serif',
-		scoreHeader: 'bold 8px sans-serif',
-		scoreValue: 'bold 16px sans-serif',
-		cubeValue: 'bold 16px sans-serif',
-		pointNumber: 'bold 16px sans-serif',
-		pipCount: 'bold 14px sans-serif',
+		checkerLabel: 'bold 16px "Segoe UI", system-ui, sans-serif',
+		scoreHeader: '600 9px "Segoe UI", system-ui, sans-serif',
+		scoreValue: 'bold 17px "Segoe UI", system-ui, sans-serif',
+		cubeValue: 'bold 18px "Segoe UI", system-ui, sans-serif',
+		pointNumber: '600 13px "Segoe UI", system-ui, sans-serif',
+		pipCount: '600 13px "Segoe UI", system-ui, sans-serif',
 	},
 	
 	sizing: {

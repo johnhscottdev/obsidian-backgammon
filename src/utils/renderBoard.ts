@@ -30,10 +30,19 @@ export function renderBoard(el: HTMLElement, boardData: BackgammonPosition): voi
 		scaleFactor *= styleConfig.sizing.unexplainedScaleError;
 		scaleFactor = Math.min(scaleFactor, 1);
 
-		canvas.width = styleConfig.boardWidth * scaleFactor;
-		canvas.height = styleConfig.boardHeight * scaleFactor;
+		// Set canvas size accounting for device pixel ratio for crisp rendering
+		const dpr = window.devicePixelRatio || 1;
+		canvas.width = styleConfig.boardWidth * scaleFactor * dpr;
+		canvas.height = styleConfig.boardHeight * scaleFactor * dpr;
+		
+		// Scale the canvas back down using CSS
+		canvas.style.width = `${styleConfig.boardWidth * scaleFactor}px`;
+		canvas.style.height = `${styleConfig.boardHeight * scaleFactor}px`;
 
-		ctx.setTransform(scaleFactor, 0, 0, scaleFactor, 0, 0);
+		// Enable crisp rendering
+		ctx.imageSmoothingEnabled = false;
+		
+		ctx.setTransform(scaleFactor * dpr, 0, 0, scaleFactor * dpr, 0, 0);
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
 		drawBoard(ctx); // draw triangles/background
 		renderPointNumbers(ctx, boardData); // draw point numbers
@@ -171,6 +180,23 @@ function drawCheckerLabel(ctx: CanvasRenderingContext2D, x: number, y: number, t
 	ctx.fillText(text, x, y);
 }
 /**
+ * Helper function to draw a rounded rectangle
+ */
+function drawRoundedRect(ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, radius: number): void {
+	ctx.beginPath();
+	ctx.moveTo(x + radius, y);
+	ctx.lineTo(x + width - radius, y);
+	ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+	ctx.lineTo(x + width, y + height - radius);
+	ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+	ctx.lineTo(x + radius, y + height);
+	ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+	ctx.lineTo(x, y + radius);
+	ctx.quadraticCurveTo(x, y, x + radius, y);
+	ctx.closePath();
+}
+
+/**
  * Draws a score display box showing match scores or match length.
  * 
  * @param ctx - 2D canvas rendering context
@@ -181,25 +207,54 @@ function drawCheckerLabel(ctx: CanvasRenderingContext2D, x: number, y: number, t
  */
 function drawScoreAtPosition(ctx: CanvasRenderingContext2D, xPos:number, yPos:number, score:number, header:string)
 {
-	const sizeX = styleConfig.columnWidth;
+	const sizeX = styleConfig.columnWidth - 4; // Small margin to keep within column
 	const sizeY = sizeX + styleConfig.checkerRadius;
-	ctx.fillStyle = styleConfig.colors.scoreBackground;
-	ctx.strokeStyle = styleConfig.colors.scoreBorder;
-	ctx.fillRect(xPos-sizeX/2, yPos-sizeY/2, sizeX, sizeY);
-
-	ctx.lineWidth = 1;
-	ctx.strokeRect(xPos-sizeX/2, yPos-sizeY/2, sizeX, sizeY);		
+	const cornerRadius = 8;
+	const x = xPos - sizeX/2;
+	const y = yPos - sizeY/2;
 	
+	// Save context for shadow
+	ctx.save();
+	
+	// Draw subtle drop shadow
+	ctx.shadowColor = 'rgba(0, 0, 0, 0.15)';
+	ctx.shadowBlur = 4;
+	ctx.shadowOffsetX = 2;
+	ctx.shadowOffsetY = 2;
+	
+	// Create gradient background
+	const gradient = ctx.createLinearGradient(x, y, x, y + sizeY);
+	gradient.addColorStop(0, '#ffffff');
+	gradient.addColorStop(1, '#f0f0f0');
+	
+	ctx.fillStyle = gradient;
+	drawRoundedRect(ctx, x, y, sizeX, sizeY, cornerRadius);
+	ctx.fill();
+	
+	// Reset shadow for border
+	ctx.shadowColor = 'transparent';
+	
+	// Draw subtle border
+	ctx.strokeStyle = '#d0d0d0';
+	ctx.lineWidth = 1;
+	drawRoundedRect(ctx, x, y, sizeX, sizeY, cornerRadius);
+	ctx.stroke();
+	
+	// Restore context
+	ctx.restore();
+	
+	// Draw header text with better styling
 	ctx.font = styleConfig.fonts.scoreHeader;
 	ctx.textAlign = 'center';
 	ctx.textBaseline = 'middle';
-	ctx.fillStyle = styleConfig.colors.text;
+	ctx.fillStyle = '#666666';
 	ctx.fillText(header, xPos, yPos-styleConfig.checkerRadius*.5);
 
+	// Draw score value with emphasis
 	ctx.font = styleConfig.fonts.scoreValue;
 	ctx.textAlign = 'center';
 	ctx.textBaseline = 'middle';
-	ctx.fillStyle = styleConfig.colors.text;
+	ctx.fillStyle = '#333333';
 	ctx.fillText(score.toString(), xPos, yPos + styleConfig.checkerRadius*.5);
 }
 
@@ -214,15 +269,45 @@ function drawScoreAtPosition(ctx: CanvasRenderingContext2D, xPos:number, yPos:nu
 function drawCubeAtPosition(ctx: CanvasRenderingContext2D, xPos:number, yPos:number, cubeValue:string)
 {
 	const size = styleConfig.columnWidth - styleConfig.sizing.cubeSize;
-	ctx.fillStyle = styleConfig.colors.cubeBackground;
-	ctx.strokeStyle = styleConfig.colors.cubeBorder;
-	ctx.fillRect(xPos-size/2, yPos-size/2, size, size);
-	ctx.strokeRect(xPos-size/2, yPos-size/2, size, size);		
+	const cornerRadius = 6;
+	const x = xPos - size/2;
+	const y = yPos - size/2;
 	
+	// Save context for shadow
+	ctx.save();
+	
+	// Draw subtle drop shadow
+	ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
+	ctx.shadowBlur = 3;
+	ctx.shadowOffsetX = 2;
+	ctx.shadowOffsetY = 2;
+	
+	// Create gradient background for 3D effect
+	const gradient = ctx.createLinearGradient(x, y, x + size, y + size);
+	gradient.addColorStop(0, '#ffffff');
+	gradient.addColorStop(1, '#f0f0f0');
+	
+	ctx.fillStyle = gradient;
+	drawRoundedRect(ctx, x, y, size, size, cornerRadius);
+	ctx.fill();
+	
+	// Reset shadow for border
+	ctx.shadowColor = 'transparent';
+	
+	// Draw border
+	ctx.strokeStyle = '#cccccc';
+	ctx.lineWidth = 1.5;
+	drawRoundedRect(ctx, x, y, size, size, cornerRadius);
+	ctx.stroke();
+	
+	// Restore context
+	ctx.restore();
+	
+	// Draw cube value with better styling
 	ctx.font = styleConfig.fonts.cubeValue;
 	ctx.textAlign = 'center';
 	ctx.textBaseline = 'middle';
-	ctx.fillStyle = styleConfig.colors.text;
+	ctx.fillStyle = '#333333';
 	ctx.fillText(cubeValue, xPos, yPos);
 }
 
@@ -355,7 +440,6 @@ function renderPointNumbers(ctx: CanvasRenderingContext2D, boardData: Backgammon
 	ctx.font = styleConfig.fonts.pointNumber;
 	ctx.textAlign = 'center';
 	ctx.textBaseline = 'middle';
-	ctx.fillStyle = styleConfig.colors.pointNumber;
 
 	// Draw point numbers 1-24, reversed perspective for White's turn
 	for (let pointNumber = 1; pointNumber <= 24; pointNumber++) {
@@ -374,7 +458,19 @@ function renderPointNumbers(ctx: CanvasRenderingContext2D, boardData: Backgammon
 			10 : // Above the board
 			styleConfig.boardHeight - 8; // Below the board
 		
-		ctx.fillText(displayNumber.toString(), x, y);
+		// Round coordinates to pixel boundaries for crisp text
+		const pixelX = Math.round(x);
+		const pixelY = Math.round(y);
+		
+		// Set crisp text rendering
+		ctx.save();
+		ctx.imageSmoothingEnabled = false;
+		
+		// Draw point number with refined color
+		ctx.fillStyle = '#555555';
+		ctx.fillText(displayNumber.toString(), pixelX, pixelY);
+		
+		ctx.restore();
 	}
 }
 
@@ -388,22 +484,62 @@ function renderPointNumbers(ctx: CanvasRenderingContext2D, boardData: Backgammon
  * @param boardData - Complete board state
  */
 function renderPipCounts(ctx: CanvasRenderingContext2D, boardData: BackgammonPosition): void {
-	
-	ctx.font = styleConfig.fonts.pipCount;
-	ctx.textAlign = 'center';
-	ctx.textBaseline = 'middle';
-	ctx.fillStyle = styleConfig.colors.pipCount;
-	
 	const boardTop = 20;
 	const boardBottom = styleConfig.boardHeight - 20;
 	const barCenterX = styleConfig.boardWidth / 2;
 	const margin = 15;
 	
+	// Helper function to draw pip count with background
+	const drawPipCount = (pipCount: number, x: number, y: number) => {
+		const text = pipCount.toString();
+		ctx.font = styleConfig.fonts.pipCount;
+		
+		// Measure text for background sizing
+		const metrics = ctx.measureText(text);
+		const textWidth = metrics.width;
+		const padding = 6;
+		const maxWidth = styleConfig.barWidth - 4; // Constrain to bar width with small margin
+		const bgWidth = Math.min(textWidth + padding * 2, maxWidth);
+		const bgHeight = 18;
+		const cornerRadius = 9;
+		
+		// Save context for shadow
+		ctx.save();
+		
+		// Draw subtle background with shadow
+		ctx.shadowColor = 'rgba(0, 0, 0, 0.1)';
+		ctx.shadowBlur = 2;
+		ctx.shadowOffsetX = 1;
+		ctx.shadowOffsetY = 1;
+		
+		ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+		drawRoundedRect(ctx, x - bgWidth/2, y - bgHeight/2, bgWidth, bgHeight, cornerRadius);
+		ctx.fill();
+		
+		// Reset shadow
+		ctx.shadowColor = 'transparent';
+		
+		// Draw subtle border
+		ctx.strokeStyle = 'rgba(0, 0, 0, 0.15)';
+		ctx.lineWidth = 1;
+		drawRoundedRect(ctx, x - bgWidth/2, y - bgHeight/2, bgWidth, bgHeight, cornerRadius);
+		ctx.stroke();
+		
+		// Restore context
+		ctx.restore();
+		
+		// Draw text
+		ctx.textAlign = 'center';
+		ctx.textBaseline = 'middle';
+		ctx.fillStyle = '#444444';
+		ctx.fillText(text, x, y);
+	};
+	
 	// X player pip count (bottom edge of board)
-	ctx.fillText(`${boardData.pipCountX}`, barCenterX, boardBottom - margin);
+	drawPipCount(boardData.pipCountX, barCenterX, boardBottom - margin);
 	
 	// O player pip count (top edge of board)
-	ctx.fillText(`${boardData.pipCountO}`, barCenterX, boardTop + margin);
+	drawPipCount(boardData.pipCountO, barCenterX, boardTop + margin);
 }
 
 export function drawCheckers(ctx: CanvasRenderingContext2D, boardData: BackgammonPosition): void {

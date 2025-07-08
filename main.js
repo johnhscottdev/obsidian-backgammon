@@ -71,12 +71,12 @@ var styleConfig = {
     pipCount: "black"
   },
   fonts: {
-    checkerLabel: "bold 16px sans-serif",
-    scoreHeader: "bold 8px sans-serif",
-    scoreValue: "bold 16px sans-serif",
-    cubeValue: "bold 16px sans-serif",
-    pointNumber: "bold 16px sans-serif",
-    pipCount: "bold 14px sans-serif"
+    checkerLabel: 'bold 16px "Segoe UI", system-ui, sans-serif',
+    scoreHeader: '600 9px "Segoe UI", system-ui, sans-serif',
+    scoreValue: 'bold 17px "Segoe UI", system-ui, sans-serif',
+    cubeValue: 'bold 18px "Segoe UI", system-ui, sans-serif',
+    pointNumber: '600 13px "Segoe UI", system-ui, sans-serif',
+    pipCount: '600 13px "Segoe UI", system-ui, sans-serif'
   },
   sizing: {
     borderWidth: 3,
@@ -108,9 +108,13 @@ function renderBoard(el, boardData) {
     scaleFactor = noteWidth / styleConfig.boardWidth;
     scaleFactor *= styleConfig.sizing.unexplainedScaleError;
     scaleFactor = Math.min(scaleFactor, 1);
-    canvas.width = styleConfig.boardWidth * scaleFactor;
-    canvas.height = styleConfig.boardHeight * scaleFactor;
-    ctx.setTransform(scaleFactor, 0, 0, scaleFactor, 0, 0);
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = styleConfig.boardWidth * scaleFactor * dpr;
+    canvas.height = styleConfig.boardHeight * scaleFactor * dpr;
+    canvas.style.width = `${styleConfig.boardWidth * scaleFactor}px`;
+    canvas.style.height = `${styleConfig.boardHeight * scaleFactor}px`;
+    ctx.imageSmoothingEnabled = false;
+    ctx.setTransform(scaleFactor * dpr, 0, 0, scaleFactor * dpr, 0, 0);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawBoard(ctx);
     renderPointNumbers(ctx, boardData);
@@ -207,35 +211,79 @@ function drawCheckerLabel(ctx, x, y, text, checkerColor) {
   ctx.fillStyle = checkerColor;
   ctx.fillText(text, x, y);
 }
+function drawRoundedRect(ctx, x, y, width, height, radius) {
+  ctx.beginPath();
+  ctx.moveTo(x + radius, y);
+  ctx.lineTo(x + width - radius, y);
+  ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+  ctx.lineTo(x + width, y + height - radius);
+  ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+  ctx.lineTo(x + radius, y + height);
+  ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+  ctx.lineTo(x, y + radius);
+  ctx.quadraticCurveTo(x, y, x + radius, y);
+  ctx.closePath();
+}
 function drawScoreAtPosition(ctx, xPos, yPos, score, header) {
-  const sizeX = styleConfig.columnWidth;
+  const sizeX = styleConfig.columnWidth - 4;
   const sizeY = sizeX + styleConfig.checkerRadius;
-  ctx.fillStyle = styleConfig.colors.scoreBackground;
-  ctx.strokeStyle = styleConfig.colors.scoreBorder;
-  ctx.fillRect(xPos - sizeX / 2, yPos - sizeY / 2, sizeX, sizeY);
+  const cornerRadius = 8;
+  const x = xPos - sizeX / 2;
+  const y = yPos - sizeY / 2;
+  ctx.save();
+  ctx.shadowColor = "rgba(0, 0, 0, 0.15)";
+  ctx.shadowBlur = 4;
+  ctx.shadowOffsetX = 2;
+  ctx.shadowOffsetY = 2;
+  const gradient = ctx.createLinearGradient(x, y, x, y + sizeY);
+  gradient.addColorStop(0, "#ffffff");
+  gradient.addColorStop(1, "#f0f0f0");
+  ctx.fillStyle = gradient;
+  drawRoundedRect(ctx, x, y, sizeX, sizeY, cornerRadius);
+  ctx.fill();
+  ctx.shadowColor = "transparent";
+  ctx.strokeStyle = "#d0d0d0";
   ctx.lineWidth = 1;
-  ctx.strokeRect(xPos - sizeX / 2, yPos - sizeY / 2, sizeX, sizeY);
+  drawRoundedRect(ctx, x, y, sizeX, sizeY, cornerRadius);
+  ctx.stroke();
+  ctx.restore();
   ctx.font = styleConfig.fonts.scoreHeader;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillStyle = styleConfig.colors.text;
+  ctx.fillStyle = "#666666";
   ctx.fillText(header, xPos, yPos - styleConfig.checkerRadius * 0.5);
   ctx.font = styleConfig.fonts.scoreValue;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillStyle = styleConfig.colors.text;
+  ctx.fillStyle = "#333333";
   ctx.fillText(score.toString(), xPos, yPos + styleConfig.checkerRadius * 0.5);
 }
 function drawCubeAtPosition(ctx, xPos, yPos, cubeValue) {
   const size = styleConfig.columnWidth - styleConfig.sizing.cubeSize;
-  ctx.fillStyle = styleConfig.colors.cubeBackground;
-  ctx.strokeStyle = styleConfig.colors.cubeBorder;
-  ctx.fillRect(xPos - size / 2, yPos - size / 2, size, size);
-  ctx.strokeRect(xPos - size / 2, yPos - size / 2, size, size);
+  const cornerRadius = 6;
+  const x = xPos - size / 2;
+  const y = yPos - size / 2;
+  ctx.save();
+  ctx.shadowColor = "rgba(0, 0, 0, 0.2)";
+  ctx.shadowBlur = 3;
+  ctx.shadowOffsetX = 2;
+  ctx.shadowOffsetY = 2;
+  const gradient = ctx.createLinearGradient(x, y, x + size, y + size);
+  gradient.addColorStop(0, "#ffffff");
+  gradient.addColorStop(1, "#f0f0f0");
+  ctx.fillStyle = gradient;
+  drawRoundedRect(ctx, x, y, size, size, cornerRadius);
+  ctx.fill();
+  ctx.shadowColor = "transparent";
+  ctx.strokeStyle = "#cccccc";
+  ctx.lineWidth = 1.5;
+  drawRoundedRect(ctx, x, y, size, size, cornerRadius);
+  ctx.stroke();
+  ctx.restore();
   ctx.font = styleConfig.fonts.cubeValue;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillStyle = styleConfig.colors.text;
+  ctx.fillStyle = "#333333";
   ctx.fillText(cubeValue, xPos, yPos);
 }
 function drawDieAtPosition(ctx, x, y, size, value, color) {
@@ -304,7 +352,6 @@ function renderPointNumbers(ctx, boardData) {
   ctx.font = styleConfig.fonts.pointNumber;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillStyle = styleConfig.colors.pointNumber;
   for (let pointNumber = 1; pointNumber <= 24; pointNumber++) {
     const x = getPointX(pointNumber);
     let displayNumber = pointNumber;
@@ -316,20 +363,51 @@ function renderPointNumbers(ctx, boardData) {
       // Above the board
       styleConfig.boardHeight - 8
     );
-    ctx.fillText(displayNumber.toString(), x, y);
+    const pixelX = Math.round(x);
+    const pixelY = Math.round(y);
+    ctx.save();
+    ctx.imageSmoothingEnabled = false;
+    ctx.fillStyle = "#555555";
+    ctx.fillText(displayNumber.toString(), pixelX, pixelY);
+    ctx.restore();
   }
 }
 function renderPipCounts(ctx, boardData) {
-  ctx.font = styleConfig.fonts.pipCount;
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillStyle = styleConfig.colors.pipCount;
   const boardTop = 20;
   const boardBottom = styleConfig.boardHeight - 20;
   const barCenterX = styleConfig.boardWidth / 2;
   const margin = 15;
-  ctx.fillText(`${boardData.pipCountX}`, barCenterX, boardBottom - margin);
-  ctx.fillText(`${boardData.pipCountO}`, barCenterX, boardTop + margin);
+  const drawPipCount = (pipCount, x, y) => {
+    const text = pipCount.toString();
+    ctx.font = styleConfig.fonts.pipCount;
+    const metrics = ctx.measureText(text);
+    const textWidth = metrics.width;
+    const padding = 6;
+    const maxWidth = styleConfig.barWidth - 4;
+    const bgWidth = Math.min(textWidth + padding * 2, maxWidth);
+    const bgHeight = 18;
+    const cornerRadius = 9;
+    ctx.save();
+    ctx.shadowColor = "rgba(0, 0, 0, 0.1)";
+    ctx.shadowBlur = 2;
+    ctx.shadowOffsetX = 1;
+    ctx.shadowOffsetY = 1;
+    ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+    drawRoundedRect(ctx, x - bgWidth / 2, y - bgHeight / 2, bgWidth, bgHeight, cornerRadius);
+    ctx.fill();
+    ctx.shadowColor = "transparent";
+    ctx.strokeStyle = "rgba(0, 0, 0, 0.15)";
+    ctx.lineWidth = 1;
+    drawRoundedRect(ctx, x - bgWidth / 2, y - bgHeight / 2, bgWidth, bgHeight, cornerRadius);
+    ctx.stroke();
+    ctx.restore();
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = "#444444";
+    ctx.fillText(text, x, y);
+  };
+  drawPipCount(boardData.pipCountX, barCenterX, boardBottom - margin);
+  drawPipCount(boardData.pipCountO, barCenterX, boardTop + margin);
 }
 function drawCheckers(ctx, boardData) {
   const getPointX = (absolutePointNumber) => {
