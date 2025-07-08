@@ -138,7 +138,6 @@ function drawBoard(ctx: CanvasRenderingContext2D): void {
 		let x = i * styleConfig.pointWidth;
 		x += styleConfig.columnWidth; // offset for bear off tray
 		if (i >= 6) x += styleConfig.barWidth;
-		let quadrantIndex = i < 6 ? 0 : 1;
 		let color = colors[(i+1) % 2];
 		drawTriangle(x, true, color);
 	}
@@ -147,7 +146,6 @@ function drawBoard(ctx: CanvasRenderingContext2D): void {
 		let x = i * styleConfig.pointWidth;
 		x += styleConfig.columnWidth; // offset for bear off tray
 		if (i >= 6) x += styleConfig.barWidth;
-		let quadrantIndex = i < 6 ? 3 : 2;
 		let color = colors[i % 2];
 		drawTriangle(x, false, color);
 	}
@@ -440,9 +438,6 @@ export function drawCheckers(ctx: CanvasRenderingContext2D, boardData: Backgammo
 			continue;
 		
 		let absolutePointNumber = i;
-		let playerPointNumber = 24 - i;
-		if(point.player==='O')
-			playerPointNumber = i;
 		
 		const isTop = absolutePointNumber <= 12;
 		const onBar = absolutePointNumber === 0 || absolutePointNumber === 25;

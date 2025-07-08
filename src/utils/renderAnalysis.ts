@@ -1,4 +1,4 @@
-import { AnalysisData, MoveAnalysis, CubeAnalysis, MoveData } from '../types/analysis';
+import { AnalysisData, MoveAnalysis, CubeAnalysis } from '../types/analysis';
 
 /**
  * Determines move color based on equity difference

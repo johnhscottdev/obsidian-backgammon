@@ -5,7 +5,7 @@
  */
 
 import { Plugin } from 'obsidian';
-import { BackgammonPosition } from './types';
+// import { BackgammonPosition } from './types'; // Unused import removed
 import { renderBoard, parseXGID, extractAnalysisText, parseAnalysis, renderAnalysis } from './utils';
 
 

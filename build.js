@@ -27,7 +27,7 @@ function copyToObsidian() {
 // Run TypeScript type checking first
 console.log('🔍 Type checking...');
 try {
-  execSync('npx tsc --noEmit', { stdio: 'inherit' });
+  execSync('npx tsc --noEmit --strict --noImplicitAny --noImplicitReturns --noUnusedLocals --noUnusedParameters --pretty --noErrorTruncation', { stdio: 'inherit' });
   console.log('✅ Type checking passed');
 } catch (error) {
   console.error('❌ Type checking failed');
