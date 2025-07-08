@@ -698,6 +698,16 @@ function renderAnalysis(analysis) {
         
         .analysis-move {
             margin-bottom: 8px;
+            padding: 4px 8px;
+            border-radius: 3px;
+        }
+        
+        .analysis-move.even {
+            background-color: #ffffff;
+        }
+        
+        .analysis-move.odd {
+            background-color: #f8f8f8;
         }
         
         .move-line {
@@ -817,9 +827,9 @@ function renderAnalysis(analysis) {
   return container;
 }
 function renderMoveAnalysis(container, analysis) {
-  analysis.moves.forEach((move) => {
+  analysis.moves.forEach((move, index) => {
     const moveDiv = document.createElement("div");
-    moveDiv.className = "analysis-move";
+    moveDiv.className = `analysis-move ${index % 2 === 0 ? "even" : "odd"}`;
     const moveLine = document.createElement("div");
     moveLine.className = "move-line";
     const moveText = document.createElement("span");
