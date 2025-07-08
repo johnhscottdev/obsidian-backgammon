@@ -762,6 +762,9 @@ function renderAnalysis(analysis) {
             border: 1px solid #ddd;
             border-radius: 4px;
             padding: 15px;
+            max-width: 500px;
+            width: 100%;
+            box-sizing: border-box;
         }
         
         .analysis-move {
