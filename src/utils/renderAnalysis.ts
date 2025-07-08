@@ -60,7 +60,7 @@ export function renderAnalysis(analysis: AnalysisData): HTMLDivElement {
         }
         
         .move-stats {
-            font-size: 10px;
+            font-size: 12px;
             color: #666;
             margin-left: 20px;
         }
