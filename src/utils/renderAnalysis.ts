@@ -183,10 +183,18 @@ function renderMoveAnalysis(container: HTMLDivElement, analysis: MoveAnalysis): 
         
         // Player stats
         if (move.playerStats) {
+            const statsContainer = document.createElement('div');
+            statsContainer.className = 'move-stats';
+            
             const playerStats = document.createElement('div');
-            playerStats.className = 'move-stats';
-            playerStats.innerHTML = `P: ${move.playerStats.win.toFixed(1)} ${move.playerStats.gammon.toFixed(1)} ${move.playerStats.backgammon.toFixed(1)} &nbsp;&nbsp; O: ${move.opponentStats?.win.toFixed(1) || '0.0'} ${move.opponentStats?.gammon.toFixed(1) || '0.0'} ${move.opponentStats?.backgammon.toFixed(1) || '0.0'}`;
-            moveDiv.appendChild(playerStats);
+            playerStats.textContent = `P: ${move.playerStats.win.toFixed(1)} ${move.playerStats.gammon.toFixed(1)} ${move.playerStats.backgammon.toFixed(1)}`;
+            
+            const opponentStats = document.createElement('div');
+            opponentStats.textContent = `O: ${move.opponentStats?.win.toFixed(1) || '0.0'} ${move.opponentStats?.gammon.toFixed(1) || '0.0'} ${move.opponentStats?.backgammon.toFixed(1) || '0.0'}`;
+            
+            statsContainer.appendChild(playerStats);
+            statsContainer.appendChild(opponentStats);
+            moveDiv.appendChild(statsContainer);
         }
         
         container.appendChild(moveDiv);
