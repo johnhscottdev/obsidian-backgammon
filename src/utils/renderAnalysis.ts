@@ -163,7 +163,7 @@ function renderMoveAnalysis(container: HTMLDivElement, analysis: MoveAnalysis): 
         moveText.className = 'move-text';
         moveText.style.color = getMoveColor(move.equityDiff);
         
-        const moveNotation = `${move.rank}. ${move.analysisLevel} ${move.move}`;
+        const moveNotation = `${move.rank}. ${move.move}`;
         moveText.textContent = moveNotation;
         
         const equityText = document.createElement('span');

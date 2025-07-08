@@ -809,7 +809,7 @@ function renderMoveAnalysis(container, analysis) {
     const moveText = document.createElement("span");
     moveText.className = "move-text";
     moveText.style.color = getMoveColor(move.equityDiff);
-    const moveNotation = `${move.rank}. ${move.analysisLevel} ${move.move}`;
+    const moveNotation = `${move.rank}. ${move.move}`;
     moveText.textContent = moveNotation;
     const equityText = document.createElement("span");
     equityText.className = "move-equity";
