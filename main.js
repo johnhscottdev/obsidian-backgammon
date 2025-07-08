@@ -43,7 +43,7 @@ var styleConfig = {
     return this.columnWidth;
   },
   get triangleHeight() {
-    return this.boardHeight / 2 * 0.9;
+    return (this.boardHeight - 40) / 2 - this.columnWidth / 2;
   },
   get checkerRadius() {
     return this.columnWidth / 2;

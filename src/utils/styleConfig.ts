@@ -69,7 +69,7 @@ export const styleConfig: StyleConfig = {
 	get columnWidth() { return this.boardWidth / this.boardColumns; },
 	get barWidth() { return this.columnWidth; },
 	get pointWidth() { return this.columnWidth; },
-	get triangleHeight() { return (this.boardHeight / 2) * 0.9; },
+	get triangleHeight() { return (this.boardHeight - 40) / 2 - this.columnWidth / 2; },
 	get checkerRadius() { return this.columnWidth / 2; },
 	get checkerMargin() { return this.boardWidth * 0.04; },
 	get barX() { return this.boardWidth / 2; },
