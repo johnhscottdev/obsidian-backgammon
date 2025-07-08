@@ -235,10 +235,7 @@ function drawScoreAtPosition(ctx, xPos, yPos, score, header) {
   ctx.shadowBlur = 4;
   ctx.shadowOffsetX = 2;
   ctx.shadowOffsetY = 2;
-  const gradient = ctx.createLinearGradient(x, y, x, y + sizeY);
-  gradient.addColorStop(0, "#ffffff");
-  gradient.addColorStop(1, "#f0f0f0");
-  ctx.fillStyle = gradient;
+  ctx.fillStyle = "#ffffff";
   drawRoundedRect(ctx, x, y, sizeX, sizeY, cornerRadius);
   ctx.fill();
   ctx.shadowColor = "transparent";
@@ -268,10 +265,7 @@ function drawCubeAtPosition(ctx, xPos, yPos, cubeValue) {
   ctx.shadowBlur = 3;
   ctx.shadowOffsetX = 2;
   ctx.shadowOffsetY = 2;
-  const gradient = ctx.createLinearGradient(x, y, x + size, y + size);
-  gradient.addColorStop(0, "#ffffff");
-  gradient.addColorStop(1, "#f0f0f0");
-  ctx.fillStyle = gradient;
+  ctx.fillStyle = "#ffffff";
   drawRoundedRect(ctx, x, y, size, size, cornerRadius);
   ctx.fill();
   ctx.shadowColor = "transparent";
@@ -331,7 +325,8 @@ function drawCheckerAtPosition(ctx, xPos, yPos, color) {
   ctx.fillStyle = color;
   ctx.arc(xPos, yPos, styleConfig.checkerRadius, 0, Math.PI * 2);
   ctx.fill();
-  ctx.strokeStyle = styleConfig.colors.boardBorder;
+  ctx.strokeStyle = "#999999";
+  ctx.lineWidth = 0.5;
   ctx.stroke();
 }
 function renderPointNumbers(ctx, boardData) {

@@ -222,12 +222,8 @@ function drawScoreAtPosition(ctx: CanvasRenderingContext2D, xPos:number, yPos:nu
 	ctx.shadowOffsetX = 2;
 	ctx.shadowOffsetY = 2;
 	
-	// Create gradient background
-	const gradient = ctx.createLinearGradient(x, y, x, y + sizeY);
-	gradient.addColorStop(0, '#ffffff');
-	gradient.addColorStop(1, '#f0f0f0');
-	
-	ctx.fillStyle = gradient;
+	// Solid background
+	ctx.fillStyle = '#ffffff';
 	drawRoundedRect(ctx, x, y, sizeX, sizeY, cornerRadius);
 	ctx.fill();
 	
@@ -282,12 +278,8 @@ function drawCubeAtPosition(ctx: CanvasRenderingContext2D, xPos:number, yPos:num
 	ctx.shadowOffsetX = 2;
 	ctx.shadowOffsetY = 2;
 	
-	// Create gradient background for 3D effect
-	const gradient = ctx.createLinearGradient(x, y, x + size, y + size);
-	gradient.addColorStop(0, '#ffffff');
-	gradient.addColorStop(1, '#f0f0f0');
-	
-	ctx.fillStyle = gradient;
+	// Solid background
+	ctx.fillStyle = '#ffffff';
 	drawRoundedRect(ctx, x, y, size, size, cornerRadius);
 	ctx.fill();
 	
@@ -385,13 +377,16 @@ function drawDieAtPosition(ctx: CanvasRenderingContext2D, x: number, y: number, 
  */
 function drawCheckerAtPosition(ctx: CanvasRenderingContext2D, xPos:number, yPos:number, color:string)
 {
+	// Draw clean, flat checker
 	ctx.beginPath();
 	ctx.fillStyle = color;
 	ctx.arc(xPos, yPos, styleConfig.checkerRadius, 0, Math.PI * 2);
 	ctx.fill();
 	
-	ctx.strokeStyle = styleConfig.colors.boardBorder;
-	ctx.stroke();		
+	// Draw subtle border
+	ctx.strokeStyle = '#999999';
+	ctx.lineWidth = 0.5;
+	ctx.stroke();
 }
 
 /**
