@@ -202,8 +202,11 @@ function renderMoveAnalysis(container: HTMLDivElement, analysis: MoveAnalysis): 
             const statsContainer = document.createElement('div');
             statsContainer.className = 'move-stats';
             
+            const moveColor = getMoveColor(move.equityDiff);
+            
             const playerStats = document.createElement('div');
             playerStats.className = 'stats-line';
+            playerStats.style.color = moveColor;
             playerStats.innerHTML = `
                 <span class="stats-label">P:</span>
                 <span class="stats-number">${move.playerStats.win.toFixed(1)}</span>
@@ -213,6 +216,7 @@ function renderMoveAnalysis(container: HTMLDivElement, analysis: MoveAnalysis): 
             
             const opponentStats = document.createElement('div');
             opponentStats.className = 'stats-line';
+            opponentStats.style.color = moveColor;
             opponentStats.innerHTML = `
                 <span class="stats-label">O:</span>
                 <span class="stats-number">${move.opponentStats?.win.toFixed(1) || '0.0'}</span>
