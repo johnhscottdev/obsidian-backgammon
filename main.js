@@ -722,6 +722,22 @@ function renderAnalysis(analysis) {
             margin-left: 20px;
         }
         
+        .stats-line {
+            display: flex;
+            gap: 0;
+        }
+        
+        .stats-label {
+            width: 20px;
+            flex-shrink: 0;
+        }
+        
+        .stats-number {
+            width: 35px;
+            text-align: right;
+            flex-shrink: 0;
+        }
+        
         .cube-analysis {
             margin-bottom: 12px;
         }
@@ -827,9 +843,21 @@ function renderMoveAnalysis(container, analysis) {
       const statsContainer = document.createElement("div");
       statsContainer.className = "move-stats";
       const playerStats = document.createElement("div");
-      playerStats.textContent = `P: ${move.playerStats.win.toFixed(1)} ${move.playerStats.gammon.toFixed(1)} ${move.playerStats.backgammon.toFixed(1)}`;
+      playerStats.className = "stats-line";
+      playerStats.innerHTML = `
+                <span class="stats-label">P:</span>
+                <span class="stats-number">${move.playerStats.win.toFixed(1)}</span>
+                <span class="stats-number">${move.playerStats.gammon.toFixed(1)}</span>
+                <span class="stats-number">${move.playerStats.backgammon.toFixed(1)}</span>
+            `;
       const opponentStats = document.createElement("div");
-      opponentStats.textContent = `O: ${move.opponentStats?.win.toFixed(1) || "0.0"} ${move.opponentStats?.gammon.toFixed(1) || "0.0"} ${move.opponentStats?.backgammon.toFixed(1) || "0.0"}`;
+      opponentStats.className = "stats-line";
+      opponentStats.innerHTML = `
+                <span class="stats-label">O:</span>
+                <span class="stats-number">${move.opponentStats?.win.toFixed(1) || "0.0"}</span>
+                <span class="stats-number">${move.opponentStats?.gammon.toFixed(1) || "0.0"}</span>
+                <span class="stats-number">${move.opponentStats?.backgammon.toFixed(1) || "0.0"}</span>
+            `;
       statsContainer.appendChild(playerStats);
       statsContainer.appendChild(opponentStats);
       moveDiv.appendChild(statsContainer);
