@@ -1057,9 +1057,6 @@ var BackgammonPlugin = class extends import_obsidian.Plugin {
         }
         const boardData = parseXGID(xgidLine);
         renderBoard(el, boardData);
-        const xgidContainer = el.createDiv({ cls: "xgid-display" });
-        xgidContainer.style.cssText = "margin-top: 10px; padding: 8px; background-color: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 12px; color: #333;";
-        xgidContainer.setText(xgidLine);
         const analysisText = extractAnalysisText(source);
         if (analysisText) {
           const analysis = parseAnalysis(analysisText);

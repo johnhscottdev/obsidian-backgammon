@@ -26,10 +26,10 @@ export default class BackgammonPlugin extends Plugin {
                 // Render the board
                 renderBoard(el, boardData);
 
-                // Display XGID string
-                const xgidContainer = el.createDiv({ cls: "xgid-display" });
-                xgidContainer.style.cssText = "margin-top: 10px; padding: 8px; background-color: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 12px; color: #333;";
-                xgidContainer.setText(xgidLine);
+                // Display XGID string (disabled for now)
+                // const xgidContainer = el.createDiv({ cls: "xgid-display" });
+                // xgidContainer.style.cssText = "margin-top: 10px; padding: 8px; background-color: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 12px; color: #333;";
+                // xgidContainer.setText(xgidLine);
 
                 // Parse and render analysis if present
                 const analysisText = extractAnalysisText(source);
