@@ -78,7 +78,8 @@ export function renderBoard(el: HTMLElement, boardData: BackgammonPosition): voi
 		drawCubeAtPosition(ctx, styleConfig.columnWidth/2, cubeY, cubeValue);
 
 		const dieColor = boardData.turn === 'X' ? styleConfig.colors.checkerBlack : styleConfig.colors.checkerWhite
-		//if(boardData.die1 > 0 && boardData.die2 > 0)
+		// Only render dice if they have values (move decision, not cube decision)
+		if(boardData.die1 > 0 && boardData.die2 > 0)
 		{	
 			let dieOffset = styleConfig.columnWidth * styleConfig.spacing.dieOffset;
 			let dieSpacing = styleConfig.spacing.dieSpacing;

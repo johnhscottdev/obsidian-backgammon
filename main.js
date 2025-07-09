@@ -144,7 +144,7 @@ function renderBoard(el, boardData) {
       cubeValue = "Cr";
     drawCubeAtPosition(ctx, styleConfig.columnWidth / 2, cubeY, cubeValue);
     const dieColor = boardData.turn === "X" ? styleConfig.colors.checkerBlack : styleConfig.colors.checkerWhite;
-    {
+    if (boardData.die1 > 0 && boardData.die2 > 0) {
       let dieOffset = styleConfig.columnWidth * styleConfig.spacing.dieOffset;
       let dieSpacing = styleConfig.spacing.dieSpacing;
       if (boardData.turn === "O") {
