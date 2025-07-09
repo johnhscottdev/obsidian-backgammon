@@ -110,23 +110,20 @@ function renderBoard(el, boardData) {
   el.appendChild(canvas);
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
-  let scaleFactor = 1;
-  const getCanvasContainerWidth = () => {
-    return canvas.parentElement?.clientWidth || window.innerWidth;
-  };
-  const resizeCanvas = () => {
-    let noteWidth = getCanvasContainerWidth();
-    scaleFactor = noteWidth / styleConfig.boardWidth;
-    scaleFactor *= styleConfig.sizing.unexplainedScaleError;
-    scaleFactor = Math.min(scaleFactor, 1);
-    const dpr = window.devicePixelRatio || 1;
-    canvas.width = styleConfig.boardWidth * scaleFactor * dpr;
-    canvas.height = styleConfig.boardHeight * scaleFactor * dpr;
-    canvas.style.width = `${styleConfig.boardWidth * scaleFactor}px`;
-    canvas.style.height = `${styleConfig.boardHeight * scaleFactor}px`;
-    ctx.imageSmoothingEnabled = false;
-    ctx.setTransform(scaleFactor * dpr, 0, 0, scaleFactor * dpr, 0, 0);
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const drawCanvas = () => {
+    const internalMargin = 8;
+    const canvasWidth = styleConfig.boardWidth;
+    const canvasHeight = styleConfig.boardHeight;
+    canvas.width = canvasWidth;
+    canvas.height = canvasHeight;
+    canvas.style.width = `${canvasWidth}px`;
+    canvas.style.height = `${canvasHeight}px`;
+    canvas.style.maxWidth = "100%";
+    canvas.style.height = "auto";
+    const availableWidth = canvasWidth - internalMargin * 2;
+    const scaleX = availableWidth / styleConfig.boardWidth;
+    ctx.setTransform(scaleX, 0, 0, 1, internalMargin, 0);
+    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
     drawBoard(ctx);
     renderPointNumbers(ctx, boardData);
     renderPipCounts(ctx, boardData);
@@ -162,10 +159,7 @@ function renderBoard(el, boardData) {
       drawScoreAtPosition(ctx, scoreX, boardTop + boardHeight / 2, boardData.matchLength, "Length");
     }
   };
-  const observer = new ResizeObserver(() => {
-    resizeCanvas();
-  });
-  observer.observe(canvas.parentElement);
+  drawCanvas();
 }
 function drawBoard(ctx) {
   ctx.fillStyle = styleConfig.colors.background;

@@ -31,33 +31,29 @@ export function renderBoard(el: HTMLElement, boardData: BackgammonPosition): voi
 	const ctx: CanvasRenderingContext2D | null = canvas.getContext('2d');
 
 	if (!ctx) return;
-	let scaleFactor = 1;
 
-	const getCanvasContainerWidth = (): number => {
-		return canvas.parentElement?.clientWidth || window.innerWidth;
-	};
-
-	const resizeCanvas = () => {
-		let noteWidth = getCanvasContainerWidth();
-
-		scaleFactor = noteWidth / styleConfig.boardWidth;
-		scaleFactor *= styleConfig.sizing.unexplainedScaleError;
-		scaleFactor = Math.min(scaleFactor, 1);
-
-		// Set canvas size accounting for device pixel ratio for crisp rendering
-		const dpr = window.devicePixelRatio || 1;
-		canvas.width = styleConfig.boardWidth * scaleFactor * dpr;
-		canvas.height = styleConfig.boardHeight * scaleFactor * dpr;
+	const drawCanvas = () => {
+		// Keep canvas same width as other elements, but add internal margins via transform
+		const internalMargin = 8;
+		const canvasWidth = styleConfig.boardWidth; // Same as other elements
+		const canvasHeight = styleConfig.boardHeight;
 		
-		// Scale the canvas back down using CSS
-		canvas.style.width = `${styleConfig.boardWidth * scaleFactor}px`;
-		canvas.style.height = `${styleConfig.boardHeight * scaleFactor}px`;
+		// Set canvas to match other elements
+		canvas.width = canvasWidth;
+		canvas.height = canvasHeight;
+		canvas.style.width = `${canvasWidth}px`;
+		canvas.style.height = `${canvasHeight}px`;
+		canvas.style.maxWidth = '100%';
+		canvas.style.height = 'auto';
 
-		// Enable crisp rendering
-		ctx.imageSmoothingEnabled = false;
+		// Scale down board content to fit within canvas with margins
+		const availableWidth = canvasWidth - (internalMargin * 2);
+		const scaleX = availableWidth / styleConfig.boardWidth;
 		
-		ctx.setTransform(scaleFactor * dpr, 0, 0, scaleFactor * dpr, 0, 0);
-		ctx.clearRect(0, 0, canvas.width, canvas.height);
+		// Apply scale and margin offset
+		ctx.setTransform(scaleX, 0, 0, 1, internalMargin, 0);
+		ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+		
 		drawBoard(ctx); // draw triangles/background
 		renderPointNumbers(ctx, boardData); // draw point numbers
 		renderPipCounts(ctx, boardData); // draw pip counts
@@ -103,11 +99,7 @@ export function renderBoard(el: HTMLElement, boardData: BackgammonPosition): voi
 		}
 	};
 
-	const observer = new ResizeObserver(() => {
-		resizeCanvas(); // your resize logic
-	});
-	observer.observe(canvas.parentElement!);
-	//resizeCanvas();
+	drawCanvas();
 }
 
 /**
