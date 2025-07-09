@@ -771,7 +771,6 @@ function renderAnalysis(analysis) {
             font-size: 12px;
             line-height: 1.4;
             background: #f8f8f8;
-            border: 1px solid #ddd;
             border-left: 8px solid #34495e;
             border-right: 8px solid #34495e;
             border-radius: 0;
