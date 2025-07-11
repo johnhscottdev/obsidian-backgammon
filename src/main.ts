@@ -4,13 +4,14 @@
  * parses the position string, and renders a visualization inline.
  */
 
-import { Plugin } from 'obsidian';
+import { Plugin, Platform } from 'obsidian';
 import { BackgammonPosition } from './types';
 import { renderBoard, parseXGID, extractAnalysisText, parseAnalysis, renderAnalysis } from './utils';
 
 
 export default class BackgammonPlugin extends Plugin {
     async onload(): Promise<void> {
+        // Different approach - create visual effect using margins and container width
         this.registerMarkdownCodeBlockProcessor('xgid', (source, el) => {
             try {
                 // Extract XGID from first line that starts with XGID=
@@ -23,8 +24,31 @@ export default class BackgammonPlugin extends Plugin {
                 
                 const boardData = parseXGID(xgidLine);
                 
+                // Create a wrapper with conditional 31px left shift
+                const wrapper = el.createDiv({ cls: "backgammon-wrapper" });
+                
+                // Check if we're on mobile and in Reading Mode
+                const isMobile = Platform.isMobile;
+                
+                // More reliable Reading Mode detection
+                const isReadingMode = el.closest('.markdown-preview-view') !== null;
+                
+                // Apply 31px shift only on mobile in Reading Mode
+                if (isMobile && isReadingMode) {
+                    wrapper.style.cssText = `
+                        position: relative;
+                        left: -31px;
+                        overflow: visible;
+                    `;
+                } else {
+                    wrapper.style.cssText = `
+                        position: relative;
+                        overflow: visible;
+                    `;
+                }
+                
                 // Add header bar
-                const headerBar = el.createDiv({ cls: "backgammon-header" });
+                const headerBar = wrapper.createDiv({ cls: "backgammon-header" });
                 headerBar.style.cssText = `
                     background: #34495e;
                     color: white;
@@ -60,7 +84,7 @@ export default class BackgammonPlugin extends Plugin {
                 headerBar.setText(getActionText(boardData));
                 
                 // Render the board
-                renderBoard(el, boardData);
+                renderBoard(wrapper, boardData);
 
                 // Parse and render analysis if present
                 const analysisText = extractAnalysisText(source);
@@ -68,12 +92,12 @@ export default class BackgammonPlugin extends Plugin {
                     const analysis = parseAnalysis(analysisText);
                     if (analysis) {
                         const analysisElement = renderAnalysis(analysis);
-                        el.appendChild(analysisElement);
+                        wrapper.appendChild(analysisElement);
                     }
                 }
 
                 // Add footer bar
-                const footerBar = el.createDiv({ cls: "backgammon-footer" });
+                const footerBar = wrapper.createDiv({ cls: "backgammon-footer" });
                 footerBar.style.cssText = `
                     background: #34495e;
                     height: 8px;

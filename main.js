@@ -1046,7 +1046,22 @@ var BackgammonPlugin = class extends import_obsidian.Plugin {
           throw new Error("No XGID found in code block");
         }
         const boardData = parseXGID(xgidLine);
-        const headerBar = el.createDiv({ cls: "backgammon-header" });
+        const wrapper = el.createDiv({ cls: "backgammon-wrapper" });
+        const isMobile = import_obsidian.Platform.isMobile;
+        const isReadingMode = el.closest(".markdown-preview-view") !== null;
+        if (isMobile && isReadingMode) {
+          wrapper.style.cssText = `
+                        position: relative;
+                        left: -31px;
+                        overflow: visible;
+                    `;
+        } else {
+          wrapper.style.cssText = `
+                        position: relative;
+                        overflow: visible;
+                    `;
+        }
+        const headerBar = wrapper.createDiv({ cls: "backgammon-header" });
         headerBar.style.cssText = `
                     background: #34495e;
                     color: white;
@@ -1074,16 +1089,16 @@ var BackgammonPlugin = class extends import_obsidian.Plugin {
           return `${playerName} on Roll - Cube Decision`;
         };
         headerBar.setText(getActionText(boardData));
-        renderBoard(el, boardData);
+        renderBoard(wrapper, boardData);
         const analysisText = extractAnalysisText(source);
         if (analysisText) {
           const analysis = parseAnalysis(analysisText);
           if (analysis) {
             const analysisElement = renderAnalysis(analysis);
-            el.appendChild(analysisElement);
+            wrapper.appendChild(analysisElement);
           }
         }
-        const footerBar = el.createDiv({ cls: "backgammon-footer" });
+        const footerBar = wrapper.createDiv({ cls: "backgammon-footer" });
         footerBar.style.cssText = `
                     background: #34495e;
                     height: 8px;
