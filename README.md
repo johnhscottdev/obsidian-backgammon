@@ -1,10 +1,12 @@
 # Backgammon XGID Display
 
-Transform your backgammon analysis in Obsidian with beautiful visual position rendering and comprehensive move analysis.
+Transform your backgammon analysis in Obsidian with visual position rendering and move analysis.
 
 ## What is this plugin?
 
-This plugin lets you display backgammon positions directly in your Obsidian notes using the XGID format. Simply paste an XGID string in a code block, and get a fully rendered backgammon board with analysis.
+This plugin lets you display backgammon positions directly in your Obsidian notes using the XGID format. Simply paste an XGID string in a code block, and get a fully rendered backgammon board.
+
+If analysis is included from XG, it will display as well!
 
 ## Quick Start
 
@@ -27,6 +29,8 @@ XGID=-a-bE-D---cD---c-b-a-E-:0:0:1:63:0:0:0:0
 ````
 
 Displays the opening position with X to play 6-3.
+
+<img src="./readme_images/BlackToPlay63.jpg" alt="Black To Play 63" width="500">
 
 ### 2. Position with Analysis copied from eXtreme Gammon (CTRL+C)
 
@@ -96,47 +100,53 @@ eXtreme Gammon Version: 2.10
 ```
 ````
 
-Shows:
-- **Move rankings** (1st, 2nd, 3rd best moves)
-- **Equity values** with differences from best move
-- **Winning chances** for both players
-- **Color coding** - Black (good), Green (error), Red (blunder)
+<img src="./readme_images/BlackToPlay64_with_analysis.jpg" alt="Black To Play 64 with analysis" width="500">
 
 ### 3. Cube Analysis
 
 ````
 ```xgid
-XGID=--b-C-E----bB-Bb-c----A--:2:1:0:63:2:1:0:7
+XGID=-a-a--ECBA--dB---cBf------:0:0:1:00:0:0:3:0:X:Player 1   O:Player 2
+10
 
-Player Winning Chances:     58.23% (G:15.45% B:1.23%)
-Opponent Winning Chances:   41.77% (G:8.91% B:0.87%)
+Score is X:0 O:0. Unlimited Game, Jacoby Beaver
+ +13-14-15-16-17-18------19-20-21-22-23-24-+
+ | X           O  X |   | O                |
+ | X           O  X |   | O                |
+ |             O    |   | O                |
+ |                  |   | O                |
+ |                  |   | 6                |
+ |                  |BAR|                  |
+ |                  |   | X                |
+ | O                |   | X                |
+ | O              X |   | X                |
+ | O           X  X |   | X                |
+ | O        X  X  X |   | X        O     O |
+ +12-11-10--9--8--7-------6--5--4--3--2--1-+
+Pip count  X: 138  O: 158 X-O: 0-0
+Cube: 1
+X on roll, cube action
+
+Analyzed in XG Roller+
+Player Winning Chances:   69.56% (G:19.30% B:0.62%)
+Opponent Winning Chances: 30.44% (G:5.16% B:0.16%)
+
+Cubeless Equities: No Double=+0.537, Double=+1.091
 
 Cubeful Equities:
-No double:          +0.234
-Double/Take:        +0.445 (+0.211)
-Double/Pass:        +1.000 (+0.766)
+       No double:     +0.792 (-0.083)
+       Double/Take:   +0.875
+       Double/Pass:   +1.000 (+0.125)
 
-Best Cube action: Double/Take
+Best Cube action: Double / Take
+
+eXtreme Gammon Version: 2.10
+
 ```
 ````
 
-### Key Components
+<img src="./readme_images/BlackOnRoll_cube_decision.jpg" alt="Black On Roll Cube Decision" width="500">
 
-- **Position**: 26-character string encoding checker positions
-- **Cube**: Doubling cube value and owner
-- **Turn**: Which player's turn (-1 for O, other for X)
-- **Dice**: Current dice roll
-- **Scores**: Match scores
-- **Rules**: Game rules (Crawford, Jacoby, etc.)
-- **Match**: Match length (0 for money game)
-
-### Common Examples
-
-| Situation | XGID |
-|-----------|------|
-| Opening position | `XGID=-a-bE-D---cD---c-b-a-E-:0:0:1:63:0:0:0:0` |
-| Match play | `XGID=--b-C-E----bB-Bb-c----A--:2:1:0:63:2:1:0:7` |
-| Money game | `XGID=----BD-------d-b-a-E---:3:2:-1:42:0:0:0:0` |
 
 ## Troubleshooting
 
@@ -160,7 +170,7 @@ Best Cube action: Double/Take
 
 ## Getting XGIDs
 
-You can get XGID strings from:
+You can get XGID strings from eXtreme Gammon:
 
 - **Simple XGID** - "File -> Copy XGID to Clipboard" from the menu or with the hotkey CTRL+SHIFT+C
 - **XGID with Analysis** - "File -> Copy position to Clipboard" from the menu or with the hotkey CTRL+SHIFT+C
