@@ -185,7 +185,7 @@ For local development:
 3. Run `npm run build` to build the plugin
 4. (Optional) Set `OBSIDIAN_PLUGINS_PATH` environment variable to automatically copy built files to your Obsidian vault:
    ```bash
-   export OBSIDIAN_PLUGINS_PATH="/path/to/your/vault/.obsidian/plugins/obsidian-backgammon-xgid"
+   export OBSIDIAN_PLUGINS_PATH="/path/to/your/vault/.obsidian/plugins/backgammon-xgid"
    npm run build
    ```
 
