@@ -1,7 +1,7 @@
 {
     "id": "obsidian-backgammon-xgid",
     "name": "Backgammon XGID Display",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "minAppVersion": "1.8.9",
     "author": "John H Scott",
     "description": "Renders a backgammon position given an XGID",
