@@ -1,17 +1,17 @@
 {
-  "name": "obsidian-backgammon-gxid",
+  "name": "obsidian-backgammon-xgid",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "main.js",
   "scripts": {
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "build": "node build.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
+  "keywords": ["obsidian", "backgammon", "xgid", "board-games"],
+  "author": "John H Scott",
+  "license": "MIT",
+  "description": "Renders backgammon positions from XGID format in Obsidian",
   "dependencies": {
     "obsidian": "^1.8.7"
   },
