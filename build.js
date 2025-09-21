@@ -3,9 +3,26 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
-const OBSIDIAN_PLUGINS_PATH = '/mnt/f/ObsidianVault/.obsidian/plugins/obsidian-backgammon-xgid';
+// Load .env.local if it exists
+const envPath = path.join(__dirname, '.env.local');
+if (fs.existsSync(envPath)) {
+  const envFile = fs.readFileSync(envPath, 'utf8');
+  envFile.split('\n').forEach(line => {
+    const [key, value] = line.split('=');
+    if (key && value) {
+      process.env[key] = value;
+    }
+  });
+}
+
+const OBSIDIAN_PLUGINS_PATH = process.env.OBSIDIAN_PLUGINS_PATH;
 
 function copyToObsidian() {
+  if (!OBSIDIAN_PLUGINS_PATH) {
+    console.log('ℹ️  Skipping copy to Obsidian (OBSIDIAN_PLUGINS_PATH not set)');
+    return;
+  }
+  
   try {
     // Ensure the plugin directory exists
     if (!fs.existsSync(OBSIDIAN_PLUGINS_PATH)) {

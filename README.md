@@ -176,6 +176,20 @@ You can get XGID strings from eXtreme Gammon:
 - **Simple XGID** - "File -> Copy XGID to Clipboard" from the menu or with the hotkey CTRL+SHIFT+C
 - **XGID with Analysis** - "File -> Copy position to Clipboard" from the menu or with the hotkey CTRL+SHIFT+C
 
+## Development Setup
+
+For local development:
+
+1. Clone this repository
+2. Run `npm install` to install dependencies
+3. Run `npm run build` to build the plugin
+4. (Optional) Set `OBSIDIAN_PLUGINS_PATH` environment variable to automatically copy built files to your Obsidian vault:
+   ```bash
+   export OBSIDIAN_PLUGINS_PATH="/path/to/your/vault/.obsidian/plugins/backgammon-xgid"
+   npm run build
+   ```
+
+
 ## License
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 
