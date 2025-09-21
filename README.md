@@ -1,12 +1,13 @@
 # Backgammon XGID Display
 
-Transform your backgammon analysis in Obsidian with visual position rendering and move analysis.
+Renders backgammon positions and optional analysis in Obsidian given an XGID string. 
 
 ## What is this plugin?
 
-This plugin lets you display backgammon positions directly in your Obsidian notes using the XGID format. Simply paste an XGID string in a code block, and get a fully rendered backgammon board.
-
-If analysis is included from XG, it will display as well!
+- This plugin lets you display backgammon positions directly in your Obsidian notes using the XGID format. 
+- Simply paste an XGID string in a code block, and get a fully rendered backgammon board.
+- If analysis is included from XG, it will display it as well!
+- Works on both desktop and mobile 
 
 ## Quick Start
 
@@ -175,6 +176,8 @@ You can get XGID strings from eXtreme Gammon:
 - **Simple XGID** - "File -> Copy XGID to Clipboard" from the menu or with the hotkey CTRL+SHIFT+C
 - **XGID with Analysis** - "File -> Copy position to Clipboard" from the menu or with the hotkey CTRL+SHIFT+C
 
+## License
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 
 ---
 
