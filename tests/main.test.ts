@@ -51,10 +51,8 @@ describe('BackgammonPlugin', () => {
           }),
           createDiv: jest.fn().mockReturnValue({
             setText: jest.fn(),
-            style: { cssText: '' },
           }),
           setText: jest.fn(),
-          style: { cssText: '' },
         };
         
         const mockContainer = {
@@ -141,9 +139,7 @@ describe('BackgammonPlugin', () => {
         const mockErrorDiv = {
           createDiv: jest.fn().mockReturnValue({
             setText: jest.fn(),
-            style: { cssText: '' },
           }),
-          style: { cssText: '' },
         };
         
         mockElement.createDiv = jest.fn().mockReturnValue(mockErrorDiv);
@@ -169,9 +165,7 @@ describe('BackgammonPlugin', () => {
         const mockErrorDiv = {
           createDiv: jest.fn().mockReturnValue({
             setText: jest.fn(),
-            style: { cssText: '' },
           }),
-          style: { cssText: '' },
         };
         
         mockElement.createDiv = jest.fn().mockReturnValue(mockErrorDiv);
@@ -192,9 +186,7 @@ describe('BackgammonPlugin', () => {
         const mockErrorDiv = {
           createDiv: jest.fn().mockReturnValue({
             setText: jest.fn(),
-            style: { cssText: '' },
           }),
-          style: { cssText: '' },
         };
         
         mockElement.createDiv = jest.fn().mockReturnValue(mockErrorDiv);
@@ -205,9 +197,7 @@ describe('BackgammonPlugin', () => {
         
         processorCallback(invalidXGID, mockElement);
         
-        expect(mockErrorDiv.style.cssText).toContain('background-color: #ffe6e6');
-        expect(mockErrorDiv.style.cssText).toContain('border: 1px solid #ffcccc');
-        expect(mockErrorDiv.style.cssText).toContain('padding: 10px');
+        expect(mockElement.createDiv).toHaveBeenCalledWith({ cls: 'backgammon-error' });
       });
 
       it('should create analysis container for any input', () => {
@@ -232,11 +222,9 @@ describe('BackgammonPlugin', () => {
             return {
               createDiv: jest.fn().mockReturnValue({
                 setText: jest.fn(),
-                style: { cssText: '' },
-              }),
+                  }),
               setText: jest.fn(),
-              style: { cssText: '' },
-            };
+              };
           }),
         };
         
@@ -266,9 +254,7 @@ describe('BackgammonPlugin', () => {
         createDiv: jest.fn().mockReturnValue({
           createDiv: jest.fn().mockReturnValue({
             setText: jest.fn(),
-            style: { cssText: '' },
           }),
-          style: { cssText: '' },
         }),
       };
       
@@ -300,10 +286,8 @@ describe('BackgammonPlugin', () => {
           return {
             createDiv: jest.fn().mockReturnValue({
               setText: jest.fn(),
-              style: { cssText: '' },
-            }),
+              }),
             setText: jest.fn(),
-            style: { cssText: '' },
           };
         }),
       };
