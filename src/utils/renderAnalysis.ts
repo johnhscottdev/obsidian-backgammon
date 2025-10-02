@@ -1,20 +1,17 @@
 import { AnalysisData, MoveAnalysis, CubeAnalysis, MoveData } from '../types/analysis';
 
 /**
- * Determines move color based on equity difference
- * Black: Good moves (equity loss < 0.02)
- * Green: Errors (equity loss 0.02-0.08)
- * Red: Blunders (equity loss > 0.08)
+ * Helper function to determine move classification based on equity difference
  */
-function getMoveColor(equityDiff: number): string {
+function getMoveClass(equityDiff: number): string {
     const absEquityDiff = Math.abs(equityDiff);
-    
+
     if (absEquityDiff < 0.02) {
-        return '#000000'; // Black for good moves
+        return 'good';
     } else if (absEquityDiff < 0.08) {
-        return '#008000'; // Green for errors
+        return 'error';
     } else {
-        return '#ff0000'; // Red for blunders
+        return 'blunder';
     }
 }
 
@@ -24,156 +21,13 @@ function getMoveColor(equityDiff: number): string {
 export function renderAnalysis(analysis: AnalysisData): HTMLDivElement {
     const container = document.createElement('div');
     container.className = 'backgammon-analysis';
-    
-    // Add CSS styles
-    const style = document.createElement('style');
-    style.textContent = `
-        .backgammon-analysis {
-            margin-top: 0;
-            font-family: monospace;
-            font-size: 12px;
-            line-height: 1.4;
-            background: #f8f8f8;
-            border-left: 8px solid #34495e;
-            border-right: 8px solid #34495e;
-            border-radius: 0;
-            padding: 15px;
-            max-width: 500px;
-            width: 100%;
-            box-sizing: border-box;
-        }
-        
-        .analysis-move {
-            margin-bottom: 8px;
-            padding: 4px 8px;
-            border-radius: 3px;
-        }
-        
-        .analysis-move.even {
-            background-color: #ffffff;
-        }
-        
-        .analysis-move.odd {
-            background-color: #f8f8f8;
-        }
-        
-        .move-line {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2px;
-        }
-        
-        .move-text {
-            font-weight: bold;
-        }
-        
-        .move-equity {
-            font-weight: bold;
-            text-align: right;
-        }
-        
-        .move-stats {
-            font-size: 12px;
-            color: #666;
-            margin-left: 20px;
-        }
-        
-        .stats-line {
-            display: flex;
-            gap: 0;
-        }
-        
-        .stats-label {
-            width: 20px;
-            flex-shrink: 0;
-        }
-        
-        .stats-number {
-            width: 35px;
-            text-align: right;
-            flex-shrink: 0;
-        }
-        
-        .cube-analysis {
-            margin-bottom: 12px;
-        }
-        
-        .cube-section {
-            margin-bottom: 8px;
-        }
-        
-        .cube-title {
-            font-weight: bold;
-            margin-bottom: 4px;
-        }
-        
-        .cube-line {
-            margin-bottom: 2px;
-        }
-        
-        .winning-chances {
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-            flex-wrap: wrap;
-        }
-        
-        .winning-label {
-            flex: 0 0 auto;
-            min-width: 180px;
-        }
-        
-        .winning-stats {
-            flex: 1;
-            text-align: right;
-            font-family: monospace;
-            min-width: 200px;
-        }
-        
-        @media (max-width: 400px) {
-            .winning-chances {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            
-            .winning-label {
-                min-width: auto;
-                margin-bottom: 2px;
-            }
-            
-            .winning-stats {
-                text-align: left;
-                min-width: auto;
-                margin-left: 20px;
-            }
-        }
-        
-        .equity-table {
-            margin: 8px 0;
-        }
-        
-        .equity-row {
-            font-family: monospace;
-            white-space: pre;
-            margin-bottom: 2px;
-        }
-        
-        .best-action {
-            font-weight: bold;
-            color: #0066cc;
-            margin-top: 8px;
-        }
-    `;
-    
-    container.appendChild(style);
-    
+
     if (analysis.type === 'move') {
         renderMoveAnalysis(container, analysis);
     } else {
         renderCubeAnalysis(container, analysis);
     }
-    
+
     return container;
 }
 
@@ -191,14 +45,14 @@ function renderMoveAnalysis(container: HTMLDivElement, analysis: MoveAnalysis): 
         
         const moveText = document.createElement('span');
         moveText.className = 'move-text';
-        moveText.style.color = getMoveColor(move.equityDiff);
+        moveText.className += ' move-' + getMoveClass(move.equityDiff);
         
         const moveNotation = `${move.rank}. ${move.move}`;
         moveText.textContent = moveNotation;
         
         const equityText = document.createElement('span');
         equityText.className = 'move-equity';
-        equityText.style.color = getMoveColor(move.equityDiff);
+        equityText.className += ' move-' + getMoveClass(move.equityDiff);
         
         let equityDisplay = move.equity >= 0 ? `+${move.equity.toFixed(3)}` : move.equity.toFixed(3);
         if (move.equityDiff !== 0) {
@@ -227,27 +81,54 @@ function renderMoveStats(moveDiv: HTMLDivElement, move: MoveData): void {
         const statsContainer = document.createElement('div');
         statsContainer.className = 'move-stats';
         
-        const moveColor = getMoveColor(move.equityDiff);
         
         const playerStats = document.createElement('div');
-        playerStats.className = 'stats-line';
-        playerStats.style.color = moveColor;
-        playerStats.innerHTML = `
-            <span class="stats-label">P:</span>
-            <span class="stats-number">${move.playerStats.win.toFixed(1)}</span>
-            <span class="stats-number">${move.playerStats.gammon.toFixed(1)}</span>
-            <span class="stats-number">${move.playerStats.backgammon.toFixed(1)}</span>
-        `;
+        playerStats.className = 'stats-line move-' + getMoveClass(move.equityDiff);
+
+        const playerLabel = document.createElement('span');
+        playerLabel.className = 'stats-label';
+        playerLabel.textContent = 'P:';
+
+        const playerWin = document.createElement('span');
+        playerWin.className = 'stats-number';
+        playerWin.textContent = move.playerStats.win.toFixed(1);
+
+        const playerGammon = document.createElement('span');
+        playerGammon.className = 'stats-number';
+        playerGammon.textContent = move.playerStats.gammon.toFixed(1);
+
+        const playerBackgammon = document.createElement('span');
+        playerBackgammon.className = 'stats-number';
+        playerBackgammon.textContent = move.playerStats.backgammon.toFixed(1);
+
+        playerStats.appendChild(playerLabel);
+        playerStats.appendChild(playerWin);
+        playerStats.appendChild(playerGammon);
+        playerStats.appendChild(playerBackgammon);
         
         const opponentStats = document.createElement('div');
-        opponentStats.className = 'stats-line';
-        opponentStats.style.color = moveColor;
-        opponentStats.innerHTML = `
-            <span class="stats-label">O:</span>
-            <span class="stats-number">${move.opponentStats?.win.toFixed(1) || '0.0'}</span>
-            <span class="stats-number">${move.opponentStats?.gammon.toFixed(1) || '0.0'}</span>
-            <span class="stats-number">${move.opponentStats?.backgammon.toFixed(1) || '0.0'}</span>
-        `;
+        opponentStats.className = 'stats-line move-' + getMoveClass(move.equityDiff);
+
+        const opponentLabel = document.createElement('span');
+        opponentLabel.className = 'stats-label';
+        opponentLabel.textContent = 'O:';
+
+        const opponentWin = document.createElement('span');
+        opponentWin.className = 'stats-number';
+        opponentWin.textContent = move.opponentStats?.win.toFixed(1) || '0.0';
+
+        const opponentGammon = document.createElement('span');
+        opponentGammon.className = 'stats-number';
+        opponentGammon.textContent = move.opponentStats?.gammon.toFixed(1) || '0.0';
+
+        const opponentBackgammon = document.createElement('span');
+        opponentBackgammon.className = 'stats-number';
+        opponentBackgammon.textContent = move.opponentStats?.backgammon.toFixed(1) || '0.0';
+
+        opponentStats.appendChild(opponentLabel);
+        opponentStats.appendChild(opponentWin);
+        opponentStats.appendChild(opponentGammon);
+        opponentStats.appendChild(opponentBackgammon);
         
         statsContainer.appendChild(playerStats);
         statsContainer.appendChild(opponentStats);

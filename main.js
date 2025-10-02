@@ -96,17 +96,7 @@ var styleConfig = {
 // src/utils/renderBoard.ts
 function renderBoard(el, boardData) {
   const canvas = document.createElement("canvas");
-  canvas.style.cssText = `
-		display: block;
-		border: 1px solid #2c3e50;
-		border-top: none;
-		border-bottom: none;
-		border-left: 8px solid #34495e;
-		border-right: 8px solid #34495e;
-		border-radius: 0;
-		max-width: 500px;
-		box-sizing: border-box;
-	`;
+  canvas.className = "backgammon-canvas";
   el.appendChild(canvas);
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
@@ -116,10 +106,12 @@ function renderBoard(el, boardData) {
     const canvasHeight = styleConfig.boardHeight;
     canvas.width = canvasWidth;
     canvas.height = canvasHeight;
-    canvas.style.width = `${canvasWidth}px`;
-    canvas.style.height = `${canvasHeight}px`;
-    canvas.style.maxWidth = "100%";
-    canvas.style.height = "auto";
+    if (canvas.style) {
+      canvas.style.width = `${canvasWidth}px`;
+      canvas.style.height = `${canvasHeight}px`;
+      canvas.style.maxWidth = "100%";
+      canvas.style.height = "auto";
+    }
     const availableWidth = canvasWidth - internalMargin * 2;
     const scaleX = availableWidth / styleConfig.boardWidth;
     ctx.setTransform(scaleX, 0, 0, 1, internalMargin, 0);
@@ -750,159 +742,19 @@ function parseCubeAnalysis(text) {
 }
 
 // src/utils/renderAnalysis.ts
-function getMoveColor(equityDiff) {
+function getMoveClass(equityDiff) {
   const absEquityDiff = Math.abs(equityDiff);
   if (absEquityDiff < 0.02) {
-    return "#000000";
+    return "good";
   } else if (absEquityDiff < 0.08) {
-    return "#008000";
+    return "error";
   } else {
-    return "#ff0000";
+    return "blunder";
   }
 }
 function renderAnalysis(analysis) {
   const container = document.createElement("div");
   container.className = "backgammon-analysis";
-  const style = document.createElement("style");
-  style.textContent = `
-        .backgammon-analysis {
-            margin-top: 0;
-            font-family: monospace;
-            font-size: 12px;
-            line-height: 1.4;
-            background: #f8f8f8;
-            border-left: 8px solid #34495e;
-            border-right: 8px solid #34495e;
-            border-radius: 0;
-            padding: 15px;
-            max-width: 500px;
-            width: 100%;
-            box-sizing: border-box;
-        }
-        
-        .analysis-move {
-            margin-bottom: 8px;
-            padding: 4px 8px;
-            border-radius: 3px;
-        }
-        
-        .analysis-move.even {
-            background-color: #ffffff;
-        }
-        
-        .analysis-move.odd {
-            background-color: #f8f8f8;
-        }
-        
-        .move-line {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2px;
-        }
-        
-        .move-text {
-            font-weight: bold;
-        }
-        
-        .move-equity {
-            font-weight: bold;
-            text-align: right;
-        }
-        
-        .move-stats {
-            font-size: 12px;
-            color: #666;
-            margin-left: 20px;
-        }
-        
-        .stats-line {
-            display: flex;
-            gap: 0;
-        }
-        
-        .stats-label {
-            width: 20px;
-            flex-shrink: 0;
-        }
-        
-        .stats-number {
-            width: 35px;
-            text-align: right;
-            flex-shrink: 0;
-        }
-        
-        .cube-analysis {
-            margin-bottom: 12px;
-        }
-        
-        .cube-section {
-            margin-bottom: 8px;
-        }
-        
-        .cube-title {
-            font-weight: bold;
-            margin-bottom: 4px;
-        }
-        
-        .cube-line {
-            margin-bottom: 2px;
-        }
-        
-        .winning-chances {
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-            flex-wrap: wrap;
-        }
-        
-        .winning-label {
-            flex: 0 0 auto;
-            min-width: 180px;
-        }
-        
-        .winning-stats {
-            flex: 1;
-            text-align: right;
-            font-family: monospace;
-            min-width: 200px;
-        }
-        
-        @media (max-width: 400px) {
-            .winning-chances {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            
-            .winning-label {
-                min-width: auto;
-                margin-bottom: 2px;
-            }
-            
-            .winning-stats {
-                text-align: left;
-                min-width: auto;
-                margin-left: 20px;
-            }
-        }
-        
-        .equity-table {
-            margin: 8px 0;
-        }
-        
-        .equity-row {
-            font-family: monospace;
-            white-space: pre;
-            margin-bottom: 2px;
-        }
-        
-        .best-action {
-            font-weight: bold;
-            color: #0066cc;
-            margin-top: 8px;
-        }
-    `;
-  container.appendChild(style);
   if (analysis.type === "move") {
     renderMoveAnalysis(container, analysis);
   } else {
@@ -918,12 +770,12 @@ function renderMoveAnalysis(container, analysis) {
     moveLine.className = "move-line";
     const moveText = document.createElement("span");
     moveText.className = "move-text";
-    moveText.style.color = getMoveColor(move.equityDiff);
+    moveText.className += " move-" + getMoveClass(move.equityDiff);
     const moveNotation = `${move.rank}. ${move.move}`;
     moveText.textContent = moveNotation;
     const equityText = document.createElement("span");
     equityText.className = "move-equity";
-    equityText.style.color = getMoveColor(move.equityDiff);
+    equityText.className += " move-" + getMoveClass(move.equityDiff);
     let equityDisplay = move.equity >= 0 ? `+${move.equity.toFixed(3)}` : move.equity.toFixed(3);
     if (move.equityDiff !== 0) {
       const diffDisplay = move.equityDiff >= 0 ? `+${move.equityDiff.toFixed(3)}` : move.equityDiff.toFixed(3);
@@ -1050,33 +902,9 @@ var BackgammonPlugin = class extends import_obsidian.Plugin {
         const isMobile = import_obsidian.Platform.isMobile;
         const isReadingMode = el.closest(".markdown-preview-view") !== null;
         if (isMobile && isReadingMode) {
-          wrapper.style.cssText = `
-                        position: relative;
-                        left: -31px;
-                        overflow: visible;
-                    `;
-        } else {
-          wrapper.style.cssText = `
-                        position: relative;
-                        overflow: visible;
-                    `;
+          wrapper.addClass("mobile-reading");
         }
         const headerBar = wrapper.createDiv({ cls: "backgammon-header" });
-        headerBar.style.cssText = `
-                    background: #34495e;
-                    color: white;
-                    padding: 12px 16px;
-                    font-family: "Segoe UI", system-ui, sans-serif;
-                    font-weight: 600;
-                    font-size: 16px;
-                    margin-bottom: 0;
-                    border-radius: 4px 4px 0 0;
-                    border-left: 8px solid #34495e;
-                    border-right: 8px solid #34495e;
-                    border-top: 8px solid #34495e;
-                    max-width: 500px;
-                    box-sizing: border-box;
-                `;
         const getActionText = (data) => {
           const playerName = data.turn === "X" ? "Black" : "White";
           if (data.die1 > 0 && data.die2 > 0) {
@@ -1098,26 +926,13 @@ var BackgammonPlugin = class extends import_obsidian.Plugin {
             wrapper.appendChild(analysisElement);
           }
         }
-        const footerBar = wrapper.createDiv({ cls: "backgammon-footer" });
-        footerBar.style.cssText = `
-                    background: #34495e;
-                    height: 8px;
-                    margin-top: 0;
-                    border-radius: 0 0 4px 4px;
-                    border-left: 8px solid #34495e;
-                    border-right: 8px solid #34495e;
-                    border-bottom: 8px solid #34495e;
-                    max-width: 500px;
-                    box-sizing: border-box;
-                `;
+        wrapper.createDiv({ cls: "backgammon-footer" });
       } catch (error) {
         const errorDiv = el.createDiv({ cls: "backgammon-error" });
-        errorDiv.style.cssText = "background-color: #ffe6e6; border: 1px solid #ffcccc; padding: 10px; border-radius: 4px; margin: 5px 0;";
         errorDiv.createDiv().setText(source);
-        const errorMsg = errorDiv.createDiv();
+        const errorMsg = errorDiv.createDiv({ cls: "backgammon-error-message" });
         const message = error instanceof Error ? error.message : String(error);
         errorMsg.setText(`\u26A0\uFE0F Error: ${message}`);
-        errorMsg.style.cssText = "color: #cc0000; font-weight: bold; margin-top: 5px;";
       }
     });
   }

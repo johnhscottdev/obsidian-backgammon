@@ -15,17 +15,7 @@ export function renderBoard(el: HTMLElement, boardData: BackgammonPosition): voi
 	const canvas: HTMLCanvasElement = document.createElement('canvas');
 	
 	// Style canvas to connect with header bar
-	canvas.style.cssText = `
-		display: block;
-		border: 1px solid #2c3e50;
-		border-top: none;
-		border-bottom: none;
-		border-left: 8px solid #34495e;
-		border-right: 8px solid #34495e;
-		border-radius: 0;
-		max-width: 500px;
-		box-sizing: border-box;
-	`;
+	canvas.className = 'backgammon-canvas';
 	
 	el.appendChild(canvas);
 	const ctx: CanvasRenderingContext2D | null = canvas.getContext('2d');
@@ -41,10 +31,12 @@ export function renderBoard(el: HTMLElement, boardData: BackgammonPosition): voi
 		// Set canvas to match other elements
 		canvas.width = canvasWidth;
 		canvas.height = canvasHeight;
-		canvas.style.width = `${canvasWidth}px`;
-		canvas.style.height = `${canvasHeight}px`;
-		canvas.style.maxWidth = '100%';
-		canvas.style.height = 'auto';
+		if (canvas.style) {
+			canvas.style.width = `${canvasWidth}px`;
+			canvas.style.height = `${canvasHeight}px`;
+			canvas.style.maxWidth = '100%';
+			canvas.style.height = 'auto';
+		}
 
 		// Scale down board content to fit within canvas with margins
 		const availableWidth = canvasWidth - (internalMargin * 2);

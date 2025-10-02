@@ -1,0 +1,220 @@
+/* Backgammon Plugin Styles */
+
+/* Main wrapper styles */
+.backgammon-wrapper {
+    position: relative;
+    overflow: visible;
+}
+
+.backgammon-wrapper.mobile-reading {
+    left: -31px;
+}
+
+/* Header bar */
+.backgammon-header {
+    background: #34495e;
+    color: white;
+    padding: 12px 16px;
+    font-family: "Segoe UI", system-ui, sans-serif;
+    font-weight: 600;
+    font-size: 16px;
+    margin-bottom: 0;
+    border-radius: 4px 4px 0 0;
+    border-left: 8px solid #34495e;
+    border-right: 8px solid #34495e;
+    border-top: 8px solid #34495e;
+    max-width: 500px;
+    box-sizing: border-box;
+}
+
+/* Canvas styles */
+.backgammon-canvas {
+    display: block;
+    border: 1px solid #2c3e50;
+    border-top: none;
+    border-bottom: none;
+    border-left: 8px solid #34495e;
+    border-right: 8px solid #34495e;
+    border-radius: 0;
+    max-width: 500px;
+    box-sizing: border-box;
+}
+
+/* Footer bar */
+.backgammon-footer {
+    background: #34495e;
+    height: 8px;
+    margin-top: 0;
+    border-radius: 0 0 4px 4px;
+    border-left: 8px solid #34495e;
+    border-right: 8px solid #34495e;
+    border-bottom: 8px solid #34495e;
+    max-width: 500px;
+    box-sizing: border-box;
+}
+
+/* Error styles */
+.backgammon-error {
+    background-color: #ffe6e6;
+    border: 1px solid #ffcccc;
+    padding: 10px;
+    border-radius: 4px;
+    margin: 5px 0;
+}
+
+.backgammon-error-message {
+    color: #cc0000;
+    font-weight: bold;
+    margin-top: 5px;
+}
+
+/* Analysis styles */
+.backgammon-analysis {
+    margin-top: 0;
+    font-family: monospace;
+    font-size: 12px;
+    line-height: 1.4;
+    background: #f8f8f8;
+    border-left: 8px solid #34495e;
+    border-right: 8px solid #34495e;
+    border-radius: 0;
+    padding: 15px;
+    max-width: 500px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.analysis-move {
+    margin-bottom: 8px;
+    padding: 4px 8px;
+    border-radius: 3px;
+}
+
+.analysis-move.even {
+    background-color: #ffffff;
+}
+
+.analysis-move.odd {
+    background-color: #f8f8f8;
+}
+
+.move-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2px;
+}
+
+.move-text {
+    font-weight: bold;
+}
+
+.move-equity {
+    font-weight: bold;
+    text-align: right;
+}
+
+.move-stats {
+    font-size: 12px;
+    color: #666;
+    margin-left: 20px;
+}
+
+.stats-line {
+    display: flex;
+    gap: 0;
+}
+
+.stats-label {
+    width: 20px;
+    flex-shrink: 0;
+}
+
+.stats-number {
+    width: 35px;
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.cube-analysis {
+    margin-bottom: 12px;
+}
+
+.cube-section {
+    margin-bottom: 8px;
+}
+
+.cube-title {
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+
+.cube-line {
+    margin-bottom: 2px;
+}
+
+.winning-chances {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+}
+
+.winning-label {
+    flex: 0 0 auto;
+    min-width: 180px;
+}
+
+.winning-stats {
+    flex: 1;
+    text-align: right;
+    font-family: monospace;
+    min-width: 200px;
+}
+
+@media (max-width: 400px) {
+    .winning-chances {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .winning-label {
+        min-width: auto;
+        margin-bottom: 2px;
+    }
+
+    .winning-stats {
+        text-align: left;
+        min-width: auto;
+        margin-left: 20px;
+    }
+}
+
+.equity-table {
+    margin: 8px 0;
+}
+
+.equity-row {
+    font-family: monospace;
+    white-space: pre;
+    margin-bottom: 2px;
+}
+
+.best-action {
+    font-weight: bold;
+    color: #0066cc;
+    margin-top: 8px;
+}
+
+/* Move classification colors */
+.move-good {
+    color: #000000;
+}
+
+.move-error {
+    color: #008000;
+}
+
+.move-blunder {
+    color: #ff0000;
+}

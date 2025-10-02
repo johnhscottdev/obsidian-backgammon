@@ -31,9 +31,12 @@ function copyToObsidian() {
 
     // Copy main.js
     fs.copyFileSync('main.js', path.join(OBSIDIAN_PLUGINS_PATH, 'main.js'));
-    
+
     // Copy manifest.json
     fs.copyFileSync('manifest.json', path.join(OBSIDIAN_PLUGINS_PATH, 'manifest.json'));
+
+    // Copy styles.css
+    fs.copyFileSync('styles.css', path.join(OBSIDIAN_PLUGINS_PATH, 'styles.css'));
     
     console.log('📁 Files copied to Obsidian plugins folder');
   } catch (error) {

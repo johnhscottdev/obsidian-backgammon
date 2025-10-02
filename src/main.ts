@@ -35,35 +35,11 @@ export default class BackgammonPlugin extends Plugin {
                 
                 // Apply 31px shift only on mobile in Reading Mode
                 if (isMobile && isReadingMode) {
-                    wrapper.style.cssText = `
-                        position: relative;
-                        left: -31px;
-                        overflow: visible;
-                    `;
-                } else {
-                    wrapper.style.cssText = `
-                        position: relative;
-                        overflow: visible;
-                    `;
+                    wrapper.addClass('mobile-reading');
                 }
                 
                 // Add header bar
                 const headerBar = wrapper.createDiv({ cls: "backgammon-header" });
-                headerBar.style.cssText = `
-                    background: #34495e;
-                    color: white;
-                    padding: 12px 16px;
-                    font-family: "Segoe UI", system-ui, sans-serif;
-                    font-weight: 600;
-                    font-size: 16px;
-                    margin-bottom: 0;
-                    border-radius: 4px 4px 0 0;
-                    border-left: 8px solid #34495e;
-                    border-right: 8px solid #34495e;
-                    border-top: 8px solid #34495e;
-                    max-width: 500px;
-                    box-sizing: border-box;
-                `;
                 
                 // Determine the action text based on board state
                 const getActionText = (data: BackgammonPosition): string => {
@@ -97,18 +73,7 @@ export default class BackgammonPlugin extends Plugin {
                 }
 
                 // Add footer bar
-                const footerBar = wrapper.createDiv({ cls: "backgammon-footer" });
-                footerBar.style.cssText = `
-                    background: #34495e;
-                    height: 8px;
-                    margin-top: 0;
-                    border-radius: 0 0 4px 4px;
-                    border-left: 8px solid #34495e;
-                    border-right: 8px solid #34495e;
-                    border-bottom: 8px solid #34495e;
-                    max-width: 500px;
-                    box-sizing: border-box;
-                `;
+                wrapper.createDiv({ cls: "backgammon-footer" });
 
                 // Display XGID string (disabled for now)
                 // const xgidContainer = el.createDiv({ cls: "xgid-display" });
@@ -116,12 +81,10 @@ export default class BackgammonPlugin extends Plugin {
                 // xgidContainer.setText(xgidLine);
             } catch (error) {
                 const errorDiv = el.createDiv({ cls: "backgammon-error" });
-                errorDiv.style.cssText = "background-color: #ffe6e6; border: 1px solid #ffcccc; padding: 10px; border-radius: 4px; margin: 5px 0;";
                 errorDiv.createDiv().setText(source);
-                const errorMsg = errorDiv.createDiv();
+                const errorMsg = errorDiv.createDiv({ cls: "backgammon-error-message" });
                 const message = error instanceof Error ? error.message : String(error);
                 errorMsg.setText(`⚠️ Error: ${message}`);
-                errorMsg.style.cssText = "color: #cc0000; font-weight: bold; margin-top: 5px;";
             }
         });
     }
