@@ -175,28 +175,6 @@ function renderCubeAnalysis(container: HTMLDivElement, analysis: CubeAnalysis): 
         cubeDiv.appendChild(winningDiv);
     }
     
-    // Cubeless equities (commented out for now)
-    /*
-    if (analysis.cubelessEquities) {
-        const cubelessDiv = document.createElement('div');
-        cubelessDiv.className = 'cube-section';
-        
-        const title = document.createElement('div');
-        title.className = 'cube-title';
-        title.textContent = 'Cubeless Equities:';
-        
-        const equityLine = document.createElement('div');
-        equityLine.className = 'cube-line';
-        const noDouble = analysis.cubelessEquities.noDouble >= 0 ? `+${analysis.cubelessEquities.noDouble.toFixed(3)}` : analysis.cubelessEquities.noDouble.toFixed(3);
-        const double = analysis.cubelessEquities.double >= 0 ? `+${analysis.cubelessEquities.double.toFixed(3)}` : analysis.cubelessEquities.double.toFixed(3);
-        equityLine.textContent = `No Double=${noDouble}, Double=${double}`;
-        
-        cubelessDiv.appendChild(title);
-        cubelessDiv.appendChild(equityLine);
-        cubeDiv.appendChild(cubelessDiv);
-    }
-    */
-    
     // Cubeful equities
     if (analysis.cubefulEquities) {
         const cubefulDiv = document.createElement('div');
