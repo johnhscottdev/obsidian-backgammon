@@ -31,12 +31,11 @@ export function renderBoard(el: HTMLElement, boardData: BackgammonPosition): voi
 		// Set canvas to match other elements
 		canvas.width = canvasWidth;
 		canvas.height = canvasHeight;
-		if (canvas.style) {
-			canvas.style.width = `${canvasWidth}px`;
-			canvas.style.height = `${canvasHeight}px`;
-			canvas.style.maxWidth = '100%';
-			canvas.style.height = 'auto';
-		}
+		canvas.setCssProps({
+			width: `${canvasWidth}px`,
+			height: 'auto',
+			maxWidth: '100%'
+		});
 
 		// Scale down board content to fit within canvas with margins
 		const availableWidth = canvasWidth - (internalMargin * 2);

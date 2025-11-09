@@ -1,4 +1,4 @@
-import { AnalysisData, MoveAnalysis, CubeAnalysis, MoveData } from '../types/analysis';
+import { AnalysisData, MoveAnalysis, CubeAnalysis } from '../types/analysis';
 
 /**
  * Helper function to determine move classification based on equity difference
@@ -64,76 +64,9 @@ function renderMoveAnalysis(container: HTMLDivElement, analysis: MoveAnalysis): 
         moveLine.appendChild(moveText);
         moveLine.appendChild(equityText);
         moveDiv.appendChild(moveLine);
-        
-        // Player stats (disabled for now - uncomment line below to enable)
-        // renderMoveStats(moveDiv, move);
-        
+
         container.appendChild(moveDiv);
     });
-}
-
-/**
- * Renders move statistics (winning chances) for a single move
- */
-// @ts-ignore - Function kept for easy re-enabling
-function renderMoveStats(moveDiv: HTMLDivElement, move: MoveData): void {
-    if (move.playerStats) {
-        const statsContainer = document.createElement('div');
-        statsContainer.className = 'move-stats';
-        
-        
-        const playerStats = document.createElement('div');
-        playerStats.className = 'stats-line move-' + getMoveClass(move.equityDiff);
-
-        const playerLabel = document.createElement('span');
-        playerLabel.className = 'stats-label';
-        playerLabel.textContent = 'P:';
-
-        const playerWin = document.createElement('span');
-        playerWin.className = 'stats-number';
-        playerWin.textContent = move.playerStats.win.toFixed(1);
-
-        const playerGammon = document.createElement('span');
-        playerGammon.className = 'stats-number';
-        playerGammon.textContent = move.playerStats.gammon.toFixed(1);
-
-        const playerBackgammon = document.createElement('span');
-        playerBackgammon.className = 'stats-number';
-        playerBackgammon.textContent = move.playerStats.backgammon.toFixed(1);
-
-        playerStats.appendChild(playerLabel);
-        playerStats.appendChild(playerWin);
-        playerStats.appendChild(playerGammon);
-        playerStats.appendChild(playerBackgammon);
-        
-        const opponentStats = document.createElement('div');
-        opponentStats.className = 'stats-line move-' + getMoveClass(move.equityDiff);
-
-        const opponentLabel = document.createElement('span');
-        opponentLabel.className = 'stats-label';
-        opponentLabel.textContent = 'O:';
-
-        const opponentWin = document.createElement('span');
-        opponentWin.className = 'stats-number';
-        opponentWin.textContent = move.opponentStats?.win.toFixed(1) || '0.0';
-
-        const opponentGammon = document.createElement('span');
-        opponentGammon.className = 'stats-number';
-        opponentGammon.textContent = move.opponentStats?.gammon.toFixed(1) || '0.0';
-
-        const opponentBackgammon = document.createElement('span');
-        opponentBackgammon.className = 'stats-number';
-        opponentBackgammon.textContent = move.opponentStats?.backgammon.toFixed(1) || '0.0';
-
-        opponentStats.appendChild(opponentLabel);
-        opponentStats.appendChild(opponentWin);
-        opponentStats.appendChild(opponentGammon);
-        opponentStats.appendChild(opponentBackgammon);
-        
-        statsContainer.appendChild(playerStats);
-        statsContainer.appendChild(opponentStats);
-        moveDiv.appendChild(statsContainer);
-    }
 }
 
 /**
@@ -152,7 +85,7 @@ function renderCubeAnalysis(container: HTMLDivElement, analysis: CubeAnalysis): 
         playerLine.className = 'cube-line winning-chances';
         const playerLabel = document.createElement('span');
         playerLabel.className = 'winning-label';
-        playerLabel.textContent = 'Player Winning Chances:';
+        playerLabel.textContent = 'Player winning chances:';
         const playerStats = document.createElement('span');
         playerStats.className = 'winning-stats';
         playerStats.textContent = `${analysis.playerWinning.win.toFixed(2)}% (G:${analysis.playerWinning.gammon.toFixed(2)}% B:${analysis.playerWinning.backgammon.toFixed(2)}%)`;
@@ -163,7 +96,7 @@ function renderCubeAnalysis(container: HTMLDivElement, analysis: CubeAnalysis): 
         opponentLine.className = 'cube-line winning-chances';
         const opponentLabel = document.createElement('span');
         opponentLabel.className = 'winning-label';
-        opponentLabel.textContent = 'Opponent Winning Chances:';
+        opponentLabel.textContent = 'Opponent winning chances:';
         const opponentStats = document.createElement('span');
         opponentStats.className = 'winning-stats';
         opponentStats.textContent = `${analysis.opponentWinning.win.toFixed(2)}% (G:${analysis.opponentWinning.gammon.toFixed(2)}% B:${analysis.opponentWinning.backgammon.toFixed(2)}%)`;
@@ -182,7 +115,7 @@ function renderCubeAnalysis(container: HTMLDivElement, analysis: CubeAnalysis): 
         
         const title = document.createElement('div');
         title.className = 'cube-title';
-        title.textContent = 'Cubeful Equities:';
+        title.textContent = 'Cubeful equities:';
         
         const equityTable = document.createElement('div');
         equityTable.className = 'equity-table';
@@ -249,7 +182,7 @@ function renderCubeAnalysis(container: HTMLDivElement, analysis: CubeAnalysis): 
     if (analysis.bestAction) {
         const actionDiv = document.createElement('div');
         actionDiv.className = 'best-action';
-        actionDiv.textContent = `Best Cube action: ${analysis.bestAction}`;
+        actionDiv.textContent = `Best cube action: ${analysis.bestAction}`;
         cubeDiv.appendChild(actionDiv);
     }
     

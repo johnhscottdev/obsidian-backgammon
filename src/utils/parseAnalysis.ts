@@ -54,7 +54,7 @@ function parseMoveAnalysis(text: string): MoveAnalysis {
         
         // Match move lines like "1. Book¹       Bar/20 13/11                 eq:+0.095"
         // Format: rank. analysisLevel [whitespace] move [whitespace] eq:equity (diff)
-        const moveMatch = line.match(/^(\d+)\.\s+(.+?)\s+eq:([\+\-]\d+\.\d+)(?:\s+\(([\+\-]\d+\.\d+)\))?/);
+        const moveMatch = line.match(/^(\d+)\.\s+(.+?)\s+eq:([+\-]\d+\.\d+)(?:\s+\(([+\-]\d+\.\d+)\))?/);
         
         if (moveMatch) {
             const [, rank, remainder, equity, equityDiff] = moveMatch;
@@ -165,7 +165,7 @@ function parseCubeAnalysis(text: string): CubeAnalysis {
         }
         
         // Cubeless Equities: No Double=+0.082, Double=+0.159
-        const cubelessMatch = trimmed.match(/Cubeless Equities:\s+No Double=([\+\-]\d+\.\d+),\s+Double=([\+\-]\d+\.\d+)/);
+        const cubelessMatch = trimmed.match(/Cubeless Equities:\s+No Double=([+\-]\d+\.\d+),\s+Double=([+\-]\d+\.\d+)/);
         if (cubelessMatch) {
             cubelessEquities = {
                 noDouble: parseFloat(cubelessMatch[1]),
@@ -175,7 +175,7 @@ function parseCubeAnalysis(text: string): CubeAnalysis {
         
         // Cubeful Equities - parse multiple lines
         if (trimmed.includes('No double:')) {
-            const noDoubleMatch = trimmed.match(/No double:\s+([\+\-]\d+\.\d+)(?:\s+\(([\+\-]\d+\.\d+)\))?/);
+            const noDoubleMatch = trimmed.match(/No double:\s+([+\-]\d+\.\d+)(?:\s+\(([+\-]\d+\.\d+)\))?/);
             if (noDoubleMatch) {
                 cubefulEquities = { 
                     ...cubefulEquities, 
@@ -186,7 +186,7 @@ function parseCubeAnalysis(text: string): CubeAnalysis {
         }
         
         if (trimmed.includes('Double/Take:')) {
-            const takeMatch = trimmed.match(/Double\/Take:\s+([\+\-]\d+\.\d+)(?:\s+\(([\+\-]\d+\.\d+)\))?/);
+            const takeMatch = trimmed.match(/Double\/Take:\s+([+\-]\d+\.\d+)(?:\s+\(([+\-]\d+\.\d+)\))?/);
             if (takeMatch) {
                 cubefulEquities = { 
                     ...cubefulEquities, 
@@ -197,7 +197,7 @@ function parseCubeAnalysis(text: string): CubeAnalysis {
         }
         
         if (trimmed.includes('Double/Beaver:')) {
-            const beaverMatch = trimmed.match(/Double\/Beaver:\s+([\+\-]\d+\.\d+)(?:\s+\(([\+\-]\d+\.\d+)\))?/);
+            const beaverMatch = trimmed.match(/Double\/Beaver:\s+([+\-]\d+\.\d+)(?:\s+\(([+\-]\d+\.\d+)\))?/);
             if (beaverMatch) {
                 cubefulEquities = { 
                     ...cubefulEquities, 
@@ -208,7 +208,7 @@ function parseCubeAnalysis(text: string): CubeAnalysis {
         }
         
         if (trimmed.includes('Double/Pass:')) {
-            const passMatch = trimmed.match(/Double\/Pass:\s+([\+\-]\d+\.\d+)(?:\s+\(([\+\-]\d+\.\d+)\))?/);
+            const passMatch = trimmed.match(/Double\/Pass:\s+([+\-]\d+\.\d+)(?:\s+\(([+\-]\d+\.\d+)\))?/);
             if (passMatch) {
                 cubefulEquities = { 
                     ...cubefulEquities, 

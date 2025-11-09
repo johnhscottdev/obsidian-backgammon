@@ -10,7 +10,7 @@ import { renderBoard, parseXGID, extractAnalysisText, parseAnalysis, renderAnaly
 
 
 export default class BackgammonPlugin extends Plugin {
-    async onload(): Promise<void> {
+    onload(): void {
         // Different approach - create visual effect using margins and container width
         this.registerMarkdownCodeBlockProcessor('xgid', (source, el) => {
             try {
@@ -47,14 +47,14 @@ export default class BackgammonPlugin extends Plugin {
                     
                     // Check if dice are rolled (move decision)
                     if (data.die1 > 0 && data.die2 > 0) {
-                        const diceText = data.die1 === data.die2 ? 
+                        const diceText = data.die1 === data.die2 ?
                             `${data.die1}${data.die1}` : // Doubles: "66"
                             `${data.die1}${data.die2}`;  // Regular: "63"
-                        return `${playerName} to Play ${diceText}`;
+                        return `${playerName} to play ${diceText}`;
                     }
-                    
+
                     // No dice rolled - cube decision
-                    return `${playerName} on Roll - Cube Decision`;
+                    return `${playerName} on roll - cube decision`;
                 };
                 
                 headerBar.setText(getActionText(boardData));

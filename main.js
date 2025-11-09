@@ -106,12 +106,11 @@ function renderBoard(el, boardData) {
     const canvasHeight = styleConfig.boardHeight;
     canvas.width = canvasWidth;
     canvas.height = canvasHeight;
-    if (canvas.style) {
-      canvas.style.width = `${canvasWidth}px`;
-      canvas.style.height = `${canvasHeight}px`;
-      canvas.style.maxWidth = "100%";
-      canvas.style.height = "auto";
-    }
+    canvas.setCssProps({
+      width: `${canvasWidth}px`,
+      height: "auto",
+      maxWidth: "100%"
+    });
     const availableWidth = canvasWidth - internalMargin * 2;
     const scaleX = availableWidth / styleConfig.boardWidth;
     ctx.setTransform(scaleX, 0, 0, 1, internalMargin, 0);
@@ -486,7 +485,7 @@ function parseXGID(xgid) {
     throw new Error('No line found starting with "XGID="');
   }
   const cleanXgid = xgidLine.trim();
-  if (!cleanXgid.match(/^XGID=[a-zA-Z\-]+:[0-9]+:-?[0-9]+:-?[0-9]+:/)) {
+  if (!cleanXgid.match(/^XGID=[a-zA-Z-]+:[0-9]+:-?[0-9]+:-?[0-9]+:/)) {
     throw new Error("Invalid XGID format: does not match expected pattern");
   }
   const xgidString = cleanXgid;
@@ -594,7 +593,7 @@ function parseMoveAnalysis(text) {
   const lines = text.split("\n");
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
-    const moveMatch = line.match(/^(\d+)\.\s+(.+?)\s+eq:([\+\-]\d+\.\d+)(?:\s+\(([\+\-]\d+\.\d+)\))?/);
+    const moveMatch = line.match(/^(\d+)\.\s+(.+?)\s+eq:([+\-]\d+\.\d+)(?:\s+\(([+\-]\d+\.\d+)\))?/);
     if (moveMatch) {
       const [, rank, remainder, equity, equityDiff] = moveMatch;
       const parts = remainder.trim().split(/\s+/);
@@ -679,7 +678,7 @@ function parseCubeAnalysis(text) {
         backgammon: parseFloat(opponentMatch[3])
       };
     }
-    const cubelessMatch = trimmed.match(/Cubeless Equities:\s+No Double=([\+\-]\d+\.\d+),\s+Double=([\+\-]\d+\.\d+)/);
+    const cubelessMatch = trimmed.match(/Cubeless Equities:\s+No Double=([+\-]\d+\.\d+),\s+Double=([+\-]\d+\.\d+)/);
     if (cubelessMatch) {
       cubelessEquities = {
         noDouble: parseFloat(cubelessMatch[1]),
@@ -687,7 +686,7 @@ function parseCubeAnalysis(text) {
       };
     }
     if (trimmed.includes("No double:")) {
-      const noDoubleMatch = trimmed.match(/No double:\s+([\+\-]\d+\.\d+)(?:\s+\(([\+\-]\d+\.\d+)\))?/);
+      const noDoubleMatch = trimmed.match(/No double:\s+([+\-]\d+\.\d+)(?:\s+\(([+\-]\d+\.\d+)\))?/);
       if (noDoubleMatch) {
         cubefulEquities = {
           ...cubefulEquities,
@@ -697,7 +696,7 @@ function parseCubeAnalysis(text) {
       }
     }
     if (trimmed.includes("Double/Take:")) {
-      const takeMatch = trimmed.match(/Double\/Take:\s+([\+\-]\d+\.\d+)(?:\s+\(([\+\-]\d+\.\d+)\))?/);
+      const takeMatch = trimmed.match(/Double\/Take:\s+([+\-]\d+\.\d+)(?:\s+\(([+\-]\d+\.\d+)\))?/);
       if (takeMatch) {
         cubefulEquities = {
           ...cubefulEquities,
@@ -707,7 +706,7 @@ function parseCubeAnalysis(text) {
       }
     }
     if (trimmed.includes("Double/Beaver:")) {
-      const beaverMatch = trimmed.match(/Double\/Beaver:\s+([\+\-]\d+\.\d+)(?:\s+\(([\+\-]\d+\.\d+)\))?/);
+      const beaverMatch = trimmed.match(/Double\/Beaver:\s+([+\-]\d+\.\d+)(?:\s+\(([+\-]\d+\.\d+)\))?/);
       if (beaverMatch) {
         cubefulEquities = {
           ...cubefulEquities,
@@ -717,7 +716,7 @@ function parseCubeAnalysis(text) {
       }
     }
     if (trimmed.includes("Double/Pass:")) {
-      const passMatch = trimmed.match(/Double\/Pass:\s+([\+\-]\d+\.\d+)(?:\s+\(([\+\-]\d+\.\d+)\))?/);
+      const passMatch = trimmed.match(/Double\/Pass:\s+([+\-]\d+\.\d+)(?:\s+\(([+\-]\d+\.\d+)\))?/);
       if (passMatch) {
         cubefulEquities = {
           ...cubefulEquities,
@@ -798,7 +797,7 @@ function renderCubeAnalysis(container, analysis) {
     playerLine.className = "cube-line winning-chances";
     const playerLabel = document.createElement("span");
     playerLabel.className = "winning-label";
-    playerLabel.textContent = "Player Winning Chances:";
+    playerLabel.textContent = "Player winning chances:";
     const playerStats = document.createElement("span");
     playerStats.className = "winning-stats";
     playerStats.textContent = `${analysis.playerWinning.win.toFixed(2)}% (G:${analysis.playerWinning.gammon.toFixed(2)}% B:${analysis.playerWinning.backgammon.toFixed(2)}%)`;
@@ -808,7 +807,7 @@ function renderCubeAnalysis(container, analysis) {
     opponentLine.className = "cube-line winning-chances";
     const opponentLabel = document.createElement("span");
     opponentLabel.className = "winning-label";
-    opponentLabel.textContent = "Opponent Winning Chances:";
+    opponentLabel.textContent = "Opponent winning chances:";
     const opponentStats = document.createElement("span");
     opponentStats.className = "winning-stats";
     opponentStats.textContent = `${analysis.opponentWinning.win.toFixed(2)}% (G:${analysis.opponentWinning.gammon.toFixed(2)}% B:${analysis.opponentWinning.backgammon.toFixed(2)}%)`;
@@ -823,7 +822,7 @@ function renderCubeAnalysis(container, analysis) {
     cubefulDiv.className = "cube-section";
     const title = document.createElement("div");
     title.className = "cube-title";
-    title.textContent = "Cubeful Equities:";
+    title.textContent = "Cubeful equities:";
     const equityTable = document.createElement("div");
     equityTable.className = "equity-table";
     if (analysis.cubefulEquities.noDouble !== void 0) {
@@ -881,7 +880,7 @@ function renderCubeAnalysis(container, analysis) {
   if (analysis.bestAction) {
     const actionDiv = document.createElement("div");
     actionDiv.className = "best-action";
-    actionDiv.textContent = `Best Cube action: ${analysis.bestAction}`;
+    actionDiv.textContent = `Best cube action: ${analysis.bestAction}`;
     cubeDiv.appendChild(actionDiv);
   }
   container.appendChild(cubeDiv);
@@ -889,7 +888,7 @@ function renderCubeAnalysis(container, analysis) {
 
 // src/main.ts
 var BackgammonPlugin = class extends import_obsidian.Plugin {
-  async onload() {
+  onload() {
     this.registerMarkdownCodeBlockProcessor("xgid", (source, el) => {
       try {
         const lines = source.split("\n");
@@ -912,9 +911,9 @@ var BackgammonPlugin = class extends import_obsidian.Plugin {
               // Doubles: "66"
               `${data.die1}${data.die2}`
             );
-            return `${playerName} to Play ${diceText}`;
+            return `${playerName} to play ${diceText}`;
           }
-          return `${playerName} on Roll - Cube Decision`;
+          return `${playerName} on roll - cube decision`;
         };
         headerBar.setText(getActionText(boardData));
         renderBoard(wrapper, boardData);
