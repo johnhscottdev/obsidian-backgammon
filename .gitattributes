@@ -1,0 +1,7 @@
+# Store and check out text files with LF line endings, whatever core.autocrlf says.
+# Obsidian and esbuild both write LF, so CRLF checkouts showed files as modified
+# after merely viewing the vault or running a build.
+* text=auto eol=lf
+
+*.pdf binary
+*.png binary
