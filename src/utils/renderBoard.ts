@@ -540,6 +540,9 @@ function renderPipCounts(ctx: CanvasRenderingContext2D, boardData: BackgammonPos
 	drawPipCount(boardData.pipCountO, barCenterX, boardTop + margin);
 }
 
+const MAX_CHECKERS_PER_POINT = 5;
+const MAX_CHECKERS_ON_BAR = 4;
+
 export function drawCheckers(ctx: CanvasRenderingContext2D, boardData: BackgammonPosition): void {
 
 	// Helper to get x-position from point number (1–24)
@@ -588,12 +591,21 @@ export function drawCheckers(ctx: CanvasRenderingContext2D, boardData: Backgammo
 		const direction = isTop ? 1 : -1;
 		ctx.lineWidth = 1;
 
-		for (let j = 0; j < point.checkerCount; j++) {
-			let checkerColor = point.player === 'X' ? styleConfig.colors.checkerBlack : styleConfig.colors.checkerWhite;
-			let xPos = x;
-			let yPos = yStart + direction * j * styleConfig.checkerRadius*2;
-			drawCheckerAtPosition(ctx, xPos, yPos, checkerColor);
-			//drawCheckerLabel(ctx, xPos, yPos, absolutePointNumber.toString(), point.player === 'X' ? 'black' : 'white');
+		// Cap the stack so it never crosses the centre line: 5 fit on a point, but only 4 on the
+		// bar, which starts one checker further in (to leave room for the pip count).
+		const maxDrawn = onBar ? MAX_CHECKERS_ON_BAR : MAX_CHECKERS_PER_POINT;
+		const drawnCount = Math.min(point.checkerCount, maxDrawn);
+		const isBlack = point.player === 'X';
+		const checkerColor = isBlack ? styleConfig.colors.checkerBlack : styleConfig.colors.checkerWhite;
+		const labelColor = isBlack ? styleConfig.colors.checkerWhite : styleConfig.colors.checkerBlack;
+
+		for (let j = 0; j < drawnCount; j++) {
+			const yPos = yStart + direction * j * styleConfig.checkerRadius*2;
+			drawCheckerAtPosition(ctx, x, yPos, checkerColor);
+			// Label the first checker (nearest the edge) with the total when some aren't drawn
+			if (j === 0 && point.checkerCount > drawnCount) {
+				drawCheckerLabel(ctx, x, yPos, point.checkerCount.toString(), labelColor);
+			}
 		}
 	};
 

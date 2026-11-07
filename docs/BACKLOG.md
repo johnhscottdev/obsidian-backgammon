@@ -6,9 +6,9 @@ then tick it off here.
 
 ## Bugs
 
-- [ ] **Tall stacks overflow their point.** No cap on checkers drawn per point. The 6th checker
+- [x] **Tall stacks overflow their point.** (fixed 2026-11-07) No cap on checkers drawn per point. The 6th checker
   crosses the center line and the 7th+ overlap the opposite stack (`renderBoard.ts`, `drawCheckers`).
-  Fix: draw at most 5 and label the top checker with the total.
+  Fix: draw at most 5 and label the first checker (nearest the edge) with the total.
   Vault: `01 Board positions` → "15 checkers on one point" and "Bear-off with 7 on the 6-point".
 - [ ] **Redouble analysis is dropped.** Cube analysis only matches `No double:` / `Double/Take:` /
   `Double/Pass:`. When the cube is owned XG prints `No redouble:` / `Redouble/Take:` / `Redouble/Pass:`,

@@ -46,19 +46,24 @@ XGID=c-----E-C---dD---c-e-----C:0:0:1:31:0:0:3:0:10
 ```
 
 ## 15 checkers on one point
-**Known bug** (stacks overflow, see `docs/BACKLOG.md`).
-**Expect:** All 15 black checkers on Black's 6-point and all 15 white on White's 6-point. At most 5 checkers drawn per point with the top one labelled "15". Nothing crosses the centre line. Pip counts 90 / 90.
+**Expect:** All 15 black checkers on Black's 6-point and all 15 white on White's 6-point. At most 5 checkers drawn per point, with the first checker (nearest the board edge) labelled "15". Nothing crosses the centre line. Pip counts 90 / 90.
 
 ```xgid
 XGID=------O------------o------:0:0:1:21:0:0:3:0:10
 ```
 
 ## Bear-off with 7 on the 6-point
-**Known bug** (stacks overflow, see `docs/BACKLOG.md`).
-**Expect:** Black: 7 on 6, 4 on 5, 4 on 4. White mirrored. The 7-stacks don't reach the centre or touch the opposite stack (max 5 drawn, labelled "7"). Pip counts 78 / 78.
+**Expect:** Black: 7 on 6, 4 on 5, 4 on 4. White mirrored. The 7-stacks don't reach the centre or touch the opposite stack (max 5 drawn, the first checker nearest the edge labelled "7"). Pip counts 78 / 78.
 
 ```xgid
 XGID=----DDG------------gdd----:0:0:1:64:0:0:3:0:10
+```
+
+## 9 checkers on the bar for each player
+**Expect:** Black: 6 on its 6-point and 9 on the bar (top half of the bar). White: 6 on its 6-point and 9 on the bar (bottom half). Bar stacks are drawn as 4 checkers with the first one (nearest the board edge, next to the pip count) labelled "9"; the 6-point stacks as 5 labelled "6". Labels are white on black checkers and black on white checkers. Nothing crosses the centre line. Pip counts 261 / 261.
+
+```xgid
+XGID=i-----F------------f-----I:0:0:1:00:0:0:3:0:10
 ```
 
 ## Checkers borne off

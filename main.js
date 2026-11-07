@@ -405,6 +405,8 @@ function renderPipCounts(ctx, boardData) {
   drawPipCount(boardData.pipCountX, barCenterX, boardBottom - margin);
   drawPipCount(boardData.pipCountO, barCenterX, boardTop + margin);
 }
+var MAX_CHECKERS_PER_POINT = 5;
+var MAX_CHECKERS_ON_BAR = 4;
 function drawCheckers(ctx, boardData) {
   const getPointX = (absolutePointNumber) => {
     let index = 0;
@@ -438,11 +440,17 @@ function drawCheckers(ctx, boardData) {
     const yStart = isTop ? boardTop + margin : boardBottom - margin;
     const direction = isTop ? 1 : -1;
     ctx.lineWidth = 1;
-    for (let j = 0; j < point.checkerCount; j++) {
-      let checkerColor = point.player === "X" ? styleConfig.colors.checkerBlack : styleConfig.colors.checkerWhite;
-      let xPos = x;
-      let yPos = yStart + direction * j * styleConfig.checkerRadius * 2;
-      drawCheckerAtPosition(ctx, xPos, yPos, checkerColor);
+    const maxDrawn = onBar ? MAX_CHECKERS_ON_BAR : MAX_CHECKERS_PER_POINT;
+    const drawnCount = Math.min(point.checkerCount, maxDrawn);
+    const isBlack = point.player === "X";
+    const checkerColor = isBlack ? styleConfig.colors.checkerBlack : styleConfig.colors.checkerWhite;
+    const labelColor = isBlack ? styleConfig.colors.checkerWhite : styleConfig.colors.checkerBlack;
+    for (let j = 0; j < drawnCount; j++) {
+      const yPos = yStart + direction * j * styleConfig.checkerRadius * 2;
+      drawCheckerAtPosition(ctx, x, yPos, checkerColor);
+      if (j === 0 && point.checkerCount > drawnCount) {
+        drawCheckerLabel(ctx, x, yPos, point.checkerCount.toString(), labelColor);
+      }
     }
   }
   ;

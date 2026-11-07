@@ -93,3 +93,19 @@ Jest: `tests/turnField.test.ts`.
 ```xgid
 XGID=--CAABD---------D---cdbba-:1:-1:0:00:0:0:0:0:10
 ```
+
+## Tall stacks overflowed their point (fixed 2026-11-07)
+There was no cap on checkers drawn per point, so the 6th checker crossed the centre line and the
+7th and later overlapped the opposite stack. Now at most 5 are drawn on a point (4 on the bar,
+which starts further in) and the first checker (nearest the board edge) is labelled with the total.
+See also "15 checkers on one point", "Bear-off with 7 on the 6-point" and "9 checkers on the bar for each player" in [[01 Board positions]].
+Jest: `tests/tallStacks.test.ts`.
+
+**Expect:** Black: 9 on its 6-point, drawn as 5 with the first one (nearest the edge) labelled "9" in white, and 6 on
+the bar (top half), drawn as 4 with the first one labelled "6" in white. White mirrored: 9 on its
+6-point and 6 on the bar (bottom half), labels in black. No stack reaches the centre line or the
+opposite stack. Pip counts 204 / 204.
+
+```xgid
+XGID=f-----I------------i-----F:0:0:1:00:0:0:3:0:10
+```
