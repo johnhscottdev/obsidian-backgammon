@@ -92,7 +92,6 @@ eXtreme Gammon Version: 2.10
 ```
 
 ## Redouble / No redouble (9-point match, Black owns the cube)
-**Known bug** (redouble lines aren't parsed, see `docs/BACKLOG.md`).
 **Expect:** Cube shows 2 at the **bottom** of the left tray. Score boxes White 0, Length 9, Black 0.
 Pip counts 134 (Black) / 106 (White). Header "Black on roll - cube decision". Below the board:
 Player winning chances 64.84% (G:12.13% B:0.47%), Opponent 35.16% (G:10.10% B:0.21%).

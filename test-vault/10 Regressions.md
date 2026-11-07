@@ -30,8 +30,8 @@ line, with the rest of the XGID on the next line. The plugin showed "Invalid XGI
 White on roll (header "White on roll - cube decision"), point numbers in White's view. Cube 2 at the
 **top** of the left tray (White owns it). Score boxes White 0, Length 9, Black 1. Pip counts
 Black 47 / White 42. Borne off: Black 4, White 3. Below the board: winning chances 74.36% / 25.64%
-and "Best cube action: Redouble / Take". (The redouble cubeful equities are missing until the
-redouble-parsing bug in `docs/BACKLOG.md` is fixed.)
+Cubeful equities: No redouble +0.791 (-0.099), Redouble/Take +0.889, Redouble/Pass +1.000 (+0.111).
+"Best cube action: Redouble / Take".
 Note: XG's text calls the player on roll "X", so XG's X (Amy, 42 pips) is the plugin's White here.
 Confirmed: XG's Ctrl+Shift+C copy of this position is exactly the repaired XGID above, and Ctrl+C
 reproduces the split every time.
@@ -108,4 +108,53 @@ opposite stack. Pip counts 204 / 204.
 
 ```xgid
 XGID=f-----I------------i-----F:0:0:1:00:0:0:3:0:10
+```
+
+## Redouble analysis dropped (fixed 2026-11-07)
+When the cube is already owned, XG writes "No redouble" / "Redouble/Take" / "Redouble/Pass" (and
+"Redouble/Beaver" in money play). Only the "double" wording was parsed, so the cubeful equities were
+missing below the board. The split-XGID entry above was affected too.
+Jest: `tests/redoubleAnalysis.test.ts` (also covers Redouble/Beaver, with constructed text until a
+real XG copy is available).
+**Expect:** Below the board, "Cubeful equities:" with three rows in XG's wording:
+No redouble +0.582, Redouble/Take +0.449 (-0.133), Redouble/Pass +1.000 (+0.418).
+"Best cube action: No redouble / Take". Board as in [[04 Cube analysis]] → "Redouble / No redouble".
+
+```xgid
+XGID=--a--CCBCa---C---d-bb-cbA-:1:1:1:00:0:0:0:9:10
+X:Jeremy Ly   O:John Scott
+
+Score is X:0 O:0 9 pt.(s) match.
+ +13-14-15-16-17-18------19-20-21-22-23-24-+
+ | X           O    |   | O  O     O  O  X |
+ | X           O    |   | O  O     O  O    |
+ | X           O    |   |          O       |
+ |             O    |   |                  |
+ |                  |   |                  |
+ |                  |BAR|                  |
+ |                  |   |                  |
+ |                  |   |                  |
+ |             X    |   | X  X             | +---+
+ |             X  X |   | X  X             | | 2 |
+ |          O  X  X |   | X  X        O    | +---+
+ +12-11-10--9--8--7-------6--5--4--3--2--1-+
+Pip count  X: 134  O: 106 X-O: 0-0/9
+Cube: 2, X own cube
+X on roll, cube action
+
+Analyzed in XG Roller+
+Player Winning Chances:   64.84% (G:12.13% B:0.47%)
+Opponent Winning Chances: 35.16% (G:10.10% B:0.21%)
+
+Cubeless Equities: No Double=+0.321, Double=+0.652
+
+Cubeful Equities:
+       No redouble:     +0.582
+       Redouble/Take:   +0.449 (-0.133)
+       Redouble/Pass:   +1.000 (+0.418)
+
+Best Cube action: No redouble / Take
+Percentage of wrong pass needed to make the double decision right: 19.5%
+
+eXtreme Gammon Version: 2.10, MET: Kazaross XG2
 ```

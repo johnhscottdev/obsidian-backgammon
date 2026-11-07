@@ -120,56 +120,22 @@ function renderCubeAnalysis(container: HTMLDivElement, analysis: CubeAnalysis): 
         const equityTable = document.createElement('div');
         equityTable.className = 'equity-table';
         
-        if (analysis.cubefulEquities.noDouble !== undefined) {
+        const eq = analysis.cubefulEquities;
+        // XG says "redouble" once the cube is owned; show its wording
+        const verb = eq.redouble ? 'Redouble' : 'Double';
+        const rows: [string, number | undefined, number | undefined][] = [
+            [`No ${verb.toLowerCase()}:`, eq.noDouble, eq.noDoubleDiff],
+            [`${verb}/Take:`, eq.doubleTake, eq.doubleTakeDiff],
+            [`${verb}/Beaver:`, eq.doubleBeaver, eq.doubleBeaverDiff],
+            [`${verb}/Pass:`, eq.doublePass, eq.doublePassDiff],
+        ];
+        for (const [label, equity, diff] of rows) {
+            if (equity === undefined) continue;
             const row = document.createElement('div');
             row.className = 'equity-row';
-            let baseValue = analysis.cubefulEquities.noDouble >= 0 ? `+${analysis.cubefulEquities.noDouble.toFixed(3)}` : analysis.cubefulEquities.noDouble.toFixed(3);
-            let diffValue = '';
-            if (analysis.cubefulEquities.noDoubleDiff !== undefined) {
-                const diff = analysis.cubefulEquities.noDoubleDiff >= 0 ? `+${analysis.cubefulEquities.noDoubleDiff.toFixed(3)}` : analysis.cubefulEquities.noDoubleDiff.toFixed(3);
-                diffValue = ` (${diff})`;
-            }
-            // Use fixed-width formatting: label padded to 15 chars, then equity
-            row.textContent = 'No double:'.padEnd(20) + baseValue + diffValue;
-            equityTable.appendChild(row);
-        }
-        
-        if (analysis.cubefulEquities.doubleTake !== undefined) {
-            const row = document.createElement('div');
-            row.className = 'equity-row';
-            let baseValue = analysis.cubefulEquities.doubleTake >= 0 ? `+${analysis.cubefulEquities.doubleTake.toFixed(3)}` : analysis.cubefulEquities.doubleTake.toFixed(3);
-            let diffValue = '';
-            if (analysis.cubefulEquities.doubleTakeDiff !== undefined) {
-                const diff = analysis.cubefulEquities.doubleTakeDiff >= 0 ? `+${analysis.cubefulEquities.doubleTakeDiff.toFixed(3)}` : analysis.cubefulEquities.doubleTakeDiff.toFixed(3);
-                diffValue = ` (${diff})`;
-            }
-            row.textContent = 'Double/Take:'.padEnd(20) + baseValue + diffValue;
-            equityTable.appendChild(row);
-        }
-        
-        if (analysis.cubefulEquities.doubleBeaver !== undefined) {
-            const row = document.createElement('div');
-            row.className = 'equity-row';
-            let baseValue = analysis.cubefulEquities.doubleBeaver >= 0 ? `+${analysis.cubefulEquities.doubleBeaver.toFixed(3)}` : analysis.cubefulEquities.doubleBeaver.toFixed(3);
-            let diffValue = '';
-            if (analysis.cubefulEquities.doubleBeaverDiff !== undefined) {
-                const diff = analysis.cubefulEquities.doubleBeaverDiff >= 0 ? `+${analysis.cubefulEquities.doubleBeaverDiff.toFixed(3)}` : analysis.cubefulEquities.doubleBeaverDiff.toFixed(3);
-                diffValue = ` (${diff})`;
-            }
-            row.textContent = 'Double/Beaver:'.padEnd(20) + baseValue + diffValue;
-            equityTable.appendChild(row);
-        }
-        
-        if (analysis.cubefulEquities.doublePass !== undefined) {
-            const row = document.createElement('div');
-            row.className = 'equity-row';
-            let baseValue = analysis.cubefulEquities.doublePass >= 0 ? `+${analysis.cubefulEquities.doublePass.toFixed(3)}` : analysis.cubefulEquities.doublePass.toFixed(3);
-            let diffValue = '';
-            if (analysis.cubefulEquities.doublePassDiff !== undefined) {
-                const diff = analysis.cubefulEquities.doublePassDiff >= 0 ? `+${analysis.cubefulEquities.doublePassDiff.toFixed(3)}` : analysis.cubefulEquities.doublePassDiff.toFixed(3);
-                diffValue = ` (${diff})`;
-            }
-            row.textContent = 'Double/Pass:'.padEnd(20) + baseValue + diffValue;
+            // Fixed-width formatting: label padded to 20 chars, then equity and optional diff
+            const diffText = diff !== undefined ? ` (${formatSigned(diff)})` : '';
+            row.textContent = label.padEnd(20) + formatSigned(equity) + diffText;
             equityTable.appendChild(row);
         }
         
@@ -187,4 +153,9 @@ function renderCubeAnalysis(container: HTMLDivElement, analysis: CubeAnalysis): 
     }
     
     container.appendChild(cubeDiv);
+}
+
+/** Formats an equity with an explicit sign and 3 decimals, e.g. +0.582 or -0.133. */
+function formatSigned(value: number): string {
+    return value >= 0 ? `+${value.toFixed(3)}` : value.toFixed(3);
 }

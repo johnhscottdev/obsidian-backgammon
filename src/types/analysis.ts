@@ -37,6 +37,8 @@ export interface CubelessEquities {
 }
 
 export interface CubefulEquities {
+    /** True when XG used the redouble wording ("No redouble", "Redouble/Take", ...) */
+    redouble?: boolean;
     noDouble?: number;
     noDoubleDiff?: number;
     doubleTake?: number;

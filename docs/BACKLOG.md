@@ -10,7 +10,8 @@ then tick it off here.
   crosses the center line and the 7th+ overlap the opposite stack (`renderBoard.ts`, `drawCheckers`).
   Fix: draw at most 5 and label the first checker (nearest the edge) with the total.
   Vault: `01 Board positions` → "15 checkers on one point" and "Bear-off with 7 on the 6-point".
-- [ ] **Redouble analysis is dropped.** Cube analysis only matches `No double:` / `Double/Take:` /
+- [x] **Redouble analysis is dropped.** (fixed 2026-11-07; Redouble/Beaver is handled but only
+  tested with constructed text, so a real XG copy of one would be a good vault addition) Cube analysis only matches `No double:` / `Double/Take:` /
   `Double/Pass:`. When the cube is owned XG prints `No redouble:` / `Redouble/Take:` / `Redouble/Pass:`,
   so the cubeful equities are missing (`parseAnalysis.ts`).
   Vault: `04 Cube analysis` → "Redouble / No redouble" (real XG copy).
@@ -32,7 +33,8 @@ then tick it off here.
   docs describe the field order differently from what XG actually writes.
 - [ ] `coverage/` and `dist/` are in `.gitignore` but still tracked. Run `git rm -r --cached coverage dist`.
 - [ ] `extractMoveBlocks` in `parseXGID.ts` is unused.
-- [ ] `renderCubeAnalysis` repeats the same row-formatting block four times; pull out a helper.
+- [x] `renderCubeAnalysis` repeats the same row-formatting block four times; pull out a helper.
+  (done with the redouble fix)
 - [ ] Stale comments: `main.ts` header says the block is `backgammon` (it's `xgid`); XGID field
   comments in `parseXGID.ts` say cube owner `2` = O and turn `0` = X (XG uses `-1` / `1`).
 - [ ] `obsidian` should be a devDependency in `package.json`.

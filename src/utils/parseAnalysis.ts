@@ -1,4 +1,11 @@
-import { AnalysisData, MoveAnalysis, CubeAnalysis, PlayerStats, MoveData } from '../types/analysis';
+import { AnalysisData, MoveAnalysis, CubeAnalysis, CubefulEquities, PlayerStats, MoveData } from '../types/analysis';
+
+type CubefulKey = 'noDouble' | 'doubleTake' | 'doubleBeaver' | 'doublePass';
+const CUBEFUL_KEYS: Record<string, CubefulKey> = {
+    take: 'doubleTake',
+    beaver: 'doubleBeaver',
+    pass: 'doublePass',
+};
 
 /**
  * Extracts analysis text from XGID code block content
@@ -138,7 +145,7 @@ function parseCubeAnalysis(text: string): CubeAnalysis {
     let playerWinning: PlayerStats | null = null;
     let opponentWinning: PlayerStats | null = null;
     let cubelessEquities = null;
-    let cubefulEquities = {};
+    const cubefulEquities: CubefulEquities = {};
     let bestAction: string | null = null;
     
     for (const line of lines) {
@@ -173,49 +180,20 @@ function parseCubeAnalysis(text: string): CubeAnalysis {
             };
         }
         
-        // Cubeful Equities - parse multiple lines
-        if (trimmed.includes('No double:')) {
-            const noDoubleMatch = trimmed.match(/No double:\s+([+\-]\d+\.\d+)(?:\s+\(([+\-]\d+\.\d+)\))?/);
-            if (noDoubleMatch) {
-                cubefulEquities = { 
-                    ...cubefulEquities, 
-                    noDouble: parseFloat(noDoubleMatch[1]),
-                    noDoubleDiff: noDoubleMatch[2] ? parseFloat(noDoubleMatch[2]) : undefined
-                };
-            }
-        }
-        
-        if (trimmed.includes('Double/Take:')) {
-            const takeMatch = trimmed.match(/Double\/Take:\s+([+\-]\d+\.\d+)(?:\s+\(([+\-]\d+\.\d+)\))?/);
-            if (takeMatch) {
-                cubefulEquities = { 
-                    ...cubefulEquities, 
-                    doubleTake: parseFloat(takeMatch[1]),
-                    doubleTakeDiff: takeMatch[2] ? parseFloat(takeMatch[2]) : undefined
-                };
-            }
-        }
-        
-        if (trimmed.includes('Double/Beaver:')) {
-            const beaverMatch = trimmed.match(/Double\/Beaver:\s+([+\-]\d+\.\d+)(?:\s+\(([+\-]\d+\.\d+)\))?/);
-            if (beaverMatch) {
-                cubefulEquities = { 
-                    ...cubefulEquities, 
-                    doubleBeaver: parseFloat(beaverMatch[1]),
-                    doubleBeaverDiff: beaverMatch[2] ? parseFloat(beaverMatch[2]) : undefined
-                };
-            }
-        }
-        
-        if (trimmed.includes('Double/Pass:')) {
-            const passMatch = trimmed.match(/Double\/Pass:\s+([+\-]\d+\.\d+)(?:\s+\(([+\-]\d+\.\d+)\))?/);
-            if (passMatch) {
-                cubefulEquities = { 
-                    ...cubefulEquities, 
-                    doublePass: parseFloat(passMatch[1]),
-                    doublePassDiff: passMatch[2] ? parseFloat(passMatch[2]) : undefined
-                };
-            }
+        // Cubeful Equities, one per line. XG uses the "redouble" wording once the cube is owned:
+        //   No double: / Double/Take: / Double/Beaver: / Double/Pass:
+        //   No redouble: / Redouble/Take: / Redouble/Beaver: / Redouble/Pass:
+        const cubefulMatch = trimmed.match(
+            /^(No (re)?double|(Re)?double\/(Take|Beaver|Pass)):\s+([+\-]\d+\.\d+)(?:\s+\(([+\-]\d+\.\d+)\))?/i
+        );
+        if (cubefulMatch) {
+            const [, label, noRe, re, response, equity, diff] = cubefulMatch;
+            const key = label.toLowerCase().startsWith('no')
+                ? 'noDouble'
+                : CUBEFUL_KEYS[response.toLowerCase()];
+            cubefulEquities[key] = parseFloat(equity);
+            cubefulEquities[`${key}Diff`] = diff ? parseFloat(diff) : undefined;
+            if (noRe || re) cubefulEquities.redouble = true;
         }
         
         // Best Cube action: No double / Beaver

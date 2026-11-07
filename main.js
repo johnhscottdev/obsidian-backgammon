@@ -596,6 +596,11 @@ function calculatePipCount(boardData, player) {
 }
 
 // src/utils/parseAnalysis.ts
+var CUBEFUL_KEYS = {
+  take: "doubleTake",
+  beaver: "doubleBeaver",
+  pass: "doublePass"
+};
 function extractAnalysisText(content) {
   const lines = content.split("\n");
   const xgidIndex = lines.findIndex((line) => line.trim().startsWith("XGID="));
@@ -690,7 +695,7 @@ function parseCubeAnalysis(text) {
   let playerWinning = null;
   let opponentWinning = null;
   let cubelessEquities = null;
-  let cubefulEquities = {};
+  const cubefulEquities = {};
   let bestAction = null;
   for (const line of lines) {
     const trimmed = line.trim();
@@ -717,45 +722,15 @@ function parseCubeAnalysis(text) {
         double: parseFloat(cubelessMatch[2])
       };
     }
-    if (trimmed.includes("No double:")) {
-      const noDoubleMatch = trimmed.match(/No double:\s+([+\-]\d+\.\d+)(?:\s+\(([+\-]\d+\.\d+)\))?/);
-      if (noDoubleMatch) {
-        cubefulEquities = {
-          ...cubefulEquities,
-          noDouble: parseFloat(noDoubleMatch[1]),
-          noDoubleDiff: noDoubleMatch[2] ? parseFloat(noDoubleMatch[2]) : void 0
-        };
-      }
-    }
-    if (trimmed.includes("Double/Take:")) {
-      const takeMatch = trimmed.match(/Double\/Take:\s+([+\-]\d+\.\d+)(?:\s+\(([+\-]\d+\.\d+)\))?/);
-      if (takeMatch) {
-        cubefulEquities = {
-          ...cubefulEquities,
-          doubleTake: parseFloat(takeMatch[1]),
-          doubleTakeDiff: takeMatch[2] ? parseFloat(takeMatch[2]) : void 0
-        };
-      }
-    }
-    if (trimmed.includes("Double/Beaver:")) {
-      const beaverMatch = trimmed.match(/Double\/Beaver:\s+([+\-]\d+\.\d+)(?:\s+\(([+\-]\d+\.\d+)\))?/);
-      if (beaverMatch) {
-        cubefulEquities = {
-          ...cubefulEquities,
-          doubleBeaver: parseFloat(beaverMatch[1]),
-          doubleBeaverDiff: beaverMatch[2] ? parseFloat(beaverMatch[2]) : void 0
-        };
-      }
-    }
-    if (trimmed.includes("Double/Pass:")) {
-      const passMatch = trimmed.match(/Double\/Pass:\s+([+\-]\d+\.\d+)(?:\s+\(([+\-]\d+\.\d+)\))?/);
-      if (passMatch) {
-        cubefulEquities = {
-          ...cubefulEquities,
-          doublePass: parseFloat(passMatch[1]),
-          doublePassDiff: passMatch[2] ? parseFloat(passMatch[2]) : void 0
-        };
-      }
+    const cubefulMatch = trimmed.match(
+      /^(No (re)?double|(Re)?double\/(Take|Beaver|Pass)):\s+([+\-]\d+\.\d+)(?:\s+\(([+\-]\d+\.\d+)\))?/i
+    );
+    if (cubefulMatch) {
+      const [, label, noRe, re, response, equity, diff] = cubefulMatch;
+      const key = label.toLowerCase().startsWith("no") ? "noDouble" : CUBEFUL_KEYS[response.toLowerCase()];
+      cubefulEquities[key] = parseFloat(equity);
+      cubefulEquities[`${key}Diff`] = diff ? parseFloat(diff) : void 0;
+      if (noRe || re) cubefulEquities.redouble = true;
     }
     const actionMatch = trimmed.match(/Best Cube action:\s+(.+)/);
     if (actionMatch) {
@@ -857,52 +832,20 @@ function renderCubeAnalysis(container, analysis) {
     title.textContent = "Cubeful equities:";
     const equityTable = document.createElement("div");
     equityTable.className = "equity-table";
-    if (analysis.cubefulEquities.noDouble !== void 0) {
+    const eq = analysis.cubefulEquities;
+    const verb = eq.redouble ? "Redouble" : "Double";
+    const rows = [
+      [`No ${verb.toLowerCase()}:`, eq.noDouble, eq.noDoubleDiff],
+      [`${verb}/Take:`, eq.doubleTake, eq.doubleTakeDiff],
+      [`${verb}/Beaver:`, eq.doubleBeaver, eq.doubleBeaverDiff],
+      [`${verb}/Pass:`, eq.doublePass, eq.doublePassDiff]
+    ];
+    for (const [label, equity, diff] of rows) {
+      if (equity === void 0) continue;
       const row = document.createElement("div");
       row.className = "equity-row";
-      let baseValue = analysis.cubefulEquities.noDouble >= 0 ? `+${analysis.cubefulEquities.noDouble.toFixed(3)}` : analysis.cubefulEquities.noDouble.toFixed(3);
-      let diffValue = "";
-      if (analysis.cubefulEquities.noDoubleDiff !== void 0) {
-        const diff = analysis.cubefulEquities.noDoubleDiff >= 0 ? `+${analysis.cubefulEquities.noDoubleDiff.toFixed(3)}` : analysis.cubefulEquities.noDoubleDiff.toFixed(3);
-        diffValue = ` (${diff})`;
-      }
-      row.textContent = "No double:".padEnd(20) + baseValue + diffValue;
-      equityTable.appendChild(row);
-    }
-    if (analysis.cubefulEquities.doubleTake !== void 0) {
-      const row = document.createElement("div");
-      row.className = "equity-row";
-      let baseValue = analysis.cubefulEquities.doubleTake >= 0 ? `+${analysis.cubefulEquities.doubleTake.toFixed(3)}` : analysis.cubefulEquities.doubleTake.toFixed(3);
-      let diffValue = "";
-      if (analysis.cubefulEquities.doubleTakeDiff !== void 0) {
-        const diff = analysis.cubefulEquities.doubleTakeDiff >= 0 ? `+${analysis.cubefulEquities.doubleTakeDiff.toFixed(3)}` : analysis.cubefulEquities.doubleTakeDiff.toFixed(3);
-        diffValue = ` (${diff})`;
-      }
-      row.textContent = "Double/Take:".padEnd(20) + baseValue + diffValue;
-      equityTable.appendChild(row);
-    }
-    if (analysis.cubefulEquities.doubleBeaver !== void 0) {
-      const row = document.createElement("div");
-      row.className = "equity-row";
-      let baseValue = analysis.cubefulEquities.doubleBeaver >= 0 ? `+${analysis.cubefulEquities.doubleBeaver.toFixed(3)}` : analysis.cubefulEquities.doubleBeaver.toFixed(3);
-      let diffValue = "";
-      if (analysis.cubefulEquities.doubleBeaverDiff !== void 0) {
-        const diff = analysis.cubefulEquities.doubleBeaverDiff >= 0 ? `+${analysis.cubefulEquities.doubleBeaverDiff.toFixed(3)}` : analysis.cubefulEquities.doubleBeaverDiff.toFixed(3);
-        diffValue = ` (${diff})`;
-      }
-      row.textContent = "Double/Beaver:".padEnd(20) + baseValue + diffValue;
-      equityTable.appendChild(row);
-    }
-    if (analysis.cubefulEquities.doublePass !== void 0) {
-      const row = document.createElement("div");
-      row.className = "equity-row";
-      let baseValue = analysis.cubefulEquities.doublePass >= 0 ? `+${analysis.cubefulEquities.doublePass.toFixed(3)}` : analysis.cubefulEquities.doublePass.toFixed(3);
-      let diffValue = "";
-      if (analysis.cubefulEquities.doublePassDiff !== void 0) {
-        const diff = analysis.cubefulEquities.doublePassDiff >= 0 ? `+${analysis.cubefulEquities.doublePassDiff.toFixed(3)}` : analysis.cubefulEquities.doublePassDiff.toFixed(3);
-        diffValue = ` (${diff})`;
-      }
-      row.textContent = "Double/Pass:".padEnd(20) + baseValue + diffValue;
+      const diffText = diff !== void 0 ? ` (${formatSigned(diff)})` : "";
+      row.textContent = label.padEnd(20) + formatSigned(equity) + diffText;
       equityTable.appendChild(row);
     }
     cubefulDiv.appendChild(title);
@@ -916,6 +859,9 @@ function renderCubeAnalysis(container, analysis) {
     cubeDiv.appendChild(actionDiv);
   }
   container.appendChild(cubeDiv);
+}
+function formatSigned(value) {
+  return value >= 0 ? `+${value.toFixed(3)}` : value.toFixed(3);
 }
 
 // src/main.ts
