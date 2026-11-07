@@ -31,6 +31,40 @@ function countCheckers(points: { checkerCount: number; player: Player | null }[]
 }
 
 /**
+ * Finds the XGID line in a block of text (e.g. an `xgid` code block).
+ *
+ * XG can produce a copy where the player-names line ("X:Amy   O:John") is spliced
+ * into the middle of the XGID line and the rest of the XGID continues on the next line:
+ *
+ *   XGID=--CAABD-------------cdbba-:1:-1:-X:Amy Trudeau   O:John Scott
+ *   1:00:1:0:0:9:10
+ *
+ * A real XGID never contains whitespace, so a names segment inside the XGID line is
+ * removed and the next line is joined back on.
+ *
+ * @param text - Text containing a line that starts with "XGID="
+ * @returns The trimmed (and, if needed, repaired) XGID line, or null if there is none
+ */
+export function findXgidLine(text: string): string | null {
+	const lines = text.split(/\r?\n/);
+	const index = lines.findIndex(line => line.trim().startsWith('XGID='));
+	if (index === -1) {
+		return null;
+	}
+
+	let line = lines[index].trim();
+	const names = line.match(/X:.*\sO:.*$/);
+	if (names && names.index !== undefined && names.index > 'XGID='.length) {
+		line = line.slice(0, names.index);
+		const continuation = (lines[index + 1] ?? '').trim();
+		if (/^\S+$/.test(continuation)) {
+			line += continuation;
+		}
+	}
+	return line;
+}
+
+/**
  * Parses an XGID (eXtreme Gammon ID) string into structured board data.
  * 
  * XGID format: position:cube:turn:dice:scores:rules
@@ -50,15 +84,13 @@ export function parseXGID(xgid: string): BackgammonPosition {
 		throw new Error('Invalid XGID: input must be a non-empty string');
 	}
 
-	// Find the line that begins with "XGID="
-	const lines = xgid.trim().split('\n');
-	const xgidLine = lines.find(line => line.trim().startsWith('XGID='));
-	
-	if (!xgidLine) {
+	// Find the line that begins with "XGID=" (repairing it if XG split it across lines)
+	const cleanXgid = findXgidLine(xgid);
+
+	if (!cleanXgid) {
 		throw new Error('No line found starting with "XGID="');
 	}
 
-	const cleanXgid = xgidLine.trim();
 	if (!cleanXgid.match(/^XGID=[a-zA-Z-]+:[0-9]+:-?[0-9]+:-?[0-9]+:/)) {
 		throw new Error('Invalid XGID format: does not match expected pattern');
 	}
@@ -74,7 +106,15 @@ export function parseXGID(xgid: string): BackgammonPosition {
 	const pointString = parts[0];	
 	const cubeOwnerCode = parseInt(parts[2], 10); // 0 = center, 1 = X, 2 = O
 	const cubeValue = Math.pow(2, parseInt(parts[1], 10)); // e.g., 1, 2, 4, 8, 16
-	const turn = parseInt(parts[3], 10); // 0 = X, 1 = O	
+	const turn = parseInt(parts[3], 10); // 1 = X (bottom), -1 = O (top)
+	const warnings: string[] = [];
+	const turnUnknown = turn !== 1 && turn !== -1;
+	if (turnUnknown) {
+		warnings.push(
+			`XGID turn field is ${parts[3]}, but it should be 1 (Black) or -1 (White), so the player on roll is unknown. ` +
+			`The board is drawn from Black's side. This XGID may be corrupted.`
+		);
+	}
 	
 	//5 Dice 63 bullet 00 player is to roll or double  
 	//	D player has double, opponent must take or drop 
@@ -132,7 +172,9 @@ export function parseXGID(xgid: string): BackgammonPosition {
 		crawford:crawford,
 		xgid: xgidString,
 		pipCountX:0,
-		pipCountO:0
+		pipCountO:0,
+		turnUnknown,
+		warnings,
 	};
 
 	boardData.pipCountX = calculatePipCount(boardData, 'X');

@@ -53,6 +53,20 @@
     box-sizing: border-box;
 }
 
+/* Warning bar (board still drawn), sits between header and canvas */
+.backgammon-warning {
+    background: #fff4d6;
+    color: #5c4400;
+    font-family: "Segoe UI", system-ui, sans-serif;
+    font-size: 13px;
+    line-height: 1.4;
+    padding: 8px 12px;
+    border-left: 8px solid #34495e;
+    border-right: 8px solid #34495e;
+    max-width: 500px;
+    box-sizing: border-box;
+}
+
 /* Error styles */
 .backgammon-error {
     background-color: #ffe6e6;

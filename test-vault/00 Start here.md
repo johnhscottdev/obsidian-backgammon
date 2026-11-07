@@ -21,6 +21,7 @@ After changing the code, run `npm run vault` again and reload Obsidian (Ctrl/Cmd
 - [[04 Cube analysis]]: XG cube analysis below the board
 - [[05 Invalid input]]: bad input should show the red error box, not a broken board
 - [[10 Regressions]]: one entry per bug we've fixed, so it stays fixed
+- [[Inbox]]: drop new problem positions here (not checked by `npm test`)
 
 Entries marked **Known bug** describe the *correct* behaviour; they will look wrong until the bug
 in `docs/BACKLOG.md` is fixed.

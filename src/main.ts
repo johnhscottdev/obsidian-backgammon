@@ -6,7 +6,7 @@
 
 import { Plugin, Platform } from 'obsidian';
 import { BackgammonPosition } from './types';
-import { renderBoard, parseXGID, extractAnalysisText, parseAnalysis, renderAnalysis } from './utils';
+import { renderBoard, parseXGID, findXgidLine, extractAnalysisText, parseAnalysis, renderAnalysis } from './utils';
 
 
 export default class BackgammonPlugin extends Plugin {
@@ -14,9 +14,8 @@ export default class BackgammonPlugin extends Plugin {
         // Different approach - create visual effect using margins and container width
         this.registerMarkdownCodeBlockProcessor('xgid', (source, el) => {
             try {
-                // Extract XGID from first line that starts with XGID=
-                const lines = source.split('\n');
-                const xgidLine = lines.find(line => line.trim().startsWith('XGID='));
+                // Extract XGID from first line that starts with XGID= (repaired if XG split it)
+                const xgidLine = findXgidLine(source);
                 
                 if (!xgidLine) {
                     throw new Error('No XGID found in code block');
@@ -43,7 +42,7 @@ export default class BackgammonPlugin extends Plugin {
                 
                 // Determine the action text based on board state
                 const getActionText = (data: BackgammonPosition): string => {
-                    const playerName = data.turn === 'X' ? 'Black' : 'White';
+                    const playerName = data.turnUnknown ? 'Unknown player' : data.turn === 'X' ? 'Black' : 'White';
                     
                     // Check if dice are rolled (move decision)
                     if (data.die1 > 0 && data.die2 > 0) {
@@ -58,6 +57,11 @@ export default class BackgammonPlugin extends Plugin {
                 };
                 
                 headerBar.setText(getActionText(boardData));
+
+                // Problems that don't stop the board from being drawn (e.g. invalid turn field)
+                for (const warning of boardData.warnings ?? []) {
+                    wrapper.createDiv({ cls: "backgammon-warning", text: `⚠️ ${warning}` });
+                }
                 
                 // Render the board
                 renderBoard(wrapper, boardData);

@@ -12,7 +12,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import BackgammonPlugin from '../src/main';
-import { parseXGID } from '../src/utils/parseXGID';
+import { parseXGID, findXgidLine } from '../src/utils/parseXGID';
 
 const VAULT = path.join(__dirname, '..', 'test-vault');
 
@@ -67,9 +67,13 @@ export function extractXgidBlocks(note: string, text: string): VaultBlock[] {
 	return blocks;
 }
 
+// Inbox.md is the user's drop zone for new problem positions; it isn't checked until an
+// entry is moved into a real note (usually 10 Regressions.md).
+const UNCHECKED_NOTES = new Set(['Inbox.md']);
+
 const notes = fs
 	.readdirSync(VAULT)
-	.filter(f => f.endsWith('.md'))
+	.filter(f => f.endsWith('.md') && !UNCHECKED_NOTES.has(f))
 	.sort()
 	.map(f => {
 		const text = fs.readFileSync(path.join(VAULT, f), 'utf8');
@@ -132,8 +136,8 @@ describe('test vault', () => {
 
 					// Sanity checks on the fixture itself, so a typo in a note can't masquerade as a bug.
 					it('is a well-formed position (26 chars, at most 15 checkers per side)', () => {
-						const xgidLine = block.source.split(/\r?\n/).find(l => l.trim().startsWith('XGID='))!;
-						const position = xgidLine.trim().slice('XGID='.length).split(':')[0];
+						const xgidLine = findXgidLine(block.source)!;
+						const position = xgidLine.slice('XGID='.length).split(':')[0];
 						expect(position).toHaveLength(26);
 						const data = parseXGID(xgidLine);
 						expect(data.borneOffX).toBeGreaterThanOrEqual(0);

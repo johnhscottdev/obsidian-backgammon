@@ -105,6 +105,8 @@ Every bug or mistake that is fixed must add, in the same change:
 
 When a bug is fixed, also tick it off in `docs/BACKLOG.md`.
 
+`test-vault/Inbox.md` is where the user drops new problem positions. It is excluded from `vault.test.ts`; once a case is fixed, move it into `10 Regressions.md` and reset the Inbox.
+
 ## Important Notes
 
 - The plugin registers for 'xgid' code blocks (changed from 'backgammon')

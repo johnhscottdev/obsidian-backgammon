@@ -26,4 +26,8 @@ export interface BackgammonPosition {
 	xgid: string;
 	pipCountX:number;
 	pipCountO:number;
+	/** True when the XGID turn field is not 1 or -1; `turn` is then only a drawing default. */
+	turnUnknown?: boolean;
+	/** Problems with the XGID that don't stop it from being drawn. */
+	warnings?: string[];
 }

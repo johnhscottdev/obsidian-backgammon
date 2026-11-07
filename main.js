@@ -475,16 +475,31 @@ function charToCount(c) {
 function countCheckers(points, player) {
   return points.filter((p) => p.player === player).reduce((sum, p) => sum + p.checkerCount, 0);
 }
+function findXgidLine(text) {
+  const lines = text.split(/\r?\n/);
+  const index = lines.findIndex((line2) => line2.trim().startsWith("XGID="));
+  if (index === -1) {
+    return null;
+  }
+  let line = lines[index].trim();
+  const names = line.match(/X:.*\sO:.*$/);
+  if (names && names.index !== void 0 && names.index > "XGID=".length) {
+    line = line.slice(0, names.index);
+    const continuation = (lines[index + 1] ?? "").trim();
+    if (/^\S+$/.test(continuation)) {
+      line += continuation;
+    }
+  }
+  return line;
+}
 function parseXGID(xgid) {
   if (!xgid || typeof xgid !== "string") {
     throw new Error("Invalid XGID: input must be a non-empty string");
   }
-  const lines = xgid.trim().split("\n");
-  const xgidLine = lines.find((line) => line.trim().startsWith("XGID="));
-  if (!xgidLine) {
+  const cleanXgid = findXgidLine(xgid);
+  if (!cleanXgid) {
     throw new Error('No line found starting with "XGID="');
   }
-  const cleanXgid = xgidLine.trim();
   if (!cleanXgid.match(/^XGID=[a-zA-Z-]+:[0-9]+:-?[0-9]+:-?[0-9]+:/)) {
     throw new Error("Invalid XGID format: does not match expected pattern");
   }
@@ -497,6 +512,13 @@ function parseXGID(xgid) {
   const cubeOwnerCode = parseInt(parts[2], 10);
   const cubeValue = Math.pow(2, parseInt(parts[1], 10));
   const turn = parseInt(parts[3], 10);
+  const warnings = [];
+  const turnUnknown = turn !== 1 && turn !== -1;
+  if (turnUnknown) {
+    warnings.push(
+      `XGID turn field is ${parts[3]}, but it should be 1 (Black) or -1 (White), so the player on roll is unknown. The board is drawn from Black's side. This XGID may be corrupted.`
+    );
+  }
   let die1 = 0;
   let die2 = 0;
   die1 = parseInt(parts[4][0]);
@@ -538,7 +560,9 @@ function parseXGID(xgid) {
     crawford,
     xgid: xgidString,
     pipCountX: 0,
-    pipCountO: 0
+    pipCountO: 0,
+    turnUnknown,
+    warnings
   };
   boardData.pipCountX = calculatePipCount(boardData, "X");
   boardData.pipCountO = calculatePipCount(boardData, "O");
@@ -891,8 +915,7 @@ var BackgammonPlugin = class extends import_obsidian.Plugin {
   onload() {
     this.registerMarkdownCodeBlockProcessor("xgid", (source, el) => {
       try {
-        const lines = source.split("\n");
-        const xgidLine = lines.find((line) => line.trim().startsWith("XGID="));
+        const xgidLine = findXgidLine(source);
         if (!xgidLine) {
           throw new Error("No XGID found in code block");
         }
@@ -905,7 +928,7 @@ var BackgammonPlugin = class extends import_obsidian.Plugin {
         }
         const headerBar = wrapper.createDiv({ cls: "backgammon-header" });
         const getActionText = (data) => {
-          const playerName = data.turn === "X" ? "Black" : "White";
+          const playerName = data.turnUnknown ? "Unknown player" : data.turn === "X" ? "Black" : "White";
           if (data.die1 > 0 && data.die2 > 0) {
             const diceText = data.die1 === data.die2 ? `${data.die1}${data.die1}` : (
               // Doubles: "66"
@@ -916,6 +939,9 @@ var BackgammonPlugin = class extends import_obsidian.Plugin {
           return `${playerName} on roll - cube decision`;
         };
         headerBar.setText(getActionText(boardData));
+        for (const warning of boardData.warnings ?? []) {
+          wrapper.createDiv({ cls: "backgammon-warning", text: `\u26A0\uFE0F ${warning}` });
+        }
         renderBoard(wrapper, boardData);
         const analysisText = extractAnalysisText(source);
         if (analysisText) {
