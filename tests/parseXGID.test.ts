@@ -195,17 +195,18 @@ describe('parseXGID', () => {
   });
 
   describe('rules parsing', () => {
+    // Jacoby and beaver only apply to money games (match length 0); see tests/rulesFlags.test.ts
     it('should parse jacoby rule', () => {
-      const xgid = 'XGID=abcd----------------------:0:0:0:00:0:0:1:5';
+      const xgid = 'XGID=abcd----------------------:0:0:0:00:0:0:1:0';
       const result = parseXGID(xgid);
-      
+
       expect(result.jacoby).toBe(true);
     });
 
     it('should parse beaver rule', () => {
-      const xgid = 'XGID=abcd----------------------:0:0:0:00:0:0:1:5';
+      const xgid = 'XGID=abcd----------------------:0:0:0:00:0:0:2:0';
       const result = parseXGID(xgid);
-      
+
       expect(result.beaver).toBe(true);
     });
 

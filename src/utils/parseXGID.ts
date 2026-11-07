@@ -147,9 +147,13 @@ export function parseXGID(xgid: string): BackgammonPosition {
 			player,
 		}));
 
-	const jacoby = rulesFlags % 2 === 1;
-	const beaver = rulesFlags % 4 === 1;
-	const crawford = matchLength > 0 && jacoby; // this flag is overloaded between money and match games
+	// The rules field means different things in money and match play:
+	//   money (match length 0): bit field, 1 = Jacoby, 2 = Beaver (XG writes 3 for "Jacoby Beaver")
+	//   match: 1 = this is the Crawford game. Jacoby and beavers don't apply.
+	const isMoney = matchLength === 0;
+	const jacoby = isMoney && (rulesFlags & 1) !== 0;
+	const beaver = isMoney && (rulesFlags & 2) !== 0;
+	const crawford = !isMoney && (rulesFlags & 1) !== 0;
 	
 	const checkersOnBoardX = countCheckers(points, 'X');
 	const checkersOnBoardO = countCheckers(points, 'O');

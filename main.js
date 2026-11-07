@@ -544,9 +544,10 @@ function parseXGID(xgid) {
     checkerCount: count,
     player
   }));
-  const jacoby = rulesFlags % 2 === 1;
-  const beaver = rulesFlags % 4 === 1;
-  const crawford = matchLength > 0 && jacoby;
+  const isMoney = matchLength === 0;
+  const jacoby = isMoney && (rulesFlags & 1) !== 0;
+  const beaver = isMoney && (rulesFlags & 2) !== 0;
+  const crawford = !isMoney && (rulesFlags & 1) !== 0;
   const checkersOnBoardX = countCheckers(points, "X");
   const checkersOnBoardO = countCheckers(points, "O");
   const borneOffX = 15 - checkersOnBoardX;

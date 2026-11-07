@@ -15,7 +15,7 @@ then tick it off here.
   `Double/Pass:`. When the cube is owned XG prints `No redouble:` / `Redouble/Take:` / `Redouble/Pass:`,
   so the cubeful equities are missing (`parseAnalysis.ts`).
   Vault: `04 Cube analysis` → "Redouble / No redouble" (real XG copy).
-- [ ] **Beaver flag parsed backwards.** `rulesFlags % 4 === 1` should be `(rulesFlags & 2) !== 0`.
+- [x] **Beaver flag parsed backwards.** (fixed 2026-11-07) `rulesFlags % 4 === 1` should be `(rulesFlags & 2) !== 0`.
   Also, in match play the flag means Crawford, so `jacoby` should be false there (`parseXGID.ts`).
   Not visible today because neither flag is drawn.
 - [ ] **Doubled / beavered / raccooned dice states (`D`, `B`, `R`) show the wrong header.** They

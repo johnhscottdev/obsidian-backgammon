@@ -158,3 +158,24 @@ Percentage of wrong pass needed to make the double decision right: 19.5%
 
 eXtreme Gammon Version: 2.10, MET: Kazaross XG2
 ```
+
+## Rules flags decoded wrongly (fixed 2026-11-07)
+The XGID rules field is a bit field in money play (1 = Jacoby, 2 = Beaver; XG writes 3 for
+"Jacoby Beaver") and means "Crawford game" in match play. The beaver flag was tested with
+`% 4 === 1`, so "Jacoby Beaver" gave no beaver, and match games could report Jacoby.
+Not visible on the board: neither flag is drawn yet, and Crawford ("Cr" on the cube) was already
+right. This entry is here so it stays that way once the rules are shown.
+Jest: `tests/rulesFlags.test.ts`.
+**Expect:** Money game, opening position, Black on roll - cube decision. Cube 64 in the middle of the
+left tray (not "Cr"). No score boxes. Pip counts 167 / 167.
+
+```xgid
+XGID=-b----E-C---eE---c-e----B-:0:0:1:00:0:0:3:0:10
+```
+
+Same position as the Crawford game of a 7-point match.
+**Expect:** Cube shows "Cr". Score boxes White 4, Length 7, Black 6. Black to play 31.
+
+```xgid
+XGID=-b----E-C---eE---c-e----B-:0:0:1:31:6:4:1:7:10
+```
