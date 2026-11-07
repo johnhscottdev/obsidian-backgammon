@@ -1,307 +1,110 @@
 import BackgammonPlugin from '../src/main';
-import { parseXGID } from '../src/utils/parseXGID';
-import { renderBoard } from '../src/utils/renderBoard';
 
-// Mock the utilities
-jest.mock('../src/utils/parseXGID');
-jest.mock('../src/utils/renderBoard');
+const START = 'XGID=-b----E-C---eE---c-e----B-:0:0:1:00:0:0:3:0:10';
+
+type Processor = (source: string, el: HTMLElement) => void;
+
+async function loadProcessor(): Promise<{ plugin: BackgammonPlugin; processor: Processor }> {
+	const plugin = new BackgammonPlugin({} as any, {} as any);
+	plugin.registerMarkdownCodeBlockProcessor = jest.fn() as any;
+	await plugin.onload();
+	const processor = (plugin.registerMarkdownCodeBlockProcessor as jest.Mock).mock.calls[0][1];
+	return { plugin, processor };
+}
+
+function render(processor: Processor, source: string): HTMLElement {
+	const el = document.createElement('div');
+	document.body.appendChild(el);
+	processor(source, el);
+	return el;
+}
 
 describe('BackgammonPlugin', () => {
-  let plugin: BackgammonPlugin;
-  let mockParseXGID: jest.MockedFunction<typeof parseXGID>;
-  let mockRenderBoard: jest.MockedFunction<typeof renderBoard>;
+	let processor: Processor;
+	let plugin: BackgammonPlugin;
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-    
-    mockParseXGID = parseXGID as jest.MockedFunction<typeof parseXGID>;
-    mockRenderBoard = renderBoard as jest.MockedFunction<typeof renderBoard>;
-    
-    plugin = new BackgammonPlugin({} as any, {} as any);
-    
-    // Spy on the registerMarkdownCodeBlockProcessor method
-    plugin.registerMarkdownCodeBlockProcessor = jest.fn();
-  });
+	beforeEach(async () => {
+		document.body.innerHTML = '';
+		({ plugin, processor } = await loadProcessor());
+	});
 
-  describe('onload', () => {
-    it('should register xgid code block processor', async () => {
-      await plugin.onload();
-      
-      expect(plugin.registerMarkdownCodeBlockProcessor).toHaveBeenCalledWith(
-        'xgid',
-        expect.any(Function)
-      );
-    });
+	it('registers the xgid code block processor', () => {
+		expect(plugin.registerMarkdownCodeBlockProcessor).toHaveBeenCalledWith('xgid', expect.any(Function));
+	});
 
-    describe('code block processor', () => {
-      let processorCallback: (source: string, el: HTMLElement) => void;
-      let mockElement: HTMLElement;
+	it('renders header, canvas and footer for a valid XGID', () => {
+		const el = render(processor, START);
 
-      beforeEach(async () => {
-        await plugin.onload();
-        
-        // Get the processor callback
-        const calls = (plugin.registerMarkdownCodeBlockProcessor as jest.Mock).mock.calls;
-        processorCallback = calls[0][1];
-        
-        // Create mock element with required methods
-        const mockErrorDiv = {
-          createEl: jest.fn().mockReturnValue({
-            textContent: '',
-          }),
-          createDiv: jest.fn().mockReturnValue({
-            setText: jest.fn(),
-          }),
-          setText: jest.fn(),
-        };
-        
-        const mockContainer = {
-          createEl: jest.fn().mockReturnValue({
-            createEl: jest.fn().mockReturnValue({
-              textContent: '',
-            }),
-          }),
-        };
-        
-        mockElement = {
-          createDiv: jest.fn().mockImplementation((options) => {
-            if (options?.cls === 'backgammon-error') {
-              return mockErrorDiv;
-            } else if (options?.cls === 'my-container') {
-              return mockContainer;
-            }
-            return mockContainer;
-          }),
-        } as any;
-      });
+		expect(el.querySelector('.backgammon-error')).toBeNull();
+		expect(el.querySelector('.backgammon-header')?.textContent).toBe('Black on roll - cube decision');
+		expect(el.querySelector('canvas.backgammon-canvas')).not.toBeNull();
+		expect(el.querySelector('.backgammon-footer')).not.toBeNull();
+	});
 
-      it('should process valid XGID and render board', () => {
-        const validXGID = 'XGID=-a----E-C---eE---c-e----B-:1:1:11:0:0:0:0:10';
-        const mockBoardData = {
-          points: Array(26).fill({ checkerCount: 0, player: null }),
-          turn: 'X',
-          cubeOwner: 'Center',
-          cubeValue: 64,
-        };
+	it('shows the dice in the header for a move decision', () => {
+		const el = render(processor, 'XGID=-b----E-C---eE---c-e----B-:0:0:1:52:0:0:3:0:10');
+		expect(el.querySelector('.backgammon-header')?.textContent).toBe('Black to play 52');
+	});
 
-        mockParseXGID.mockReturnValue(mockBoardData as any);
-        
-        processorCallback(validXGID, mockElement);
-        
-        expect(mockParseXGID).toHaveBeenCalledWith(validXGID);
-        expect(mockRenderBoard).toHaveBeenCalledWith(mockElement, mockBoardData);
-      });
+	it('names White when it is O to play', () => {
+		const el = render(processor, 'XGID=-b----E-C---eE---c-e----B-:0:0:-1:31:0:0:3:0:10');
+		expect(el.querySelector('.backgammon-header')?.textContent).toBe('White to play 31');
+	});
 
-      it('should handle XGID with whitespace', () => {
-        const xgidWithWhitespace = '  XGID=-a----E-C---eE---c-e----B-:1:1:11:0:0:0:0:10  ';
-        const mockBoardData = { points: [] };
+	it('accepts surrounding whitespace on the XGID line', () => {
+		const el = render(processor, `   ${START}   `);
+		expect(el.querySelector('.backgammon-error')).toBeNull();
+	});
 
-        mockParseXGID.mockReturnValue(mockBoardData as any);
-        
-        processorCallback(xgidWithWhitespace, mockElement);
-        
-        expect(mockParseXGID).toHaveBeenCalledWith('  XGID=-a----E-C---eE---c-e----B-:1:1:11:0:0:0:0:10  ');
-      });
+	it('renders move analysis when present', () => {
+		const source = `${START.replace(':00:', ':52:')}
+X:Player 1   O:Player 2
 
-      it('should process move analysis blocks', () => {
-        const xgidWithAnalysis = `XGID=-a----E-C---eE---c-e----B-:1:1:11:0:0:0:0:10
-        
-1. 24/23 13/11
-   Player: -0.123 equity
-   Opponent: +0.456 equity`;
+    1. Book¹       Bar/20 13/11                 eq:+0.095
+      Player:   52.09% (G:13.91% B:0.59%)
+      Opponent: 47.91% (G:11.60% B:0.51%)
 
-        const mockBoardData = { points: [] };
-        mockParseXGID.mockReturnValue(mockBoardData as any);
-        
-        processorCallback(xgidWithAnalysis, mockElement);
-        
-        expect(mockElement.createDiv).toHaveBeenCalledWith({ cls: "xgid-display" });
-      });
+    2. XG Roller++ Bar/23 13/8                  eq:+0.085 (-0.010)
+      Player:   51.73% (G:13.47% B:0.49%)
+      Opponent: 48.27% (G:11.24% B:0.44%)
+`;
+		const el = render(processor, source);
 
-      it('should handle parsing errors gracefully', () => {
-        const invalidXGID = 'invalid-xgid-format';
-        const errorMessage = 'No XGID found in code block';
-        
-        mockParseXGID.mockImplementation(() => {
-          throw new Error(errorMessage);
-        });
-        
-        processorCallback(invalidXGID, mockElement);
-        
-        expect(mockElement.createDiv).toHaveBeenCalledWith({ cls: "backgammon-error" });
-        expect(mockRenderBoard).not.toHaveBeenCalled();
-      });
+		const moves = el.querySelectorAll('.backgammon-analysis .analysis-move');
+		expect(moves).toHaveLength(2);
+		expect(moves[0].querySelector('.move-text')?.textContent).toBe('1. Bar/20 13/11');
+	});
 
-      it('should display error message in error div', () => {
-        const invalidXGID = 'invalid-xgid-format';
-        const errorMessage = 'No XGID found in code block';
-        
-        const mockErrorDiv = {
-          createDiv: jest.fn().mockReturnValue({
-            setText: jest.fn(),
-          }),
-        };
-        
-        mockElement.createDiv = jest.fn().mockReturnValue(mockErrorDiv);
-        
-        mockParseXGID.mockImplementation(() => {
-          throw new Error(errorMessage);
-        });
-        
-        processorCallback(invalidXGID, mockElement);
-        
-        expect(mockErrorDiv.createDiv).toHaveBeenCalledTimes(2);
-        const setTextCalls = mockErrorDiv.createDiv().setText.mock.calls;
-        expect(setTextCalls).toEqual([
-          [invalidXGID],
-          [`⚠️ Error: ${errorMessage}`]
-        ]);
-      });
+	it('does not render analysis when there is none', () => {
+		const el = render(processor, START);
+		expect(el.querySelector('.backgammon-analysis')).toBeNull();
+	});
 
-      it('should handle non-Error exceptions', () => {
-        const invalidXGID = 'XGID=invalid-xgid-format';
-        const errorMessage = 'String error';
-        
-        const mockErrorDiv = {
-          createDiv: jest.fn().mockReturnValue({
-            setText: jest.fn(),
-          }),
-        };
-        
-        mockElement.createDiv = jest.fn().mockReturnValue(mockErrorDiv);
-        
-        mockParseXGID.mockImplementation(() => {
-          throw errorMessage; // Throw a string instead of Error
-        });
-        
-        processorCallback(invalidXGID, mockElement);
-        
-        const setTextCalls = mockErrorDiv.createDiv().setText.mock.calls;
-        expect(setTextCalls[1]).toEqual([`⚠️ Error: ${errorMessage}`]);
-      });
+	describe('errors', () => {
+		it('shows an error when there is no XGID line', () => {
+			const el = render(processor, 'invalid-xgid-format');
 
-      it('should apply error styling to error div', () => {
-        const invalidXGID = 'invalid-xgid-format';
-        
-        const mockErrorDiv = {
-          createDiv: jest.fn().mockReturnValue({
-            setText: jest.fn(),
-          }),
-        };
-        
-        mockElement.createDiv = jest.fn().mockReturnValue(mockErrorDiv);
-        
-        mockParseXGID.mockImplementation(() => {
-          throw new Error('Test error');
-        });
-        
-        processorCallback(invalidXGID, mockElement);
-        
-        expect(mockElement.createDiv).toHaveBeenCalledWith({ cls: 'backgammon-error' });
-      });
+			const error = el.querySelector('.backgammon-error');
+			expect(error).not.toBeNull();
+			expect(error?.textContent).toContain('invalid-xgid-format');
+			expect(el.querySelector('.backgammon-error-message')?.textContent).toBe(
+				'⚠️ Error: No XGID found in code block'
+			);
+			expect(el.querySelector('canvas')).toBeNull();
+		});
 
-      it('should create analysis container for any input', () => {
-        const validXGID = 'XGID=-a----E-C---eE---c-e----B-:1:0:0:11:0:0:0:10';
+		it('shows an error for a malformed XGID', () => {
+			const el = render(processor, 'XGID=invalid-xgid-format');
+			expect(el.querySelector('.backgammon-error-message')?.textContent).toContain('Invalid XGID format');
+		});
 
-        const mockBoardData = { points: [] };
-        const mockContainer = {
-          createEl: jest.fn().mockReturnValue({
-            createEl: jest.fn().mockReturnValue({
-              textContent: '',
-            }),
-          }),
-        };
-        
-        // Create a fresh mock element for this test to avoid conflicts
-        const testMockElement = {
-          createDiv: jest.fn().mockImplementation((options) => {
-            if (options?.cls === 'my-container') {
-              return mockContainer;
-            }
-            // Return error div for other cases
-            return {
-              createDiv: jest.fn().mockReturnValue({
-                setText: jest.fn(),
-                  }),
-              setText: jest.fn(),
-              };
-          }),
-        };
-        
-        mockParseXGID.mockReturnValue(mockBoardData as any);
-        
-        processorCallback(validXGID, testMockElement as any);
-        
-        // Should create container for XGID display
-        expect(testMockElement.createDiv).toHaveBeenCalledWith({ cls: "xgid-display" });
-        // Don't test for specific analysis extraction since that's tested separately
-      });
-    });
-  });
+		it('shows an error for empty input', () => {
+			const el = render(processor, '');
+			expect(el.querySelector('.backgammon-error')).not.toBeNull();
+		});
+	});
 
-  describe('onunload', () => {
-    it('should execute without errors', () => {
-      expect(() => plugin.onunload()).not.toThrow();
-    });
-  });
-
-  describe('integration scenarios', () => {
-    it('should handle empty XGID input', async () => {
-      await plugin.onload();
-      
-      const processorCallback = (plugin.registerMarkdownCodeBlockProcessor as jest.Mock).mock.calls[0][1];
-      const mockElement = {
-        createDiv: jest.fn().mockReturnValue({
-          createDiv: jest.fn().mockReturnValue({
-            setText: jest.fn(),
-          }),
-        }),
-      };
-      
-      mockParseXGID.mockImplementation(() => {
-        throw new Error('Invalid XGID: input must be a non-empty string');
-      });
-      
-      processorCallback('', mockElement as any);
-      
-      expect(mockElement.createDiv).toHaveBeenCalledWith({ cls: "backgammon-error" });
-    });
-
-    it('should handle valid XGID without analysis', async () => {
-      await plugin.onload();
-      
-      const processorCallback = (plugin.registerMarkdownCodeBlockProcessor as jest.Mock).mock.calls[0][1];
-      const mockElement = {
-        createDiv: jest.fn().mockImplementation((options) => {
-          if (options?.cls === 'my-container') {
-            return {
-              createEl: jest.fn().mockReturnValue({
-                createEl: jest.fn().mockReturnValue({
-                  textContent: '',
-                }),
-              }),
-            };
-          }
-          // Return error div for other cases
-          return {
-            createDiv: jest.fn().mockReturnValue({
-              setText: jest.fn(),
-              }),
-            setText: jest.fn(),
-          };
-        }),
-      };
-      
-      const validXGID = 'XGID=-a----E-C---eE---c-e----B-:1:0:0:11:0:0:0:10';
-      const mockBoardData = { points: [] };
-      
-      mockParseXGID.mockReturnValue(mockBoardData as any);
-      
-      processorCallback(validXGID, mockElement as any);
-      
-      expect(mockParseXGID).toHaveBeenCalledWith(validXGID);
-      expect(mockRenderBoard).toHaveBeenCalledWith(mockElement, mockBoardData);
-      expect(mockElement.createDiv).toHaveBeenCalledWith({ cls: "xgid-display" });
-    });
-  });
+	it('unloads without errors', () => {
+		expect(() => plugin.onunload()).not.toThrow();
+	});
 });

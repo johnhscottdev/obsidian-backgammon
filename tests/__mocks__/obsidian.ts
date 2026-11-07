@@ -1,10 +1,14 @@
 // Mock for Obsidian API
 export class Plugin {
-  constructor(app: any, manifest: any) {}
+  constructor(_app: any, _manifest: any) {}
 
   async onload(): Promise<void> {}
-  
+
   onunload(): void {}
 
-  registerMarkdownCodeBlockProcessor(language: string, processor: (source: string, el: HTMLElement) => void): void {}
+  registerMarkdownCodeBlockProcessor(_language: string, _processor: (source: string, el: HTMLElement) => void): void {}
 }
+
+export const Platform = {
+  isMobile: false,
+};

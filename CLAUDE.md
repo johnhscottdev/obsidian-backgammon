@@ -7,6 +7,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Build**: `npm run build` - Uses esbuild to compile TypeScript to main.js
 - **Install dependencies**: `npm install`
 - **Clean build**: Delete main.js and run `npm run build`
+- **Test**: `npm test` (Jest, jsdom, canvas is mocked)
+- **Review vault**: `npm run vault` - builds and installs the plugin into `test-vault/`, which can be opened in Obsidian for visual review
 
 ## Plugin Installation for Testing
 
@@ -47,7 +49,7 @@ XGID strings are colon-separated: `position:cube:turn:dice:scores:rules`
 
 ### Canvas Rendering Architecture
 
-- Uses ResizeObserver for responsive scaling
+- Fixed internal resolution (500x440); CSS scales it down with `max-width: 100%` (see Design Decisions)
 - 15-column layout: bearoff + 6 points + bar + 6 points + bearoff
 - Point numbering follows 24-point backgammon system
 - Renders checkers, dice, doubling cube, and match scores
@@ -56,7 +58,7 @@ XGID strings are colon-separated: `position:cube:turn:dice:scores:rules`
 
 - **Canvas over SVG**: Chosen for performance and pixel-perfect control
 - **Character encoding**: Efficient position storage using a-z/A-Z mapping
-- **Responsive design**: Dynamic scaling based on container width
+- **Responsive design**: Fixed canvas resolution scaled by CSS
 - **Type safety**: Comprehensive TypeScript types for game state
 
 ## File Structure
@@ -66,12 +68,42 @@ src/
 ├── main.ts              # Plugin registration and orchestration
 ├── types/
 │   ├── index.ts         # Type exports
-│   └── board.ts         # Core game data types
+│   ├── board.ts         # Core game data types
+│   └── analysis.ts      # XG analysis data types
 └── utils/
     ├── index.ts         # Utility exports
     ├── parseXGID.ts     # XGID parsing logic
-    └── renderBoard.ts   # Canvas rendering logic
+    ├── parseAnalysis.ts # XG move/cube analysis parsing
+    ├── renderAnalysis.ts# Analysis HTML rendering
+    ├── renderBoard.ts   # Canvas rendering logic
+    └── styleConfig.ts   # Board dimensions, colors, fonts
+tests/                   # Jest tests (vault.test.ts runs every block in test-vault/)
+test-vault/              # Obsidian vault of review notes (see Testing)
+docs/BACKLOG.md          # Known bugs and ideas not yet done
 ```
+
+## Design Decisions
+
+These are deliberate. Do not "fix" them without asking.
+
+- **Errors are green, blunders are red** in move analysis. This matches eXtreme Gammon's visual style.
+- **Canvas resolution is fixed** (no devicePixelRatio scaling) so the board renders properly on iPhone. It is not perfect and needs revisiting to look sharper on iPhone, but any change must be checked on iPhone.
+- **Win/gammon percentages per move are parsed but not displayed** (`playerStats` / `opponentStats` in `MoveData`). Showing them was too cluttered. Keep the parsing code so they can be added later with a cleaner design.
+
+## Testing
+
+Two layers, and both must stay green:
+
+1. **Jest** (`npm test`): unit tests plus `tests/vault.test.ts`, which runs every `xgid` block in `test-vault/` through the real plugin pipeline. Notes with `expect: error` in their frontmatter must show the error box; all others must render a board without error (and notes with `expect: analysis` must render analysis).
+2. **Review vault** (`npm run vault`, then open `test-vault/` in Obsidian): the user visually checks each entry against its **Expect:** line.
+
+### Rule: every bug gets a regression test
+
+Every bug or mistake that is fixed must add, in the same change:
+1. An entry in `test-vault/10 Regressions.md`: a heading naming the bug, an **Expect:** line describing what correct looks like, and the `xgid` block that reproduced it.
+2. A Jest test that fails before the fix and passes after. For visual bugs, assert on the mocked canvas calls (e.g. number of checkers drawn).
+
+When a bug is fixed, also tick it off in `docs/BACKLOG.md`.
 
 ## Important Notes
 

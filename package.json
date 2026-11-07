@@ -6,7 +6,8 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "build": "node build.js"
+    "build": "node build.js",
+    "vault": "node build.js --vault"
   },
   "keywords": ["obsidian", "backgammon", "xgid", "board-games"],
   "author": "John H Scott",

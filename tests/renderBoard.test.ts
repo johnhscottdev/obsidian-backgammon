@@ -57,7 +57,6 @@ describe('renderBoard', () => {
   let mockElement: HTMLElement;
   let mockCanvas: HTMLCanvasElement;
   let mockContext: CanvasRenderingContext2D;
-  let mockObserver: ResizeObserver;
 
   beforeEach(() => {
     // Reset all mocks
@@ -78,6 +77,10 @@ describe('renderBoard', () => {
       arc: jest.fn(),
       fillText: jest.fn(),
       roundRect: jest.fn(),
+      save: jest.fn(),
+      restore: jest.fn(),
+      quadraticCurveTo: jest.fn(),
+      measureText: jest.fn().mockReturnValue({ width: 20 }),
       fillStyle: '',
       strokeStyle: '',
       lineWidth: 1,
@@ -91,6 +94,7 @@ describe('renderBoard', () => {
       width: 800,
       height: 600,
       getContext: jest.fn().mockReturnValue(mockContext),
+      setCssProps: jest.fn(),
       parentElement: {
         clientWidth: 800,
       },
@@ -103,21 +107,13 @@ describe('renderBoard', () => {
     } as any;
 
     // Mock document.createElement to return our mock canvas
+    const realCreateElement = document.createElement.bind(document);
     jest.spyOn(document, 'createElement').mockImplementation((tagName: string) => {
       if (tagName === 'canvas') {
         return mockCanvas as any;
       }
-      return document.createElement(tagName);
+      return realCreateElement(tagName);
     });
-
-    // Mock ResizeObserver
-    mockObserver = {
-      observe: jest.fn(),
-      unobserve: jest.fn(),
-      disconnect: jest.fn(),
-    } as any;
-
-    global.ResizeObserver = jest.fn().mockImplementation(() => mockObserver);
   });
 
   afterEach(() => {
@@ -149,32 +145,23 @@ describe('renderBoard', () => {
       expect(() => renderBoard(mockElement, boardData)).not.toThrow();
     });
 
-    it('should set up ResizeObserver', () => {
-      const boardData = createMinimalBoardData();
-      
-      renderBoard(mockElement, boardData);
-      
-      expect(ResizeObserver).toHaveBeenCalledWith(expect.any(Function));
-      expect(mockObserver.observe).toHaveBeenCalledWith(mockCanvas.parentElement);
+    it('should size the canvas to the fixed board resolution', () => {
+      renderBoard(mockElement, createMinimalBoardData());
+
+      expect(mockCanvas.width).toBe(800);
+      expect(mockCanvas.height).toBe(600);
+      expect((mockCanvas as any).setCssProps).toHaveBeenCalledWith(
+        expect.objectContaining({ maxWidth: '100%' })
+      );
     });
   });
 
   describe('rendering calls', () => {
-    it('should call basic rendering methods when ResizeObserver callback is triggered', () => {
+    it('should call basic rendering methods', () => {
       const boardData = createMinimalBoardData();
-      
-      // Capture the ResizeObserver callback
-      let resizeCallback: ResizeObserverCallback;
-      global.ResizeObserver = jest.fn().mockImplementation((callback) => {
-        resizeCallback = callback;
-        return mockObserver;
-      });
-      
+
       renderBoard(mockElement, boardData);
-      
-      // Trigger the ResizeObserver callback
-      resizeCallback!([] as any, mockObserver as any);
-      
+
       // Should set transform for scaling
       expect(mockContext.setTransform).toHaveBeenCalled();
       

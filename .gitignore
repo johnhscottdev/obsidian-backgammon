@@ -3,3 +3,7 @@ dist/
 test_output/
 coverage/
 .env.local
+
+# Review vault: keep notes and plugin enablement, ignore installed plugin build and Obsidian UI state
+test-vault/.obsidian/*
+!test-vault/.obsidian/community-plugins.json

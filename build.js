@@ -16,32 +16,34 @@ if (fs.existsSync(envPath)) {
 }
 
 const OBSIDIAN_PLUGINS_PATH = process.env.OBSIDIAN_PLUGINS_PATH;
+const PLUGIN_ID = JSON.parse(fs.readFileSync('manifest.json', 'utf8')).id;
+// `node build.js --vault` also installs into the review vault (npm run vault)
+const VAULT_PLUGIN_PATH = process.argv.includes('--vault')
+  ? path.join(__dirname, 'test-vault', '.obsidian', 'plugins', PLUGIN_ID)
+  : null;
+
+function copyPluginTo(dest, label) {
+  try {
+    fs.mkdirSync(dest, { recursive: true });
+    for (const file of ['main.js', 'manifest.json', 'styles.css']) {
+      fs.copyFileSync(file, path.join(dest, file));
+    }
+    console.log(`📁 Files copied to ${label}: ${dest}`);
+  } catch (error) {
+    console.error(`❌ Failed to copy files to ${label}:`, error.message);
+    process.exitCode = 1;
+  }
+}
 
 function copyToObsidian() {
+  if (VAULT_PLUGIN_PATH) {
+    copyPluginTo(VAULT_PLUGIN_PATH, 'review vault');
+  }
   if (!OBSIDIAN_PLUGINS_PATH) {
     console.log('ℹ️  Skipping copy to Obsidian (OBSIDIAN_PLUGINS_PATH not set)');
     return;
   }
-  
-  try {
-    // Ensure the plugin directory exists
-    if (!fs.existsSync(OBSIDIAN_PLUGINS_PATH)) {
-      fs.mkdirSync(OBSIDIAN_PLUGINS_PATH, { recursive: true });
-    }
-
-    // Copy main.js
-    fs.copyFileSync('main.js', path.join(OBSIDIAN_PLUGINS_PATH, 'main.js'));
-
-    // Copy manifest.json
-    fs.copyFileSync('manifest.json', path.join(OBSIDIAN_PLUGINS_PATH, 'manifest.json'));
-
-    // Copy styles.css
-    fs.copyFileSync('styles.css', path.join(OBSIDIAN_PLUGINS_PATH, 'styles.css'));
-    
-    console.log('📁 Files copied to Obsidian plugins folder');
-  } catch (error) {
-    console.error('❌ Failed to copy files to Obsidian:', error.message);
-  }
+  copyPluginTo(OBSIDIAN_PLUGINS_PATH, 'Obsidian plugins folder');
 }
 
 // Run TypeScript type checking first
