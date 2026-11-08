@@ -56,7 +56,7 @@ describe('parseXGID', () => {
 
   describe('position parsing', () => {
     it('should correctly parse checker positions', () => {
-      const xgid = 'XGID=abcdefghijklmnopqrstuvwxyz:0:0:0:00:0:0:0:5';
+      const xgid = 'XGID=ab------------------------:0:0:0:00:0:0:0:5';
       const result = parseXGID(xgid);
       
       // Check that lowercase letters create O player checkers
@@ -68,7 +68,7 @@ describe('parseXGID', () => {
     });
 
     it('should correctly parse uppercase letters as X player checkers', () => {
-      const xgid = 'XGID=ABCDEFGHIJKLMNOPQRSTUVWXYZ:0:0:0:00:0:0:0:5';
+      const xgid = 'XGID=AB------------------------:0:0:0:00:0:0:0:5';
       const result = parseXGID(xgid);
       
       // Check that uppercase letters create X player checkers
@@ -253,8 +253,9 @@ describe('parseXGID', () => {
       expect(result.borneOffX).toBe(15); // 15 - 0 checkers on board
     });
 
-    it('should handle full board', () => {
-      const xgid = 'XGID=abcdefghijklmnopqrstuvwxyz:0:0:0:00:0:0:0:5';
+    it('should handle all 15 checkers on the board', () => {
+      // 1 + 2 + 3 + 4 + 5 = 15 white checkers (more than 15 is an error, see positionValidation.test.ts)
+      const xgid = 'XGID=abcde---------------------:0:0:0:00:0:0:0:5';
       const result = parseXGID(xgid);
       
       const totalO = result.points
@@ -280,7 +281,7 @@ describe('parseXGID', () => {
     });
 
     it('should parse mid-game position', () => {
-      const xgid = 'XGID=--b-C-E----bB-Bb-c----A--:2:0:00:63:2:1:0:7';
+      const xgid = 'XGID=--b-C-E----bB-Bb-c----A---:2:0:00:63:2:1:0:7';
       const result = parseXGID(xgid);
       
       expect(result.scoreX).toBe(2);

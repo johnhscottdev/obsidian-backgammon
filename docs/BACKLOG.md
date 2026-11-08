@@ -21,14 +21,14 @@ then tick it off here.
 - [ ] **Doubled / beavered / raccooned dice states (`D`, `B`, `R`) show the wrong header.** They
   parse as dice 0 and the header says "on roll - cube decision" instead of "take or pass".
   Needs a real XGID copied from XG for each state to confirm the exact format.
-- [ ] **Position length isn't validated.** A position that isn't 26 characters, or a side with
+- [x] **Position length isn't validated.** (fixed 2026-11-08) A position that isn't 26 characters, or a side with
   more than 15 checkers, is accepted and draws garbage (borne-off count can go negative).
   Should show the error box instead.
 
 ## Docs and housekeeping
 
 - [ ] `README.md` usage example 1 uses a 23-character position
-  (`XGID=-a-bE-D---cD---c-b-a-E-:...`), which draws a shifted board. Replace with a real XG copy.
+  (`XGID=-a-bE-D---cD---c-b-a-E-:...`), which now shows the error box. Replace with a real XG copy.
   Many examples in `docs/XGID-EXAMPLES.md` and `docs/XGID-FORMAT.md` have the same problem, and the
   docs describe the field order differently from what XG actually writes.
 - [ ] `coverage/` and `dist/` are in `.gitignore` but still tracked. Run `git rm -r --cached coverage dist`.

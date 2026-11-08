@@ -179,3 +179,17 @@ Same position as the Crawford game of a 7-point match.
 ```xgid
 XGID=-b----E-C---eE---c-e----B-:0:0:1:31:6:4:1:7:10
 ```
+
+## Position length and checker counts not validated (fixed 2026-11-08)
+A position that wasn't 26 characters drew a shifted board, and a side with more than 15 checkers
+drew a negative borne-off count. Both now show the error box. The test entries are in
+[[05 Invalid input]] ("Position too short", "Position too long", "Black has 16 checkers",
+"White has 16 checkers"), because that note expects errors.
+Jest: `tests/positionValidation.test.ts`.
+**Expect:** All 15 checkers a side is still fine: Black and White each have 15 on their 6-point,
+drawn as 5 labelled "15". No error.
+
+```xgid
+XGID=------O------------o------:0:0:1:21:0:0:3:0:10
+```
+

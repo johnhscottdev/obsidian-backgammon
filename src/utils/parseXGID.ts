@@ -103,7 +103,11 @@ export function parseXGID(xgid: string): BackgammonPosition {
 		throw new Error(`Invalid XGID format: expected at least 9 parts, got ${parts.length}`);
 	}
 
-	const pointString = parts[0];	
+	const pointString = parts[0];
+	// 24 points plus a bar for each side
+	if (pointString.length !== 26) {
+		throw new Error(`Invalid XGID position: position must be 26 characters, got ${pointString.length}`);
+	}
 	const cubeOwnerCode = parseInt(parts[2], 10); // 0 = center, 1 = X, 2 = O
 	const cubeValue = Math.pow(2, parseInt(parts[1], 10)); // e.g., 1, 2, 4, 8, 16
 	const turn = parseInt(parts[3], 10); // 1 = X (bottom), -1 = O (top)
@@ -157,6 +161,11 @@ export function parseXGID(xgid: string): BackgammonPosition {
 	
 	const checkersOnBoardX = countCheckers(points, 'X');
 	const checkersOnBoardO = countCheckers(points, 'O');
+	for (const [name, count] of [['Black', checkersOnBoardX], ['White', checkersOnBoardO]] as const) {
+		if (count > 15) {
+			throw new Error(`Invalid XGID position: ${name} has ${count} checkers (maximum 15)`);
+		}
+	}
 	const borneOffX = 15 - checkersOnBoardX;
 	const borneOffO = 15 - checkersOnBoardO;
 	let boardData:BackgammonPosition = {

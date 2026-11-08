@@ -517,6 +517,9 @@ function parseXGID(xgid) {
     throw new Error(`Invalid XGID format: expected at least 9 parts, got ${parts.length}`);
   }
   const pointString = parts[0];
+  if (pointString.length !== 26) {
+    throw new Error(`Invalid XGID position: position must be 26 characters, got ${pointString.length}`);
+  }
   const cubeOwnerCode = parseInt(parts[2], 10);
   const cubeValue = Math.pow(2, parseInt(parts[1], 10));
   const turn = parseInt(parts[3], 10);
@@ -550,6 +553,11 @@ function parseXGID(xgid) {
   const crawford = !isMoney && (rulesFlags & 1) !== 0;
   const checkersOnBoardX = countCheckers(points, "X");
   const checkersOnBoardO = countCheckers(points, "O");
+  for (const [name, count] of [["Black", checkersOnBoardX], ["White", checkersOnBoardO]]) {
+    if (count > 15) {
+      throw new Error(`Invalid XGID position: ${name} has ${count} checkers (maximum 15)`);
+    }
+  }
   const borneOffX = 15 - checkersOnBoardX;
   const borneOffO = 15 - checkersOnBoardO;
   let boardData = {
