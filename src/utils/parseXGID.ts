@@ -1,4 +1,11 @@
-import type { BackgammonPosition, Player } from '../types/board';
+import type { BackgammonPosition, CubeAction, Player } from '../types/board';
+
+/** Letters XG writes in the dice field once a double has been offered. */
+const CUBE_ACTIONS: Record<string, CubeAction | undefined> = {
+	D: 'doubled',
+	B: 'beavered',
+	R: 'raccooned',
+};
 
 /**
  * Converts a character from XGID position string to checker count and player.
@@ -120,18 +127,18 @@ export function parseXGID(xgid: string): BackgammonPosition {
 		);
 	}
 	
-	//5 Dice 63 bullet 00 player is to roll or double  
-	//	D player has double, opponent must take or drop 
-	//	B player has doubled, the opponent beavered,  
-	//	R player has doubled, the opponent beavered and the player racconed. 
-	//	xx player has roll the field contain both dice (11,35, etc..) 
-	let die1=0;
-	let die2=0;
-	die1 = parseInt(parts[4][0]);
-	die2 = parseInt(parts[4][1]);
-	if(isNaN(die1))
+	// Dice field:
+	//   two digits  the player on roll has rolled them (e.g. 63)
+	//   00          the player on roll is to roll or double
+	//   D           the player has doubled; the opponent must take or pass
+	//   B           the player has doubled and the opponent beavered
+	//   R           the player has doubled, the opponent beavered and the player raccooned
+	const cubeAction = Object.prototype.hasOwnProperty.call(CUBE_ACTIONS, parts[4]) ? CUBE_ACTIONS[parts[4]] : undefined;
+	let die1 = parseInt(parts[4][0]);
+	let die2 = parseInt(parts[4][1]);
+	if (isNaN(die1))
 		die1 = 0;
-	if(isNaN(die2))
+	if (isNaN(die2))
 		die2 = 0;
 
 	const scoreX = parseInt(parts[5], 10);
@@ -186,6 +193,7 @@ export function parseXGID(xgid: string): BackgammonPosition {
 		xgid: xgidString,
 		pipCountX:0,
 		pipCountO:0,
+		cubeAction,
 		turnUnknown,
 		warnings,
 	};

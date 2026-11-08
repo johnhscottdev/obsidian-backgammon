@@ -18,7 +18,8 @@ then tick it off here.
 - [x] **Beaver flag parsed backwards.** (fixed 2026-11-07) `rulesFlags % 4 === 1` should be `(rulesFlags & 2) !== 0`.
   Also, in match play the flag means Crawford, so `jacoby` should be false there (`parseXGID.ts`).
   Not visible today because neither flag is drawn.
-- [ ] **Doubled / beavered / raccooned dice states (`D`, `B`, `R`) show the wrong header.** They
+- [x] **Doubled / beavered / raccooned dice states (`D`, `B`, `R`) show the wrong header.** (fixed
+  2026-11-08 from a real `D` copy; `B` and `R` still need real XG copies to confirm) They
   parse as dice 0 and the header says "on roll - cube decision" instead of "take or pass".
   Needs a real XGID copied from XG for each state to confirm the exact format.
 - [x] **Position length isn't validated.** (fixed 2026-11-08) A position that isn't 26 characters, or a side with

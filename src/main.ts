@@ -44,6 +44,17 @@ export default class BackgammonPlugin extends Plugin {
                 const getActionText = (data: BackgammonPosition): string => {
                     const playerName = data.turnUnknown ? 'Unknown player' : data.turn === 'X' ? 'Black' : 'White';
                     
+                    // A double has been offered (XGID dice field D, B or R)
+                    if (data.cubeAction) {
+                        const opponentName = data.turnUnknown ? 'opponent' : data.turn === 'X' ? 'White' : 'Black';
+                        const doubles = `${playerName} doubles`;
+                        switch (data.cubeAction) {
+                            case 'doubled': return `${doubles} - ${opponentName} to take or pass`;
+                            case 'beavered': return `${doubles}, ${opponentName} beavers`;
+                            case 'raccooned': return `${doubles}, ${opponentName} beavers, ${playerName} raccoons`;
+                        }
+                    }
+
                     // Check if dice are rolled (move decision)
                     if (data.die1 > 0 && data.die2 > 0) {
                         const diceText = data.die1 === data.die2 ?

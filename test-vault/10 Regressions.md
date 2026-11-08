@@ -193,3 +193,52 @@ drawn as 5 labelled "15". No error.
 XGID=------O------------o------:0:0:1:21:0:0:3:0:10
 ```
 
+## Double offered showed "on roll - cube decision" (fixed 2026-11-08)
+Once a double has been offered, XG writes a letter in the XGID dice field instead of a roll:
+D = doubled (opponent to take or pass), B = the opponent beavered, R = the doubler raccooned. These
+were read as "no dice", so the header said "White on roll - cube decision".
+Copied with Ctrl+C in a money game while XG ("Professional", XG's X) had doubled John. XG's text
+calls the doubler X, so in the plugin the doubler is White.
+Jest: `tests/cubeOfferedStates.test.ts` (B and R use constructed XGIDs until real copies exist).
+**Expect:** Header "White doubles - Black to take or pass". No dice. Cube in the middle of the left
+tray. Pip counts Black 158 / White 146. Below the board: winning chances 71.17% / 28.83%; cubeful
+equities No double +0.893 (-0.107), Double/Take +1.226 (+0.226), Double/Pass +1.000;
+"Best cube action: Double / Pass".
+
+```xgid
+XGID=---aa-DCC-a-bC---c-dba---B:0:0:-1:D:0:0:3:0:10
+X:Professional   O:John
+
+Score is X:0 O:0. Unlimited Game, Jacoby Beaver
+ +13-14-15-16-17-18------19-20-21-22-23-24-+
+ | X     X     O  O |   | O     X  X       |
+ | X           O  O |   | O                |
+ |             O  O |   | O                |
+ |                  |   | O                |
+ |                  |   |                  |
+ |                  |BAR|                  |
+ |                  | O |                  |
+ |                  | O | X                |
+ | O           X    |   | X                |
+ | O           X    |   | X  X             |
+ | O           X    |   | X  X  X          |
+ +12-11-10--9--8--7-------6--5--4--3--2--1-+
+Pip count  X: 146  O: 158 X-O: 0-0
+Cube: 1
+X on roll, cube action
+
+Analyzed in 4-ply
+Player Winning Chances:   71.17% (G:34.19% B:0.95%)
+Opponent Winning Chances: 28.83% (G:5.77% B:0.27%)
+
+Cubeless Equities: No Double=+0.715, Double=+1.430
+
+Cubeful Equities:
+       No double:     +0.893 (-0.107)
+       Double/Take:   +1.226 (+0.226)
+       Double/Pass:   +1.000
+
+Best Cube action: Double / Pass
+
+eXtreme Gammon Version: 2.10
+```

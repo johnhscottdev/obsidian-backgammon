@@ -471,6 +471,11 @@ function drawCheckers(ctx, boardData) {
 }
 
 // src/utils/parseXGID.ts
+var CUBE_ACTIONS = {
+  D: "doubled",
+  B: "beavered",
+  R: "raccooned"
+};
 function charToCount(c) {
   if (c >= "a" && c <= "z") {
     return [c.charCodeAt(0) - "a".charCodeAt(0) + 1, "O"];
@@ -530,10 +535,9 @@ function parseXGID(xgid) {
       `XGID turn field is ${parts[3]}, but it should be 1 (Black) or -1 (White), so the player on roll is unknown. The board is drawn from Black's side. This XGID may be corrupted.`
     );
   }
-  let die1 = 0;
-  let die2 = 0;
-  die1 = parseInt(parts[4][0]);
-  die2 = parseInt(parts[4][1]);
+  const cubeAction = Object.prototype.hasOwnProperty.call(CUBE_ACTIONS, parts[4]) ? CUBE_ACTIONS[parts[4]] : void 0;
+  let die1 = parseInt(parts[4][0]);
+  let die2 = parseInt(parts[4][1]);
   if (isNaN(die1))
     die1 = 0;
   if (isNaN(die2))
@@ -578,6 +582,7 @@ function parseXGID(xgid) {
     xgid: xgidString,
     pipCountX: 0,
     pipCountO: 0,
+    cubeAction,
     turnUnknown,
     warnings
   };
@@ -892,6 +897,18 @@ var BackgammonPlugin = class extends import_obsidian.Plugin {
         const headerBar = wrapper.createDiv({ cls: "backgammon-header" });
         const getActionText = (data) => {
           const playerName = data.turnUnknown ? "Unknown player" : data.turn === "X" ? "Black" : "White";
+          if (data.cubeAction) {
+            const opponentName = data.turnUnknown ? "opponent" : data.turn === "X" ? "White" : "Black";
+            const doubles = `${playerName} doubles`;
+            switch (data.cubeAction) {
+              case "doubled":
+                return `${doubles} - ${opponentName} to take or pass`;
+              case "beavered":
+                return `${doubles}, ${opponentName} beavers`;
+              case "raccooned":
+                return `${doubles}, ${opponentName} beavers, ${playerName} raccoons`;
+            }
+          }
           if (data.die1 > 0 && data.die2 > 0) {
             const diceText = data.die1 === data.die2 ? `${data.die1}${data.die1}` : (
               // Doubles: "66"
