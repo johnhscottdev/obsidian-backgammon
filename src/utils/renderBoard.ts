@@ -1,5 +1,21 @@
 import type { BackgammonPosition } from '../types/board';
-import { styleConfig } from './styleConfig';
+import { styleConfig, type BoardColors } from './styleConfig';
+
+/** A drawn board: its canvas, and a function that redraws it in the current theme. */
+export interface BoardHandle {
+	canvas: HTMLCanvasElement;
+	redraw: () => void;
+}
+
+/** True when Obsidian is showing its dark theme. */
+export function isDarkTheme(): boolean {
+	return document.body.classList.contains('theme-dark');
+}
+
+/** The board palette for Obsidian's current theme. */
+function colors(): BoardColors {
+	return isDarkTheme() ? styleConfig.darkColors : styleConfig.colors;
+}
 
 /**
  * Renders a backgammon board to a canvas element within the provided HTML element.
@@ -10,8 +26,9 @@ import { styleConfig } from './styleConfig';
  * 
  * @param el - The HTML element to contain the canvas
  * @param boardData - Complete board state data including positions, cube, scores, etc.
+ * @returns The canvas and a function that redraws it (e.g. after a theme change)
  */
-export function renderBoard(el: HTMLElement, boardData: BackgammonPosition): void {
+export function renderBoard(el: HTMLElement, boardData: BackgammonPosition): BoardHandle | null {
 	const canvas: HTMLCanvasElement = document.createElement('canvas');
 	
 	// Style canvas to connect with header bar
@@ -20,7 +37,7 @@ export function renderBoard(el: HTMLElement, boardData: BackgammonPosition): voi
 	el.appendChild(canvas);
 	const ctx: CanvasRenderingContext2D | null = canvas.getContext('2d');
 
-	if (!ctx) return;
+	if (!ctx) return null;
 
 	const drawCanvas = () => {
 		// Keep canvas same width as other elements, but add internal margins via transform
@@ -64,7 +81,7 @@ export function renderBoard(el: HTMLElement, boardData: BackgammonPosition): voi
 			cubeValue = "Cr";
 		drawCubeAtPosition(ctx, styleConfig.columnWidth/2, cubeY, cubeValue);
 
-		const dieColor = boardData.turn === 'X' ? styleConfig.colors.checkerBlack : styleConfig.colors.checkerWhite
+		const dieColor = boardData.turn === 'X' ? colors().checkerBlack : colors().checkerWhite
 		// Only render dice if they have values (move decision, not cube decision)
 		if(boardData.die1 > 0 && boardData.die2 > 0)
 		{	
@@ -91,6 +108,7 @@ export function renderBoard(el: HTMLElement, boardData: BackgammonPosition): voi
 	};
 
 	drawCanvas();
+	return { canvas, redraw: drawCanvas };
 }
 
 /**
@@ -104,8 +122,8 @@ export function renderBoard(el: HTMLElement, boardData: BackgammonPosition): voi
  */
 function drawBoard(ctx: CanvasRenderingContext2D): void {
 	// clear the canvas
-	ctx.fillStyle = styleConfig.colors.background;
-	ctx.strokeStyle = styleConfig.colors.boardBorder;
+	ctx.fillStyle = colors().background;
+	ctx.strokeStyle = colors().boardBorder;
 	ctx.lineWidth = 1;
 	ctx.fillRect(0, 0, styleConfig.boardWidth, styleConfig.boardHeight);
 
@@ -115,12 +133,11 @@ function drawBoard(ctx: CanvasRenderingContext2D): void {
 	const boardHeight = boardBottom - boardTop;
 
 	// draw the bar
-	ctx.fillStyle = styleConfig.colors.bar;
 	ctx.strokeRect(styleConfig.boardWidth / 2 - styleConfig.barWidth / 2, boardTop, styleConfig.barWidth, boardHeight);
 	ctx.strokeRect(0, boardTop, styleConfig.barWidth, boardHeight);
 	ctx.strokeRect(styleConfig.boardWidth-styleConfig.columnWidth, boardTop, styleConfig.barWidth, boardHeight);
 
-	const colors = [styleConfig.colors.triangleDark, styleConfig.colors.triangleLight];
+	const triangleColors = [colors().triangleDark, colors().triangleLight];
 
 	const drawTriangle = (x: number, isBottomHalf: boolean, color: string) => {
 		ctx.beginPath();
@@ -135,7 +152,7 @@ function drawBoard(ctx: CanvasRenderingContext2D): void {
 		}
 		ctx.closePath();
 		ctx.fillStyle = color;
-		ctx.strokeStyle = styleConfig.colors.boardBorder;
+		ctx.strokeStyle = colors().boardBorder;
 		ctx.lineWidth = styleConfig.sizing.strokeWidth;
 		ctx.stroke();
 		ctx.fill();
@@ -145,7 +162,7 @@ function drawBoard(ctx: CanvasRenderingContext2D): void {
 		let x = i * styleConfig.pointWidth;
 		x += styleConfig.columnWidth; // offset for bear off tray
 		if (i >= 6) x += styleConfig.barWidth;
-		let color = colors[(i+1) % 2];
+		let color = triangleColors[(i+1) % 2];
 		drawTriangle(x, true, color);
 	}
 
@@ -153,7 +170,7 @@ function drawBoard(ctx: CanvasRenderingContext2D): void {
 		let x = i * styleConfig.pointWidth;
 		x += styleConfig.columnWidth; // offset for bear off tray
 		if (i >= 6) x += styleConfig.barWidth;
-		let color = colors[i % 2];
+		let color = triangleColors[i % 2];
 		drawTriangle(x, false, color);
 	}
 
@@ -221,7 +238,7 @@ function drawScoreAtPosition(ctx: CanvasRenderingContext2D, xPos:number, yPos:nu
 	ctx.shadowOffsetY = 2;
 	
 	// Solid background
-	ctx.fillStyle = '#ffffff';
+	ctx.fillStyle = colors().scoreBackground;
 	drawRoundedRect(ctx, x, y, sizeX, sizeY, cornerRadius);
 	ctx.fill();
 	
@@ -229,7 +246,7 @@ function drawScoreAtPosition(ctx: CanvasRenderingContext2D, xPos:number, yPos:nu
 	ctx.shadowColor = 'transparent';
 	
 	// Draw subtle border
-	ctx.strokeStyle = '#d0d0d0';
+	ctx.strokeStyle = colors().scoreBorder;
 	ctx.lineWidth = 1;
 	drawRoundedRect(ctx, x, y, sizeX, sizeY, cornerRadius);
 	ctx.stroke();
@@ -241,14 +258,14 @@ function drawScoreAtPosition(ctx: CanvasRenderingContext2D, xPos:number, yPos:nu
 	ctx.font = styleConfig.fonts.scoreHeader;
 	ctx.textAlign = 'center';
 	ctx.textBaseline = 'middle';
-	ctx.fillStyle = '#666666';
+	ctx.fillStyle = colors().scoreHeader;
 	ctx.fillText(header, xPos, yPos-styleConfig.checkerRadius*.5);
 
 	// Draw score value with emphasis
 	ctx.font = styleConfig.fonts.scoreValue;
 	ctx.textAlign = 'center';
 	ctx.textBaseline = 'middle';
-	ctx.fillStyle = '#333333';
+	ctx.fillStyle = colors().scoreValue;
 	ctx.fillText(score.toString(), xPos, yPos + styleConfig.checkerRadius*.5);
 }
 
@@ -277,7 +294,7 @@ function drawCubeAtPosition(ctx: CanvasRenderingContext2D, xPos:number, yPos:num
 	ctx.shadowOffsetY = 2;
 	
 	// Solid background
-	ctx.fillStyle = '#ffffff';
+	ctx.fillStyle = colors().cubeBackground;
 	drawRoundedRect(ctx, x, y, size, size, cornerRadius);
 	ctx.fill();
 	
@@ -285,7 +302,7 @@ function drawCubeAtPosition(ctx: CanvasRenderingContext2D, xPos:number, yPos:num
 	ctx.shadowColor = 'transparent';
 	
 	// Draw border
-	ctx.strokeStyle = '#cccccc';
+	ctx.strokeStyle = colors().cubeBorder;
 	ctx.lineWidth = 1.5;
 	drawRoundedRect(ctx, x, y, size, size, cornerRadius);
 	ctx.stroke();
@@ -297,7 +314,7 @@ function drawCubeAtPosition(ctx: CanvasRenderingContext2D, xPos:number, yPos:num
 	ctx.font = styleConfig.fonts.cubeValue;
 	ctx.textAlign = 'center';
 	ctx.textBaseline = 'middle';
-	ctx.fillStyle = '#333333';
+	ctx.fillStyle = colors().cubeText;
 	ctx.fillText(cubeValue, xPos, yPos);
 }
 
@@ -324,7 +341,7 @@ function drawDieAtPosition(ctx: CanvasRenderingContext2D, x: number, y: number, 
 	// Draw die background
 	ctx.beginPath();
 	ctx.fillStyle = color;
-	ctx.strokeStyle = color === styleConfig.colors.checkerWhite ? styleConfig.colors.checkerBlack : styleConfig.colors.checkerWhite ;
+	ctx.strokeStyle = color === colors().checkerWhite ? colors().checkerBlack : colors().checkerWhite ;
 	ctx.lineWidth = styleConfig.sizing.strokeWidth;
 	ctx.roundRect(x - radius, y - radius, size, size, size * styleConfig.sizing.dieCornerRadius);
 	ctx.fill();
@@ -353,7 +370,7 @@ function drawDieAtPosition(ctx: CanvasRenderingContext2D, x: number, y: number, 
 	if(value != 0)
 	{
 		// Draw pips
-		ctx.fillStyle = color === styleConfig.colors.checkerWhite ? styleConfig.colors.checkerBlack : styleConfig.colors.checkerWhite ;
+		ctx.fillStyle = color === colors().checkerWhite ? colors().checkerBlack : colors().checkerWhite ;
 		for (const group of pipMap[dieValue]) {
 			for (const i of group) {
 				const [dx, dy] = offsets[i];
@@ -382,12 +399,13 @@ function drawCheckerAtPosition(ctx: CanvasRenderingContext2D, xPos:number, yPos:
 	ctx.fill();
 	
 	// Draw border - thicker for white checkers for better visibility
-	if (color === styleConfig.colors.checkerWhite) {
-		ctx.strokeStyle = '#666666';
+	const palette = colors();
+	if (color === palette.checkerWhite) {
+		ctx.strokeStyle = palette.checkerBorderWhite;
 		ctx.lineWidth = 1.5;
 	} else {
-		ctx.strokeStyle = '#999999';
-		ctx.lineWidth = 0.5;
+		ctx.strokeStyle = palette.checkerBorderBlack;
+		ctx.lineWidth = palette.checkerBorderWidthBlack;
 	}
 	ctx.stroke();
 }
@@ -465,7 +483,7 @@ function renderPointNumbers(ctx: CanvasRenderingContext2D, boardData: Backgammon
 		ctx.imageSmoothingEnabled = false;
 		
 		// Draw point number with refined color
-		ctx.fillStyle = '#555555';
+		ctx.fillStyle = colors().pointNumber;
 		ctx.fillText(displayNumber.toString(), pixelX, pixelY);
 		
 		ctx.restore();
@@ -510,7 +528,7 @@ function renderPipCounts(ctx: CanvasRenderingContext2D, boardData: BackgammonPos
 		ctx.shadowOffsetX = 1;
 		ctx.shadowOffsetY = 1;
 		
-		ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+		ctx.fillStyle = colors().pipCountBackground;
 		drawRoundedRect(ctx, x - bgWidth/2, y - bgHeight/2, bgWidth, bgHeight, cornerRadius);
 		ctx.fill();
 		
@@ -518,7 +536,7 @@ function renderPipCounts(ctx: CanvasRenderingContext2D, boardData: BackgammonPos
 		ctx.shadowColor = 'transparent';
 		
 		// Draw subtle border
-		ctx.strokeStyle = 'rgba(0, 0, 0, 0.15)';
+		ctx.strokeStyle = colors().pipCountBorder;
 		ctx.lineWidth = 1;
 		drawRoundedRect(ctx, x - bgWidth/2, y - bgHeight/2, bgWidth, bgHeight, cornerRadius);
 		ctx.stroke();
@@ -529,7 +547,7 @@ function renderPipCounts(ctx: CanvasRenderingContext2D, boardData: BackgammonPos
 		// Draw text
 		ctx.textAlign = 'center';
 		ctx.textBaseline = 'middle';
-		ctx.fillStyle = '#444444';
+		ctx.fillStyle = colors().pipCount;
 		ctx.fillText(text, x, y);
 	};
 	
@@ -596,8 +614,8 @@ export function drawCheckers(ctx: CanvasRenderingContext2D, boardData: Backgammo
 		const maxDrawn = onBar ? MAX_CHECKERS_ON_BAR : MAX_CHECKERS_PER_POINT;
 		const drawnCount = Math.min(point.checkerCount, maxDrawn);
 		const isBlack = point.player === 'X';
-		const checkerColor = isBlack ? styleConfig.colors.checkerBlack : styleConfig.colors.checkerWhite;
-		const labelColor = isBlack ? styleConfig.colors.checkerWhite : styleConfig.colors.checkerBlack;
+		const checkerColor = isBlack ? colors().checkerBlack : colors().checkerWhite;
+		const labelColor = isBlack ? colors().checkerWhite : colors().checkerBlack;
 
 		for (let j = 0; j < drawnCount; j++) {
 			const yPos = yStart + direction * j * styleConfig.checkerRadius*2;
@@ -615,16 +633,16 @@ export function drawCheckers(ctx: CanvasRenderingContext2D, boardData: Backgammo
 		const xPos = (styleConfig.boardColumns * styleConfig.columnWidth) - styleConfig.columnWidth * .5;
 		const boardBottom = styleConfig.boardHeight - 20;
 		const yPos = boardBottom - (styleConfig.checkerMargin + styleConfig.checkerRadius);
-		drawCheckerAtPosition(ctx, xPos, yPos, styleConfig.colors.checkerBlack);
-		drawCheckerLabel(ctx, xPos, yPos, boardData.borneOffX.toString(), styleConfig.colors.checkerWhite);
+		drawCheckerAtPosition(ctx, xPos, yPos, colors().checkerBlack);
+		drawCheckerLabel(ctx, xPos, yPos, boardData.borneOffX.toString(), colors().checkerWhite);
 	}
 	if(boardData.borneOffO > 0)
 	{
 		const xPos = (styleConfig.boardColumns * styleConfig.columnWidth) - styleConfig.columnWidth * .5;
 		const boardTop = 20;
 		const yPos = boardTop + styleConfig.checkerMargin + styleConfig.checkerRadius;
-		drawCheckerAtPosition(ctx, xPos, yPos, styleConfig.colors.checkerWhite);
-		drawCheckerLabel(ctx, xPos, yPos, boardData.borneOffO.toString(), styleConfig.colors.checkerBlack);
+		drawCheckerAtPosition(ctx, xPos, yPos, colors().checkerWhite);
+		drawCheckerLabel(ctx, xPos, yPos, boardData.borneOffO.toString(), colors().checkerBlack);
 	}
 }
 

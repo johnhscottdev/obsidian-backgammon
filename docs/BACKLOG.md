@@ -47,7 +47,7 @@ then tick it off here.
 - [ ] **Sharper board on iPhone / high-DPI screens.** See the design decision in `CLAUDE.md`:
   resolution is fixed on purpose; any change must be checked on iPhone.
 - [ ] Checkers are slightly oval: the 8px internal margin scales X only (`setTransform(scaleX, 0, 0, 1, ...)`).
-- [ ] Dark-mode board and analysis colors (use Obsidian CSS variables for the analysis panel).
+- [x] Dark-mode board and analysis colors. (done 2026-11-08: follows Obsidian's theme and switches live)
 - [ ] Show per-move win/gammon percentages if a clean design is found (parsing is already kept).
 - [ ] Settings tab: player names instead of Black/White, board colors, toggle pip counts and point numbers.
 - [ ] Copy-XGID button (commented-out XGID display code exists in `main.ts`).

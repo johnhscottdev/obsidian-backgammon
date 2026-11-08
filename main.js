@@ -57,18 +57,46 @@ var styleConfig = {
   colors: {
     background: "#ffffff",
     boardBorder: "black",
-    bar: "#000000",
     triangleLight: "#ffffff",
     triangleDark: "#cccccc",
     checkerBlack: "black",
     checkerWhite: "white",
-    cubeBackground: "white",
-    cubeBorder: "black",
-    scoreBackground: "white",
-    scoreBorder: "black",
-    text: "black",
-    pointNumber: "black",
-    pipCount: "black"
+    checkerBorderBlack: "#999999",
+    checkerBorderWhite: "#666666",
+    checkerBorderWidthBlack: 0.5,
+    cubeBackground: "#ffffff",
+    cubeBorder: "#cccccc",
+    cubeText: "#333333",
+    scoreBackground: "#ffffff",
+    scoreBorder: "#d0d0d0",
+    scoreHeader: "#666666",
+    scoreValue: "#333333",
+    pointNumber: "#555555",
+    pipCountBackground: "rgba(255, 255, 255, 0.9)",
+    pipCountBorder: "rgba(0, 0, 0, 0.15)",
+    pipCount: "#444444"
+  },
+  darkColors: {
+    background: "#2b2b2b",
+    boardBorder: "#8c8c8c",
+    triangleLight: "#3a3a3a",
+    triangleDark: "#5c6168",
+    checkerBlack: "#111111",
+    checkerWhite: "#eeeeee",
+    checkerBorderBlack: "#b0b0b0",
+    checkerBorderWhite: "#808080",
+    checkerBorderWidthBlack: 1.5,
+    cubeBackground: "#eeeeee",
+    cubeBorder: "#999999",
+    cubeText: "#222222",
+    scoreBackground: "#383838",
+    scoreBorder: "#5a5a5a",
+    scoreHeader: "#a8a8a8",
+    scoreValue: "#e6e6e6",
+    pointNumber: "#a0a0a0",
+    pipCountBackground: "rgba(60, 60, 60, 0.95)",
+    pipCountBorder: "rgba(255, 255, 255, 0.2)",
+    pipCount: "#dddddd"
   },
   fonts: {
     checkerLabel: 'bold 16px "Segoe UI", system-ui, sans-serif',
@@ -94,12 +122,18 @@ var styleConfig = {
 };
 
 // src/utils/renderBoard.ts
+function isDarkTheme() {
+  return document.body.classList.contains("theme-dark");
+}
+function colors() {
+  return isDarkTheme() ? styleConfig.darkColors : styleConfig.colors;
+}
 function renderBoard(el, boardData) {
   const canvas = document.createElement("canvas");
   canvas.className = "backgammon-canvas";
   el.appendChild(canvas);
   const ctx = canvas.getContext("2d");
-  if (!ctx) return;
+  if (!ctx) return null;
   const drawCanvas = () => {
     const internalMargin = 8;
     const canvasWidth = styleConfig.boardWidth;
@@ -131,7 +165,7 @@ function renderBoard(el, boardData) {
     if (boardData.crawford)
       cubeValue = "Cr";
     drawCubeAtPosition(ctx, styleConfig.columnWidth / 2, cubeY, cubeValue);
-    const dieColor = boardData.turn === "X" ? styleConfig.colors.checkerBlack : styleConfig.colors.checkerWhite;
+    const dieColor = boardData.turn === "X" ? colors().checkerBlack : colors().checkerWhite;
     if (boardData.die1 > 0 && boardData.die2 > 0) {
       let dieOffset = styleConfig.columnWidth * styleConfig.spacing.dieOffset;
       let dieSpacing = styleConfig.spacing.dieSpacing;
@@ -151,20 +185,20 @@ function renderBoard(el, boardData) {
     }
   };
   drawCanvas();
+  return { canvas, redraw: drawCanvas };
 }
 function drawBoard(ctx) {
-  ctx.fillStyle = styleConfig.colors.background;
-  ctx.strokeStyle = styleConfig.colors.boardBorder;
+  ctx.fillStyle = colors().background;
+  ctx.strokeStyle = colors().boardBorder;
   ctx.lineWidth = 1;
   ctx.fillRect(0, 0, styleConfig.boardWidth, styleConfig.boardHeight);
   const boardTop = 20;
   const boardBottom = styleConfig.boardHeight - 20;
   const boardHeight = boardBottom - boardTop;
-  ctx.fillStyle = styleConfig.colors.bar;
   ctx.strokeRect(styleConfig.boardWidth / 2 - styleConfig.barWidth / 2, boardTop, styleConfig.barWidth, boardHeight);
   ctx.strokeRect(0, boardTop, styleConfig.barWidth, boardHeight);
   ctx.strokeRect(styleConfig.boardWidth - styleConfig.columnWidth, boardTop, styleConfig.barWidth, boardHeight);
-  const colors = [styleConfig.colors.triangleDark, styleConfig.colors.triangleLight];
+  const triangleColors = [colors().triangleDark, colors().triangleLight];
   const drawTriangle = (x, isBottomHalf, color) => {
     ctx.beginPath();
     if (isBottomHalf) {
@@ -178,7 +212,7 @@ function drawBoard(ctx) {
     }
     ctx.closePath();
     ctx.fillStyle = color;
-    ctx.strokeStyle = styleConfig.colors.boardBorder;
+    ctx.strokeStyle = colors().boardBorder;
     ctx.lineWidth = styleConfig.sizing.strokeWidth;
     ctx.stroke();
     ctx.fill();
@@ -187,14 +221,14 @@ function drawBoard(ctx) {
     let x = i * styleConfig.pointWidth;
     x += styleConfig.columnWidth;
     if (i >= 6) x += styleConfig.barWidth;
-    let color = colors[(i + 1) % 2];
+    let color = triangleColors[(i + 1) % 2];
     drawTriangle(x, true, color);
   }
   for (let i = 0; i < 12; i++) {
     let x = i * styleConfig.pointWidth;
     x += styleConfig.columnWidth;
     if (i >= 6) x += styleConfig.barWidth;
-    let color = colors[i % 2];
+    let color = triangleColors[i % 2];
     drawTriangle(x, false, color);
   }
   ctx.lineWidth = styleConfig.sizing.borderWidth;
@@ -231,11 +265,11 @@ function drawScoreAtPosition(ctx, xPos, yPos, score, header) {
   ctx.shadowBlur = 4;
   ctx.shadowOffsetX = 2;
   ctx.shadowOffsetY = 2;
-  ctx.fillStyle = "#ffffff";
+  ctx.fillStyle = colors().scoreBackground;
   drawRoundedRect(ctx, x, y, sizeX, sizeY, cornerRadius);
   ctx.fill();
   ctx.shadowColor = "transparent";
-  ctx.strokeStyle = "#d0d0d0";
+  ctx.strokeStyle = colors().scoreBorder;
   ctx.lineWidth = 1;
   drawRoundedRect(ctx, x, y, sizeX, sizeY, cornerRadius);
   ctx.stroke();
@@ -243,12 +277,12 @@ function drawScoreAtPosition(ctx, xPos, yPos, score, header) {
   ctx.font = styleConfig.fonts.scoreHeader;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillStyle = "#666666";
+  ctx.fillStyle = colors().scoreHeader;
   ctx.fillText(header, xPos, yPos - styleConfig.checkerRadius * 0.5);
   ctx.font = styleConfig.fonts.scoreValue;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillStyle = "#333333";
+  ctx.fillStyle = colors().scoreValue;
   ctx.fillText(score.toString(), xPos, yPos + styleConfig.checkerRadius * 0.5);
 }
 function drawCubeAtPosition(ctx, xPos, yPos, cubeValue) {
@@ -261,11 +295,11 @@ function drawCubeAtPosition(ctx, xPos, yPos, cubeValue) {
   ctx.shadowBlur = 3;
   ctx.shadowOffsetX = 2;
   ctx.shadowOffsetY = 2;
-  ctx.fillStyle = "#ffffff";
+  ctx.fillStyle = colors().cubeBackground;
   drawRoundedRect(ctx, x, y, size, size, cornerRadius);
   ctx.fill();
   ctx.shadowColor = "transparent";
-  ctx.strokeStyle = "#cccccc";
+  ctx.strokeStyle = colors().cubeBorder;
   ctx.lineWidth = 1.5;
   drawRoundedRect(ctx, x, y, size, size, cornerRadius);
   ctx.stroke();
@@ -273,7 +307,7 @@ function drawCubeAtPosition(ctx, xPos, yPos, cubeValue) {
   ctx.font = styleConfig.fonts.cubeValue;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillStyle = "#333333";
+  ctx.fillStyle = colors().cubeText;
   ctx.fillText(cubeValue, xPos, yPos);
 }
 function drawDieAtPosition(ctx, x, y, size, value, color) {
@@ -282,7 +316,7 @@ function drawDieAtPosition(ctx, x, y, size, value, color) {
   const pipRadius = size * styleConfig.sizing.diePipRadius;
   ctx.beginPath();
   ctx.fillStyle = color;
-  ctx.strokeStyle = color === styleConfig.colors.checkerWhite ? styleConfig.colors.checkerBlack : styleConfig.colors.checkerWhite;
+  ctx.strokeStyle = color === colors().checkerWhite ? colors().checkerBlack : colors().checkerWhite;
   ctx.lineWidth = styleConfig.sizing.strokeWidth;
   ctx.roundRect(x - radius, y - radius, size, size, size * styleConfig.sizing.dieCornerRadius);
   ctx.fill();
@@ -305,7 +339,7 @@ function drawDieAtPosition(ctx, x, y, size, value, color) {
     6: [[0], [1], [2], [3], [4], [5]]
   };
   if (value != 0) {
-    ctx.fillStyle = color === styleConfig.colors.checkerWhite ? styleConfig.colors.checkerBlack : styleConfig.colors.checkerWhite;
+    ctx.fillStyle = color === colors().checkerWhite ? colors().checkerBlack : colors().checkerWhite;
     for (const group of pipMap[dieValue]) {
       for (const i of group) {
         const [dx, dy] = offsets[i];
@@ -321,12 +355,13 @@ function drawCheckerAtPosition(ctx, xPos, yPos, color) {
   ctx.fillStyle = color;
   ctx.arc(xPos, yPos, styleConfig.checkerRadius, 0, Math.PI * 2);
   ctx.fill();
-  if (color === styleConfig.colors.checkerWhite) {
-    ctx.strokeStyle = "#666666";
+  const palette = colors();
+  if (color === palette.checkerWhite) {
+    ctx.strokeStyle = palette.checkerBorderWhite;
     ctx.lineWidth = 1.5;
   } else {
-    ctx.strokeStyle = "#999999";
-    ctx.lineWidth = 0.5;
+    ctx.strokeStyle = palette.checkerBorderBlack;
+    ctx.lineWidth = palette.checkerBorderWidthBlack;
   }
   ctx.stroke();
 }
@@ -363,7 +398,7 @@ function renderPointNumbers(ctx, boardData) {
     const pixelY = Math.round(y);
     ctx.save();
     ctx.imageSmoothingEnabled = false;
-    ctx.fillStyle = "#555555";
+    ctx.fillStyle = colors().pointNumber;
     ctx.fillText(displayNumber.toString(), pixelX, pixelY);
     ctx.restore();
   }
@@ -388,18 +423,18 @@ function renderPipCounts(ctx, boardData) {
     ctx.shadowBlur = 2;
     ctx.shadowOffsetX = 1;
     ctx.shadowOffsetY = 1;
-    ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+    ctx.fillStyle = colors().pipCountBackground;
     drawRoundedRect(ctx, x - bgWidth / 2, y - bgHeight / 2, bgWidth, bgHeight, cornerRadius);
     ctx.fill();
     ctx.shadowColor = "transparent";
-    ctx.strokeStyle = "rgba(0, 0, 0, 0.15)";
+    ctx.strokeStyle = colors().pipCountBorder;
     ctx.lineWidth = 1;
     drawRoundedRect(ctx, x - bgWidth / 2, y - bgHeight / 2, bgWidth, bgHeight, cornerRadius);
     ctx.stroke();
     ctx.restore();
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillStyle = "#444444";
+    ctx.fillStyle = colors().pipCount;
     ctx.fillText(text, x, y);
   };
   drawPipCount(boardData.pipCountX, barCenterX, boardBottom - margin);
@@ -443,8 +478,8 @@ function drawCheckers(ctx, boardData) {
     const maxDrawn = onBar ? MAX_CHECKERS_ON_BAR : MAX_CHECKERS_PER_POINT;
     const drawnCount = Math.min(point.checkerCount, maxDrawn);
     const isBlack = point.player === "X";
-    const checkerColor = isBlack ? styleConfig.colors.checkerBlack : styleConfig.colors.checkerWhite;
-    const labelColor = isBlack ? styleConfig.colors.checkerWhite : styleConfig.colors.checkerBlack;
+    const checkerColor = isBlack ? colors().checkerBlack : colors().checkerWhite;
+    const labelColor = isBlack ? colors().checkerWhite : colors().checkerBlack;
     for (let j = 0; j < drawnCount; j++) {
       const yPos = yStart + direction * j * styleConfig.checkerRadius * 2;
       drawCheckerAtPosition(ctx, x, yPos, checkerColor);
@@ -458,15 +493,15 @@ function drawCheckers(ctx, boardData) {
     const xPos = styleConfig.boardColumns * styleConfig.columnWidth - styleConfig.columnWidth * 0.5;
     const boardBottom = styleConfig.boardHeight - 20;
     const yPos = boardBottom - (styleConfig.checkerMargin + styleConfig.checkerRadius);
-    drawCheckerAtPosition(ctx, xPos, yPos, styleConfig.colors.checkerBlack);
-    drawCheckerLabel(ctx, xPos, yPos, boardData.borneOffX.toString(), styleConfig.colors.checkerWhite);
+    drawCheckerAtPosition(ctx, xPos, yPos, colors().checkerBlack);
+    drawCheckerLabel(ctx, xPos, yPos, boardData.borneOffX.toString(), colors().checkerWhite);
   }
   if (boardData.borneOffO > 0) {
     const xPos = styleConfig.boardColumns * styleConfig.columnWidth - styleConfig.columnWidth * 0.5;
     const boardTop = 20;
     const yPos = boardTop + styleConfig.checkerMargin + styleConfig.checkerRadius;
-    drawCheckerAtPosition(ctx, xPos, yPos, styleConfig.colors.checkerWhite);
-    drawCheckerLabel(ctx, xPos, yPos, boardData.borneOffO.toString(), styleConfig.colors.checkerBlack);
+    drawCheckerAtPosition(ctx, xPos, yPos, colors().checkerWhite);
+    drawCheckerLabel(ctx, xPos, yPos, boardData.borneOffO.toString(), colors().checkerBlack);
   }
 }
 
@@ -879,8 +914,29 @@ function formatSigned(value) {
 }
 
 // src/main.ts
+var boardHandles = /* @__PURE__ */ new WeakMap();
 var BackgammonPlugin = class extends import_obsidian.Plugin {
+  constructor() {
+    super(...arguments);
+    /**
+     * Boards drawn so far, redrawn when Obsidian switches between light and dark theme. Held
+     * weakly: Obsidian takes sections scrolled out of view off the page and puts them back later
+     * without re-rendering, so those must be redrawn too, but boards that are really gone (note
+     * closed) must still be freed.
+     */
+    this.boards = /* @__PURE__ */ new Set();
+  }
   onload() {
+    this.registerEvent(this.app.workspace.on("css-change", () => {
+      for (const ref of this.boards) {
+        const board = ref.deref();
+        if (board) {
+          board.redraw();
+        } else {
+          this.boards.delete(ref);
+        }
+      }
+    }));
     this.registerMarkdownCodeBlockProcessor("xgid", (source, el) => {
       try {
         const xgidLine = findXgidLine(source);
@@ -922,7 +978,11 @@ var BackgammonPlugin = class extends import_obsidian.Plugin {
         for (const warning of boardData.warnings ?? []) {
           wrapper.createDiv({ cls: "backgammon-warning", text: `\u26A0\uFE0F ${warning}` });
         }
-        renderBoard(wrapper, boardData);
+        const board = renderBoard(wrapper, boardData);
+        if (board) {
+          this.boards.add(new WeakRef(board));
+          boardHandles.set(board.canvas, board);
+        }
         const analysisText = extractAnalysisText(source);
         if (analysisText) {
           const analysis = parseAnalysis(analysisText);
@@ -942,5 +1002,6 @@ var BackgammonPlugin = class extends import_obsidian.Plugin {
     });
   }
   onunload() {
+    this.boards.clear();
   }
 };

@@ -88,6 +88,10 @@ These are deliberate. Do not "fix" them without asking.
 
 - **Errors are green, blunders are red** in move analysis. This matches eXtreme Gammon's visual style.
 - **Canvas resolution is fixed** (no devicePixelRatio scaling) so the board renders properly on iPhone. It is not perfect and needs revisiting to look sharper on iPhone, but any change must be checked on iPhone.
+- **Dark theme follows Obsidian** (`body.theme-dark`). Board colours live in two palettes in
+  `styleConfig.ts` (`colors` = light, `darkColors` = dark); the drawing code never hard-codes a colour.
+  Boards redraw on Obsidian's `css-change` event. Panel colours are `.theme-dark` overrides in
+  `styles.css`. The light theme must stay exactly as it was.
 - **Win/gammon percentages per move are parsed but not displayed** (`playerStats` / `opponentStats` in `MoveData`). Showing them was too cluttered. Keep the parsing code so they can be added later with a cleaner design.
 
 ## Testing

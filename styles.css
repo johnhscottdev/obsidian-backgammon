@@ -233,3 +233,54 @@
 .move-blunder {
     color: #ff0000;
 }
+
+/* ------------------------------------------------------------------------------------------
+   Dark theme (Obsidian adds .theme-dark to <body>). The board canvas has its own dark palette
+   in styleConfig.ts. Errors stay green and blunders red (as in XG), in shades readable on dark.
+   ------------------------------------------------------------------------------------------ */
+.theme-dark .backgammon-analysis {
+    background: #262626;
+    color: #dcdcdc;
+}
+
+.theme-dark .analysis-move.even {
+    background-color: #2e2e2e;
+}
+
+.theme-dark .analysis-move.odd {
+    background-color: #262626;
+}
+
+.theme-dark .move-stats {
+    color: #9a9a9a;
+}
+
+.theme-dark .move-good {
+    color: #dcdcdc;
+}
+
+.theme-dark .move-error {
+    color: #5cc95c;
+}
+
+.theme-dark .move-blunder {
+    color: #ff6b6b;
+}
+
+.theme-dark .best-action {
+    color: #6cb4ff;
+}
+
+.theme-dark .backgammon-warning {
+    background: #4a3b10;
+    color: #ffe39a;
+}
+
+.theme-dark .backgammon-error {
+    background-color: #3d1f1f;
+    border-color: #7a3434;
+}
+
+.theme-dark .backgammon-error-message {
+    color: #ff7b7b;
+}

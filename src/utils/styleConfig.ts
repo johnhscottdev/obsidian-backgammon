@@ -1,3 +1,28 @@
+/** Every colour the board canvas uses. */
+export interface BoardColors {
+	background: string;
+	boardBorder: string;
+	triangleLight: string;
+	triangleDark: string;
+	checkerBlack: string;
+	checkerWhite: string;
+	checkerBorderBlack: string;
+	checkerBorderWhite: string;
+	/** Black checkers need a heavier outline on a dark board */
+	checkerBorderWidthBlack: number;
+	cubeBackground: string;
+	cubeBorder: string;
+	cubeText: string;
+	scoreBackground: string;
+	scoreBorder: string;
+	scoreHeader: string;
+	scoreValue: string;
+	pointNumber: string;
+	pipCountBackground: string;
+	pipCountBorder: string;
+	pipCount: string;
+}
+
 export interface StyleConfig {
 	// Board dimensions
 	scale: number;
@@ -14,23 +39,9 @@ export interface StyleConfig {
 	checkerMargin: number;
 	barX: number;
 	
-	// Colors
-	colors: {
-		background: string;
-		boardBorder: string;
-		bar: string;
-		triangleLight: string;
-		triangleDark: string;
-		checkerBlack: string;
-		checkerWhite: string;
-		cubeBackground: string;
-		cubeBorder: string;
-		scoreBackground: string;
-		scoreBorder: string;
-		text: string;
-		pointNumber: string;
-		pipCount: string;
-	};
+	// Colors: light palette, and the dark one used when Obsidian is in its dark theme
+	colors: BoardColors;
+	darkColors: BoardColors;
 	
 	// Fonts
 	fonts: {
@@ -77,18 +88,47 @@ export const styleConfig: StyleConfig = {
 	colors: {
 		background: '#ffffff',
 		boardBorder: 'black',
-		bar: '#000000',
 		triangleLight: '#ffffff',
 		triangleDark: '#cccccc',
 		checkerBlack: 'black',
 		checkerWhite: 'white',
-		cubeBackground: 'white',
-		cubeBorder: 'black',
-		scoreBackground: 'white',
-		scoreBorder: 'black',
-		text: 'black',
-		pointNumber: 'black',
-		pipCount: 'black',
+		checkerBorderBlack: '#999999',
+		checkerBorderWhite: '#666666',
+		checkerBorderWidthBlack: 0.5,
+		cubeBackground: '#ffffff',
+		cubeBorder: '#cccccc',
+		cubeText: '#333333',
+		scoreBackground: '#ffffff',
+		scoreBorder: '#d0d0d0',
+		scoreHeader: '#666666',
+		scoreValue: '#333333',
+		pointNumber: '#555555',
+		pipCountBackground: 'rgba(255, 255, 255, 0.9)',
+		pipCountBorder: 'rgba(0, 0, 0, 0.15)',
+		pipCount: '#444444',
+	},
+
+	darkColors: {
+		background: '#2b2b2b',
+		boardBorder: '#8c8c8c',
+		triangleLight: '#3a3a3a',
+		triangleDark: '#5c6168',
+		checkerBlack: '#111111',
+		checkerWhite: '#eeeeee',
+		checkerBorderBlack: '#b0b0b0',
+		checkerBorderWhite: '#808080',
+		checkerBorderWidthBlack: 1.5,
+		cubeBackground: '#eeeeee',
+		cubeBorder: '#999999',
+		cubeText: '#222222',
+		scoreBackground: '#383838',
+		scoreBorder: '#5a5a5a',
+		scoreHeader: '#a8a8a8',
+		scoreValue: '#e6e6e6',
+		pointNumber: '#a0a0a0',
+		pipCountBackground: 'rgba(60, 60, 60, 0.95)',
+		pipCountBorder: 'rgba(255, 255, 255, 0.2)',
+		pipCount: '#dddddd',
 	},
 	
 	fonts: {

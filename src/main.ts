@@ -6,11 +6,36 @@
 
 import { Plugin, Platform } from 'obsidian';
 import { BackgammonPosition } from './types';
-import { renderBoard, parseXGID, findXgidLine, extractAnalysisText, parseAnalysis, renderAnalysis } from './utils';
+import { renderBoard, type BoardHandle, parseXGID, findXgidLine, extractAnalysisText, parseAnalysis, renderAnalysis } from './utils';
 
+
+/** Ties each board's handle to its canvas, so the handle lives as long as the canvas does. */
+const boardHandles = new WeakMap<HTMLCanvasElement, BoardHandle>();
 
 export default class BackgammonPlugin extends Plugin {
+    /**
+     * Boards drawn so far, redrawn when Obsidian switches between light and dark theme. Held
+     * weakly: Obsidian takes sections scrolled out of view off the page and puts them back later
+     * without re-rendering, so those must be redrawn too, but boards that are really gone (note
+     * closed) must still be freed.
+     */
+    private boards = new Set<WeakRef<BoardHandle>>();
+
     onload(): void {
+        // Obsidian fires css-change when the theme changes. Canvas colours don't follow CSS,
+        // so redraw every board that still exists, on the page or not.
+        this.registerEvent(this.app.workspace.on('css-change', () => {
+            for (const ref of this.boards) {
+                const board = ref.deref();
+                if (board) {
+                    board.redraw();
+                } else {
+                    this.boards.delete(ref);
+                }
+            }
+        }));
+
+
         // Different approach - create visual effect using margins and container width
         this.registerMarkdownCodeBlockProcessor('xgid', (source, el) => {
             try {
@@ -75,7 +100,12 @@ export default class BackgammonPlugin extends Plugin {
                 }
                 
                 // Render the board
-                renderBoard(wrapper, boardData);
+                const board = renderBoard(wrapper, boardData);
+                if (board) {
+                    this.boards.add(new WeakRef(board));
+                    // Keep the handle alive exactly as long as its canvas
+                    boardHandles.set(board.canvas, board);
+                }
 
                 // Parse and render analysis if present
                 const analysisText = extractAnalysisText(source);
@@ -105,6 +135,6 @@ export default class BackgammonPlugin extends Plugin {
     }
 
     onunload(): void {
-        //console.log('Unloading Backgammon Plugin');
+        this.boards.clear();
     }
 }

@@ -3,7 +3,7 @@
     "target": "ES2020",
     "module": "ESNext",                  // Needed for ES module syntax
     "moduleResolution": "Node",
-    "lib": ["ES2020", "DOM"],
+    "lib": ["ES2020", "ES2021.WeakRef", "DOM"],
     "outDir": "dist",                    // Optional — for typings or intermediate outputs
     "rootDir": "src",
     "strict": true,

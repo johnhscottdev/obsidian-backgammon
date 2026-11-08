@@ -242,3 +242,15 @@ Best Cube action: Double / Pass
 
 eXtreme Gammon Version: 2.10
 ```
+
+## Boards scrolled out of view kept the old theme (fixed 2026-11-08)
+After switching Obsidian between light and dark, boards on screen changed but boards further down
+the note were still in the old theme. Obsidian takes sections scrolled out of view off the page and
+puts them back later without re-rendering, and those boards weren't being redrawn.
+Jest: `tests/darkTheme.test.ts` ("also redraws boards that are off the page").
+**Expect:** Open a long note (e.g. [[01 Board positions]]) at the top, switch the theme, then scroll
+to the bottom: every board is in the new theme, including this one.
+
+```xgid
+XGID=-b----E-C---eE---c-e----B-:0:0:1:00:0:0:3:0:10
+```

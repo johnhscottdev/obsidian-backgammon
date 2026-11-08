@@ -20,6 +20,7 @@ After changing the code, run `npm run vault` again and reload Obsidian (Ctrl/Cmd
 - [[03 Move analysis]]: XG move analysis below the board
 - [[04 Cube analysis]]: XG cube analysis below the board
 - [[05 Invalid input]]: bad input should show the red error box, not a broken board
+- [[06 Dark theme]]: switch Obsidian between light and dark; boards should follow
 - [[10 Regressions]]: one entry per bug we've fixed, so it stays fixed
 - [[Inbox]]: drop new problem positions here (not checked by `npm test`)
 
