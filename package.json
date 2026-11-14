@@ -1,6 +1,6 @@
 {
   "name": "backgammon-xgid",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "main": "main.js",
   "scripts": {
     "test": "jest",
@@ -9,7 +9,12 @@
     "build": "node build.js",
     "vault": "node build.js --vault"
   },
-  "keywords": ["obsidian", "backgammon", "xgid", "board-games"],
+  "keywords": [
+    "obsidian",
+    "backgammon",
+    "xgid",
+    "board-games"
+  ],
   "author": "John H Scott",
   "license": "MIT",
   "description": "Draw backgammon positions and eXtreme Gammon analysis from XGID code blocks.",

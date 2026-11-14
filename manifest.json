@@ -1,7 +1,7 @@
 {
     "id": "backgammon-xgid",
     "name": "Backgammon XGID Display",
-    "version": "1.0.7",
+    "version": "1.0.8",
     "minAppVersion": "1.8.9",
     "author": "John H Scott",
     "description": "Draw backgammon positions and eXtreme Gammon analysis from XGID code blocks.",
