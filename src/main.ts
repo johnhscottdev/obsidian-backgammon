@@ -1,6 +1,6 @@
 /**
  * Obsidian Backgammon Plugin
- * This plugin detects a code block with the language 'backgammon',
+ * This plugin detects a code block with the language 'xgid',
  * parses the position string, and renders a visualization inline.
  */
 
@@ -36,7 +36,6 @@ export default class BackgammonPlugin extends Plugin {
         }));
 
 
-        // Different approach - create visual effect using margins and container width
         this.registerMarkdownCodeBlockProcessor('xgid', (source, el) => {
             try {
                 // Extract XGID from first line that starts with XGID= (repaired if XG split it)
@@ -119,11 +118,6 @@ export default class BackgammonPlugin extends Plugin {
 
                 // Add footer bar
                 wrapper.createDiv({ cls: "backgammon-footer" });
-
-                // Display XGID string (disabled for now)
-                // const xgidContainer = el.createDiv({ cls: "xgid-display" });
-                // xgidContainer.style.cssText = "margin-top: 10px; padding: 8px; background-color: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 12px; color: #333;";
-                // xgidContainer.setText(xgidLine);
             } catch (error) {
                 const errorDiv = el.createDiv({ cls: "backgammon-error" });
                 errorDiv.createDiv().setText(source);

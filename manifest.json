@@ -4,6 +4,6 @@
     "version": "1.0.7",
     "minAppVersion": "1.8.9",
     "author": "John H Scott",
-    "description": "Renders backgammon positions from XGID format",
+    "description": "Draw backgammon positions and eXtreme Gammon analysis from XGID code blocks.",
     "isDesktopOnly": false
   }

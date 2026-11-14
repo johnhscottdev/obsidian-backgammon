@@ -12,7 +12,7 @@
   "keywords": ["obsidian", "backgammon", "xgid", "board-games"],
   "author": "John H Scott",
   "license": "MIT",
-  "description": "Renders backgammon positions from XGID format",
+  "description": "Draw backgammon positions and eXtreme Gammon analysis from XGID code blocks.",
   "dependencies": {
     "obsidian": "^1.8.7"
   },

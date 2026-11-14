@@ -28,15 +28,15 @@ then tick it off here.
 
 ## Docs and housekeeping
 
-- [ ] `README.md` usage example 1 uses a 23-character position
+- [ ] (README fixed 2026-11-14; `docs/` examples still open) `README.md` usage example 1 uses a 23-character position
   (`XGID=-a-bE-D---cD---c-b-a-E-:...`), which now shows the error box. Replace with a real XG copy.
   Many examples in `docs/XGID-EXAMPLES.md` and `docs/XGID-FORMAT.md` have the same problem, and the
   docs describe the field order differently from what XG actually writes.
-- [ ] `coverage/` and `dist/` are in `.gitignore` but still tracked. Run `git rm -r --cached coverage dist`.
+- [x] `coverage/` and `dist/` are in `.gitignore` but still tracked. (done 2026-11-14)
 - [ ] `extractMoveBlocks` in `parseXGID.ts` is unused.
 - [x] `renderCubeAnalysis` repeats the same row-formatting block four times; pull out a helper.
   (done with the redouble fix)
-- [ ] Stale comments: `main.ts` header says the block is `backgammon` (it's `xgid`); XGID field
+- [ ] Stale comments: (`main.ts` header fixed 2026-11-14) `main.ts` header says the block is `backgammon` (it's `xgid`); XGID field
   comments in `parseXGID.ts` say cube owner `2` = O and turn `0` = X (XG uses `-1` / `1`).
 - [ ] `obsidian` should be a devDependency in `package.json`.
 - [ ] No `versions.json` (Obsidian uses it to map plugin versions to minimum app versions).

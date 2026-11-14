@@ -25,7 +25,7 @@ Renders backgammon positions and optional analysis in Obsidian given an XGID str
 
 ````
 ```xgid
-XGID=-a-bE-D---cD---c-b-a-E-:0:0:1:63:0:0:0:0
+XGID=-b----E-C---eE---c-e----B-:0:0:1:63:0:0:0:0:10
 ```
 ````
 
